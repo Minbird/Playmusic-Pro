@@ -243,7 +243,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 
 						local playerNick = ""
 						surface.SetFont( "Default_PlaymusicPro_Font" )
-						if not v["PlayUser"]:IsPlayer() then
+						if not v["PlayUser"]:IsPlayer() or not v["PlayUser"]:IsValid() then
 							playerNick = PlayMP:Str( "UnknownPlayer" )
 						else
 							playerNick = v["PlayUser"]:Nick()
