@@ -1,0 +1,11 @@
+"UnlitGeneric"
+{
+	"$basetexture"	"VGUI/playmusic_pro/search"
+	"$vertexcolor" "1"
+	"$translucent" "1"
+	"$vertexalpha" "1"
+	"$ignorez"     "1"
+	"$no_fullbright" "1"	
+	"$smooth" "0"
+	"$mips" "0"
+}
