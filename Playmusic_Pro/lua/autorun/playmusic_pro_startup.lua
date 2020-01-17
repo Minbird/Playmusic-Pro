@@ -46,8 +46,8 @@ PlayMP = {}
 PlayMP.CurSystemVersion = {}
 PlayMP.CurSystemVersion.isBeta = true
 PlayMP.CurSystemVersion.ResetOptionAnytime = false
-PlayMP.CurSystemVersion.Ver = "2.0.0 - 6 (beta)"
-PlayMP.CurSystemVersion.VerE = "0.15"
+PlayMP.CurSystemVersion.Ver = "2.0.0 - 7 (beta)"
+PlayMP.CurSystemVersion.VerE = "0.16"
 PlayMP.NewerVer = "unknown"
 PlayMP.NewerVerE = 0
 PlayMP.SysStartTime = CurTime()
@@ -110,17 +110,17 @@ timer.Simple( 1, function()
 		print("[PlayM Pro] Server side system is loading...")
 		print("[PlayM Pro] Loading Init...")
 		include("playmusicpro/init.lua")
-		resource.AddFile( "vgui/Playmusic_Pro/Search.vmt" )
-		resource.AddFile( "vgui/Playmusic_Pro/vol1.vmt" )
-		resource.AddFile( "vgui/Playmusic_Pro/vol2.vmt" )
-		resource.AddFile( "vgui/Playmusic_Pro/vol3.vmt" )
-		resource.AddFile( "vgui/Playmusic_Pro/vol4.vmt" )
-		resource.AddFile( "vgui/Playmusic_Pro/11.png" )
-		resource.AddFile( "vgui/Playmusic_Pro/22.png" )
-		resource.AddFile( "vgui/Playmusic_Pro/33.png" )
-		resource.AddFile( "vgui/Playmusic_Pro/44.png" )
-		resource.AddFile( "vgui/Playmusic_Pro/55.png" )
-		resource.AddFile( "vgui/Playmusic_Pro/mute.png" )
+		resource.AddSingleFile( "vgui/Playmusic_Pro/Search.vmt" )
+		resource.AddSingleFile( "vgui/Playmusic_Pro/vol1.vmt" )
+		resource.AddSingleFile( "vgui/Playmusic_Pro/vol2.vmt" )
+		resource.AddSingleFile( "vgui/Playmusic_Pro/vol3.vmt" )
+		resource.AddSingleFile( "vgui/Playmusic_Pro/vol4.vmt" )
+		resource.AddSingleFile( "vgui/Playmusic_Pro/11.png" )
+		resource.AddSingleFile( "vgui/Playmusic_Pro/22.png" )
+		resource.AddSingleFile( "vgui/Playmusic_Pro/33.png" )
+		resource.AddSingleFile( "vgui/Playmusic_Pro/44.png" )
+		resource.AddSingleFile( "vgui/Playmusic_Pro/55.png" )
+		resource.AddSingleFile( "vgui/Playmusic_Pro/mute.png" )
 		
 		resource.AddWorkshop( "1909043673" ) -- missing texture...
 		
