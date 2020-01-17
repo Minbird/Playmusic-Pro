@@ -46,8 +46,8 @@ PlayMP = {}
 PlayMP.CurSystemVersion = {}
 PlayMP.CurSystemVersion.isBeta = true
 PlayMP.CurSystemVersion.ResetOptionAnytime = false
-PlayMP.CurSystemVersion.Ver = "2.0.0 - 5 (beta)"
-PlayMP.CurSystemVersion.VerE = "0.14"
+PlayMP.CurSystemVersion.Ver = "2.0.0 - 6 (beta)"
+PlayMP.CurSystemVersion.VerE = "0.15"
 PlayMP.NewerVer = "unknown"
 PlayMP.NewerVerE = 0
 PlayMP.SysStartTime = CurTime()
@@ -121,6 +121,8 @@ timer.Simple( 1, function()
 		resource.AddFile( "vgui/Playmusic_Pro/44.png" )
 		resource.AddFile( "vgui/Playmusic_Pro/55.png" )
 		resource.AddFile( "vgui/Playmusic_Pro/mute.png" )
+		
+		resource.AddWorkshop( "1909043673" ) -- missing texture...
 		
 	end
 	
