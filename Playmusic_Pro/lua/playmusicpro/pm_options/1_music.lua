@@ -115,7 +115,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 			
 			if table.Count(PlayMP.CurVideoInfo) == 0 then
 				PlayMP:Notice( PlayMP:Str( "There_Is_No_Music_On_Queue" ), Color(231, 76, 47), "warning" )
-
+				PlayMP:AddTextBox( DScrollPanel, 300, TOP, PlayMP:Str( "ThereIsNoQueueText" ), DScrollPanel:GetWide() * 0.5, 5, "BigTitle_PlaymusicPro_Font", Color(150,150,150), Color(255,255,255,0), TEXT_ALIGN_CENTER )
 			else
 			
 				local only50 = PlayMP:GetSetting( "대기열에50개만표시", false, true )
@@ -181,16 +181,24 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 						end]]
 					
 						local queueListInfoPanelBase = DScrollPanel:Add( "DPanel" )
-						queueListInfoPanelBase:SetSize( DScrollPanel:GetWide(), 120 )
+						--queueListInfoPanelBase:SetSize( DScrollPanel:GetWide(), 120 )
 						queueListInfoPanelBase:Dock( TOP )
 						queueListInfoPanelBase:SetBackgroundColor( Color(0,0,0,0) )
 						
-						if k == PlayMP.CurPlayNum then
+						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
 							playingMPanel = queueListInfoPanelBase
+							queueListInfoPanelBase:SetSize( DScrollPanel:GetWide(), 120 )
+						else
+							queueListInfoPanelBase:SetSize( DScrollPanel:GetWide(), 60 )
 						end
 						
 						local queueListInfoPanel = vgui.Create( "DPanel", queueListInfoPanelBase )
-						queueListInfoPanel:SetSize( DScrollPanel:GetWide() - 4, 116 )
+						--queueListInfoPanel:SetSize( DScrollPanel:GetWide() - 4, 56 )
+						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+							queueListInfoPanel:SetSize( DScrollPanel:GetWide() - 4, 116 )
+						else
+							queueListInfoPanel:SetSize( DScrollPanel:GetWide() - 4, 56 )
+						end
 						queueListInfoPanel:SetPos( 2, 2 )
 						queueListInfoPanel:SetBackgroundColor( Color(40,40,40,230) )
 						
@@ -204,13 +212,14 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 						
 						local QueueNum = vgui.Create( "DLabel", queueListInfoPanel )
 						QueueNum:SetFont( "DermaDefault" )
-						QueueNum:SetSize( queueListInfoPanel:GetWide() - 150, 40 )
-						QueueNum:SetPos( 5, 5 )
+
 						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
 							queueListInfoPanelBase:SetBackgroundColor( Color( 42, 205, 114, 255) )
 							QueueNum:SetColor( Color( 42, 205, 114, 255) )
 							QueueNum:SetText( PlayMP:Str( "Now_Playing_MainPanelMusic" ) )
 							DScrollPanel:ScrollToChild( queueListInfoPanel )
+							QueueNum:SetSize( queueListInfoPanel:GetWide() - 150, 20 )
+							QueueNum:SetPos( 5, 10 )
 							local function colorbrth()
 								queueListInfoPanelBase:AlphaTo( 200, 1, 0, function() queueListInfoPanelBase:AlphaTo( 255, 1, 0, function() colorbrth() end) end)
 							end
@@ -218,25 +227,33 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 						else
 							QueueNum:SetColor( Color( 255, 255, 255, 255 ) )
 							QueueNum:SetText( "    #" .. v["QueueNum"] )
-
+							QueueNum:SetSize( queueListInfoPanel:GetWide() - 150, 20 )
+							QueueNum:SetPos( 5, 5 )
 						end
 
 						local Title = vgui.Create( "DLabel", queueListInfoPanel )
 						Title:SetFont( "Default_PlaymusicPro_Font" )
-						Title:SetSize( queueListInfoPanel:GetWide() / 2, 40 )
-						Title:SetPos( 10, 25 )
 						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
 							Title:SetColor( Color( 42, 205, 114, 255) )
+							Title:SetSize( queueListInfoPanel:GetWide() / 2, 20 )
+							Title:SetPos( 10, 30 )
 						else
 							Title:SetColor( Color( 255, 255, 255, 255 ) )
+							Title:SetSize( queueListInfoPanel:GetWide() / 2, 18 )
+							Title:SetPos( 22, 19 )
 						end
 						Title:SetText( "  " .. v["Title"] )
 						Title:SetMouseInputEnabled( true )
 						
 						local Length = vgui.Create( "DLabel", queueListInfoPanel )
 						Length:SetFont( "Default_PlaymusicPro_Font" )
-						Length:SetSize( 100, 40 )
-						Length:SetPos( Title:GetWide() , 25 )
+						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+							Length:SetSize( 100, 20 )
+							Length:SetPos( Title:GetWide() , 30 )
+						else
+							Length:SetSize( 100, 20 )
+							Length:SetPos( Title:GetWide() , 18 )
+						end
 						Length:SetColor( Color( 255, 255, 255, 255 ) )
 						Length:SetText( "     " .. string.ToMinutesSeconds( v["endTime"] - v["startTime"] ) )
 						Length:SetMouseInputEnabled( true )
@@ -254,57 +271,71 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 						local button = {}
 						
 						local PlayUserButtonBack = vgui.Create( "DPanel", queueListInfoPanel )
-						PlayUserButtonBack:SetSize( 32 + w + 20, 42 )
-						PlayUserButtonBack:SetPos( Title:GetWide() + Length:GetWide() + 25, 25 )
+						if k == PlayMP.CurPlayNum then
+							PlayUserButtonBack:SetSize( 32 + w + 20, 42 )
+							PlayUserButtonBack:SetPos( Title:GetWide() + Length:GetWide() + 25, 25 )
+						else
+							PlayUserButtonBack:SetSize( 42, 42 )
+							PlayUserButtonBack:SetPos( Title:GetWide() + Length:GetWide() + 25, 7 )
+						end
+
 						PlayUserButtonBack:SetBackgroundColor( Color(255,255,255,10) )
 						
-						if v["PlayUser"]:IsPlayer() then
-							local PlayUserImage = vgui.Create( "AvatarImage", queueListInfoPanel )
+						if v["PlayUser"]:IsPlayer() and v["PlayUser"]:IsValid() then
+							local PlayUserImage = vgui.Create( "AvatarImage", PlayUserButtonBack )
 							PlayUserImage:SetSize( 32, 32 )
-							PlayUserImage:SetPos( Title:GetWide() + Length:GetWide() + 30, 30 )
+							PlayUserImage:SetPos( 5,5 )
 							PlayUserImage:SetPlayer( v["PlayUser"], 32 )
 						end
 						
-						local PlayUser = vgui.Create( "DLabel", queueListInfoPanel )
-						PlayUser:SetFont( "Default_PlaymusicPro_Font" )
-						PlayUser:SetSize( w, 40 )
-						PlayUser:SetPos( Title:GetWide() + Length:GetWide() + 70, 25 )
-						PlayUser:SetColor( Color( 230, 230, 230, 255 ) )
-						PlayUser:SetText(  playerNick )
-						PlayUser:SetMouseInputEnabled( true )
+						local PlayUser
+						if k == PlayMP.CurPlayNum then
+							PlayUser = vgui.Create( "DLabel", PlayUserButtonBack )
+							PlayUser:SetFont( "Default_PlaymusicPro_Font" )
+							PlayUser:SetSize( w, 18 )
+							PlayUser:SetPos( 42, 13 )
+							PlayUser:SetColor( Color( 230, 230, 230, 255 ) )
+							PlayUser:SetText( playerNick )
+							PlayUser:SetMouseInputEnabled( true )
+						end
 						
-						local PlayUserButton = vgui.Create( "DLabel", queueListInfoPanel )
+						local PlayUserButton = vgui.Create( "DLabel", PlayUserButtonBack )
 						PlayUserButton:SetFont( "Default_PlaymusicPro_Font" )
-						PlayUserButton:SetSize( 32 + w + 20, 42 )
-						PlayUserButton:SetPos( Title:GetWide() + Length:GetWide() + 25, 25 )
+						PlayUserButton:Dock(FILL)
 						PlayUserButton:SetColor( Color( 255, 255, 255, 255 ) )
 						PlayUserButton:SetText( "" )
 						PlayUserButton:SetMouseInputEnabled( true )
 						PlayUserButton.OnCursorEntered = function( self, w, h )
 							PlayUserButtonBack:SetBackgroundColor( Color(255,255,255,50) )
-							PlayUser:SetColor( Color( 255, 255, 255, 255 ) )
+							if PlayUser != nil then
+								PlayUser:SetColor( Color( 255, 255, 255, 255 ) )
+							end
 						end
 						PlayUserButton.OnCursorExited = function( self, w, h )
 							PlayUserButtonBack:SetBackgroundColor( Color(255,255,255,10) )
-							PlayUser:SetColor( Color( 230, 230, 230, 255 ) )
+							if PlayUser != nil then
+								PlayUser:SetColor( Color( 230, 230, 230, 255 ) )
+							end
 						end
 						PlayUserButton.DoClick = function()
-							PlayMP:OpenSubFrame( PlayMP:Str( "Player_Info" ), "상세 정보", 600, 300, function( mainPanel, scrpanel, ButtonPanel )
-								if not v["PlayUser"]:IsPlayer() then
+							local tall = 300
+							if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then tall = 666 end
+							PlayMP:OpenSubFrame( PlayMP:Str( "Player_Info" ), "상세 정보", 600, tall, function( mainPanel, scrpanel, ButtonPanel )
+								if not v["PlayUser"]:IsPlayer() or not v["PlayUser"]:IsValid() then
 									PlayMP:AddTextBox( scrpanel, 30, TOP, PlayMP:Str( "NodataforPlayer" ), scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
 									PlayMP:AddTextBox( scrpanel, 30, TOP, PlayMP:Str( "Playerhasleftthegame" ), scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
 								else
 									PlayMP:AddTextBox( scrpanel, 30, TOP, PlayMP:Str( "NickName" ), scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
 									PlayMP:AddTextBox( scrpanel, 30, TOP, v["PlayUser"]:Nick(), scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
 									PlayMP:AddTextBox( scrpanel, 30, TOP, "SteamID", scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
-									PlayMP:AddTextBox( scrpanel, 40, TOP, v["PlayUser"]:SteamID(), 15, 8, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
+									PlayMP:AddTextBox( scrpanel, 40, TOP, v["PlayUser"]:SteamID(), 15, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
 										PlayMP:AddActionButton( self, PlayMP:Str( "Copy_On_Clipboard" ), Color( 60, 60, 60, 255 ), w - 170, 5, 160, 30, function()
 											SetClipboardText(v["PlayUser"]:SteamID())
 											PlayMP:Notice( PlayMP:Str( "Done_Copy_PlySID" ), Color(42, 205, 114), "notice" )
 										end)
 									end)
 									PlayMP:AddTextBox( scrpanel, 30, TOP, PlayMP:Str( "Player_Profile" ), scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
-									PlayMP:AddTextBox( scrpanel, 40, TOP, PlayMP:Str( "Player_Profile_Open" ), 15, 8, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
+									PlayMP:AddTextBox( scrpanel, 40, TOP, PlayMP:Str( "Player_Profile_Open" ), 15, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
 										PlayMP:AddActionButton( self, PlayMP:Str( "Open" ), Color( 60, 60, 60, 255 ), w - 110, 5, 100, 30, function()
 											v["PlayUser"]:ShowProfile() 
 										end)
@@ -315,10 +346,47 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 									hook.Remove("HUDPaint", "OpenRequestQueueWindow")
 									mainPanel:Close() 
 								end)
+								
+								if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
+									net.Receive( "PlayMP:GetUserInfoBySID", function( len, ply )
+										local data = net.ReadTable()
+
+										
+										PlayMP:AddTextBox( scrpanel, 48, TOP, PlayMP:Str( "Music" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+										local check1 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_Qeeue" ), nil, true, data[1], "qeeue" )
+										local check2 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_Skip" ), nil, true, data[1], "skip" )
+										local check3 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_seekTo" ), nil, true, data[1], "seekto" )
+										local check4 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_Ban" ), nil, true, data[1], "ban" )
+										
+										PlayMP:AddTextBox( scrpanel, 48, TOP, PlayMP:Str( "Admin" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+										local check5 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_AdminLicense" ), nil, true, data[1], "power" )
+										
+										PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "AdminSet_SyncData" ), Color(42, 205, 114), ButtonPanel:GetWide() - 280, 10, 180, 30, function() PlayMP:SetUserInfoBySID(v["PlayUser"]:SteamID(), data) end)
+									end)
+									PlayMP:GetUserInfoBySID(v["PlayUser"]:SteamID())
+								end
+								
 							end)
 						end
 						
-						PlayMP:AddActionButton( queueListInfoPanel, PlayMP:Str( "Save_On_MyPlaylist" ), Color( 42, 205, 114, 255 ), 20, 65, 250, 30, function() 
+						local abX
+						local abY
+						local abW
+						local abT
+						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+							--abXYWT = 20, 65, 250, 30
+							abX = 20
+							abY = 65
+							abW = 250
+							abT = 30
+						else
+							--abXYWT = queueListInfoPanel:GetWide() - 130, 13, 30, 30
+							abX = queueListInfoPanel:GetWide() - 130
+							abY = 11
+							abW = 34
+							abT = 34
+						end
+						local abD = PlayMP:AddActionButton( queueListInfoPanel, "  " ..PlayMP:Str( "Save_On_MyPlaylist" ), Color( 42, 205, 114, 255 ), abX, abY, abW, abT, function() 
 							
 							local v = v
 							local stat = PlayMP:AddLocalPlayList( {
@@ -334,19 +402,36 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 								PlayMP:Notice( PlayMP:Str( "Saved_OnMyPlylist", v["Title"] ), Color(42, 205, 114), "notice" )
 							end
 							
-						end )
-							
-						PlayMP:AddActionButton( queueListInfoPanel, PlayMP:Str( "Info_Details" ), Color( 60, 60, 60, 255 ), 280, 65, 150, 30, function() 
-							PlayMP:OpenSubFrame( PlayMP:Str( "Info_Details" ), "상세 정보", 600, 300, function( mainPanel, scrpanel, ButtonPanel )
+						end, "materials/vgui/playmusic_pro/11.png" )
+						if tonumber(v["QueueNum"]) != PlayMP.CurPlayNum then
+							abD:SetText( "" )
+						end
+						
+						
+						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+							--abXYWT = 280, 65, 150, 30
+							abX = 280
+							abY = 65
+							abW = 150
+							abT = 30
+						else
+							--abXYWT = queueListInfoPanel:GetWide() - 90, 13, 30, 30
+							abX = queueListInfoPanel:GetWide() - 90
+							abY = 11
+							abW = 34
+							abT = 34
+						end
+						local abD = PlayMP:AddActionButton( queueListInfoPanel, "  " ..PlayMP:Str( "Info_Details" ), Color( 60, 60, 60, 255 ), abX, abY, abW, abT, function() 
+							PlayMP:OpenSubFrame( PlayMP:Str( "Info_Details" ), "상세 정보", 600, 360, function( mainPanel, scrpanel, ButtonPanel )
 							
 								PlayMP:AddTextBox( scrpanel, 30, TOP, "Title", scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
 								PlayMP:AddTextBox( scrpanel, 60, TOP, v["Title"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
 								PlayMP:AddTextBox( scrpanel, 30, TOP, "Channel", scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
-								PlayMP:AddTextBox( scrpanel, 60, TOP, v["Channel"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, v["Channel"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
 								PlayMP:AddTextBox( scrpanel, 30, TOP, "Real Playback Time", scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
-								PlayMP:AddTextBox( scrpanel, 60, TOP, v["Length"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, v["Length"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
 								PlayMP:AddTextBox( scrpanel, 30, TOP, "URL", scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
-								PlayMP:AddTextBox( scrpanel, 60, TOP, "https://www.youtube.com/watch?v=" .. v["Uri"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, "https://www.youtube.com/watch?v=" .. v["Uri"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
 								
 								
 								PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "Close" ), Color(231, 76, 47), ButtonPanel:GetWide() - 90, 10, 80, 30, function() 
@@ -375,11 +460,26 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 								
 								
 							end)
-						end )
+						end, "materials/vgui/playmusic_pro/22.png" )
+						if tonumber(v["QueueNum"]) != PlayMP.CurPlayNum then
+							abD:SetText( "" )
+						end
 						
 						if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] or v["PlayUser"] == LocalPlayer() then
-						
-							PlayMP:AddActionButton( queueListInfoPanel, PlayMP:Str( "Remove" ), Color( 231, 76, 47 ), queueListInfoPanel:GetWide() - 120, 70, 100, 30, function()
+							if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+								--abXYWT = 280, 65, 150, 30
+								abX = queueListInfoPanel:GetWide() - 140
+								abY = 70
+								abW = 120
+								abT = 30
+							else
+								--abXYWT = queueListInfoPanel:GetWide() - 50, 13, 30, 30
+								abX = queueListInfoPanel:GetWide() - 50
+								abY = 11
+								abW = 34
+								abT = 34
+							end
+							local abD = PlayMP:AddActionButton( queueListInfoPanel, "  " ..PlayMP:Str( "Remove" ), Color( 231, 76, 47 ), abX, abY, abW, abT, function()
 							
 								local function waitServer()
 									PlayMP:OpenSubFrame( PlayMP:Str( "Notice" ), "알림 - 재생중인 노래 삭제?", 600, 200, function( mainPanel, scrpanel, ButtonPanel )
@@ -450,15 +550,26 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 								end
 
 								PlayMP:ChangeMenuWindow( "queueList" )
-							end )
+							end, "materials/vgui/playmusic_pro/33.png" )
+			
+							if tonumber(v["QueueNum"]) != PlayMP.CurPlayNum then
+								abD:SetText( "" )
+							end
+							
 						end
 						
 						--print( tonumber(v["QueueNum"]) >= table.Count(PlayMP.CurVideoInfo) ,tonumber(v["QueueNum"]), table.Count(PlayMP.CurVideoInfo) )
 						if tonumber(v["QueueNum"]) >= table.Count(PlayMP.CurVideoInfo) then
 							ScrollToChildPMP(playingMPanel)
 						end
+						
+						if k == #PlayMP.CurVideoInfo then
+							PlayMP:AddTextBox( DScrollPanel, 60, TOP, PlayMP:Str( "ThereIsEndOfQueueText" ), queueListInfoPanel:GetWide() * 0.5, 5, "BigTitle_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,0), TEXT_ALIGN_CENTER )
+							PlayMP:AddTextBox( DScrollPanel, 30, TOP, PlayMP:Str( "ThereIsEndOfQueueText2", #PlayMP.CurVideoInfo ), queueListInfoPanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,5), TEXT_ALIGN_CENTER )
+						end
 					
 					--end
+					
 				end
 				
 			end
@@ -498,6 +609,11 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 			if MyPlayList == nil then
 				MyPlayList = {}
 			end
+			
+			if #MyPlayList == 0 then 
+				PlayMP:AddTextBox( DScrollPanel, 300, TOP, PlayMP:Str( "ThereIsNoPlaylistText" ), DScrollPanel:GetWide() * 0.5, 5, "BigTitle_PlaymusicPro_Font", Color(150,150,150), Color(255,255,255,0), TEXT_ALIGN_CENTER )
+			end
+
 
 			PlayMP:AddTextBox( PlayMP.MenuWindowPanel, 40, TOP, PlayMP:Str( "Plylist_Count", table.Count(MyPlayList) ), 15, 15, "Default_PlaymusicPro_Font", Color( 150, 150, 150 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
 				--PlayMP:AddActionButton( self, "플레이 리스트 등록", Color( 60, 60, 60, 255 ), w - 170, 5, 160, 30, function()  end)
@@ -511,8 +627,9 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 				
 				for k, v in pairs(MyPlayList) do
 				
-				
-					local target = string.find( string.lower(v.Title), string.lower(self:GetValue()), 1, true )
+					local channelTag = ""
+					if v.Channel then channelTag = v.Channel end
+					local target = string.find( string.lower(v.Title), string.lower(self:GetValue()), 1, true ) or string.find( string.lower(channelTag), string.lower(self:GetValue()), 1, true )
 					
 					if target then
 					
@@ -532,8 +649,20 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 						Title:SetFont( "Default_PlaymusicPro_Font" )
 						Title:SetSize( InfoHelpPanel:GetWide() / 2, 40 )
 						Title:SetPos( 25, 8 )
-						Title:SetColor( Color( 230, 230, 230, 255 ) )
+						Title:SetColor( Color( 200, 200, 200, 255 ) )
 						Title:SetText( v.Title )
+						
+						local CTitle = vgui.Create( "DLabel", InfoHelpPanel )
+						CTitle:SetFont( "Default_PlaymusicPro_Font" )
+						CTitle:SetSize( InfoHelpPanel:GetWide() / 2 - 230, 40 )
+						CTitle:SetPos( InfoHelpPanel:GetWide() / 2 + 45, 8 )
+						CTitle:SetColor( Color( 150, 150, 150, 255 ) )
+						if v.Channel then
+							CTitle:SetText( v.Channel )
+						else
+							CTitle:SetText( "???" )
+							CTitle:SetColor( Color( 150, 100, 80, 255 ) )
+						end
 						
 						InfoHelpPanel.OnCursorEntered = function( self, w, h )
 							InfoHelpPanel:SetBackgroundColor( Color(50,50,50,255), 0.5 )
@@ -541,11 +670,11 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 						end
 						InfoHelpPanel.OnCursorExited = function( self, w, h )
 							InfoHelpPanel:SetBackgroundColor( Color(40,40,40,255), 1 ) 
-							Title:SetColor( Color( 230, 230, 230, 255 ) )
+							Title:SetColor( Color( 200, 200, 200, 255 ) )
 						end
 					
-						PlayMP:AddActionButton( InfoHelpPanel, PlayMP:Str( "Play" ), Color( 60, 60, 60, 255 ), InfoHelpPanel:GetWide() - 190, 13, 80, 30, function() PlayMP:OpenWriteQueueInfoPanel( "https://www.youtube.com/watch?v=" .. v.Uri, false, v.StartTime, v.EndTime ) end)
-						PlayMP:AddActionButton( InfoHelpPanel, PlayMP:Str( "Remove" ), Color(231, 76, 47), InfoHelpPanel:GetWide() - 100, 13, 80, 30, function() 
+						PlayMP:AddActionButton( InfoHelpPanel, "", Color( 60, 60, 60, 255 ), InfoHelpPanel:GetWide() - 90, 11, 34, 34, function() PlayMP:OpenWriteQueueInfoPanel( "https://www.youtube.com/watch?v=" .. v.Uri, false, v.StartTime, v.EndTime ) end, "materials/vgui/playmusic_pro/55.png")
+						PlayMP:AddActionButton( InfoHelpPanel, "", Color(231, 76, 47), InfoHelpPanel:GetWide() - 50, 11, 34, 34, function() 
 							PlayMP:OpenSubFrame( PlayMP:Str( "RemoveMusicFromPlayList" ), "알림 - 삭제 여부 확인", 600, 200, function( mainPanel, scrpanel, ButtonPanel )
 								PlayMP:AddTextBox( scrpanel, scrpanel:GetTall(), FILL, v.Title .. "\n " .. PlayMP:Str( "AreYouSureRemoveThisMusic" ), 0, 20, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_CENTER, function( TextBox, w, t, label ) label:SetWrap( false ) end)
 								PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "Remove" ), Color(231, 76, 47), ButtonPanel:GetWide() - 230, 10, 100, 30, function()
@@ -565,15 +694,16 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 									mainPanel:Close()
 								end)	
 							end)
-						end)
+						end, "materials/vgui/playmusic_pro/33.png")
 						
-						PlayMP:AddActionButton( InfoHelpPanel, PlayMP:Str( "Edit" ), Color( 60, 60, 60, 255 ), InfoHelpPanel:GetWide() - 280, 13, 80, 30, function() PlayMP:EditLocalPlayListPanel( v.Uri ) end)
+						PlayMP:AddActionButton( InfoHelpPanel, "", Color( 60, 60, 60, 255 ), InfoHelpPanel:GetWide() - 130, 11, 34, 34, function() PlayMP:EditLocalPlayListPanel( v.Uri ) end, "materials/vgui/playmusic_pro/44.png")
 						
 					end
 
 					if tonumber(k) == table.Count(MyPlayList) then
 						if tonumber(targetCount) == 0 then
-							PlayMP:AddTextBox( DScrollPanel, 40, TOP, PlayMP:Str( "There_Is_No_Result", self:GetValue() ), 15, 15, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT )
+							--PlayMP:AddTextBox( DScrollPanel, 40, TOP, PlayMP:Str( "There_Is_No_Result", self:GetValue() ), 15, 15, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT )
+							PlayMP:AddTextBox( DScrollPanel, 300, TOP, PlayMP:Str( "There_Is_No_Result", self:GetValue() ), DScrollPanel:GetWide() * 0.5, 5, "BigTitle_PlaymusicPro_Font", Color(150,150,150), Color(255,255,255,0), TEXT_ALIGN_CENTER )
 						end
 					end
 					
@@ -594,6 +724,8 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 				Title:SetColor( Color( 255, 255, 255, 255 ) )
 				Title:SetText( PlayMP:Str( "There_Is_No_Playlist" ) )
 				
+				PlayMP:AddTextBox( DScrollPanel, 300, TOP, PlayMP:Str( "ThereIsNoPlaylistText" ), DScrollPanel:GetWide() * 0.5, 5, "BigTitle_PlaymusicPro_Font", Color(150,150,150), Color(255,255,255,0), TEXT_ALIGN_CENTER )
+				
 				return
 			end
 		
@@ -613,8 +745,20 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 				Title:SetFont( "Default_PlaymusicPro_Font" )
 				Title:SetSize( InfoHelpPanel:GetWide() / 2, 40 )
 				Title:SetPos( 25, 10 )
-				Title:SetColor( Color( 230, 230, 230, 255 ) )
+				Title:SetColor( Color( 200, 200, 200, 255 ) )
 				Title:SetText( v.Title )
+				
+				local CTitle = vgui.Create( "DLabel", InfoHelpPanel )
+				CTitle:SetFont( "Default_PlaymusicPro_Font" )
+				CTitle:SetSize( InfoHelpPanel:GetWide() / 2 - 230, 40 )
+				CTitle:SetPos( InfoHelpPanel:GetWide() / 2 + 45, 8 )
+				CTitle:SetColor( Color( 150, 150, 150, 255 ) )
+				if v.Channel then
+					CTitle:SetText( v.Channel )
+				else
+					CTitle:SetText( "???" )
+					CTitle:SetColor( Color( 150, 100, 80, 255 ) )
+				end
 				
 				InfoHelpPanel.OnCursorEntered = function( self, w, h )
 					InfoHelpPanel:SetBackgroundColor( Color(50,50,50,255), 0.5 )
@@ -622,11 +766,11 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 				end
 				InfoHelpPanel.OnCursorExited = function( self, w, h )
 					InfoHelpPanel:SetBackgroundColor( Color(40,40,40,255), 1 ) 
-					Title:SetColor( Color( 230, 230, 230, 255 ) )
+					Title:SetColor( Color( 200, 200, 200, 255 ) )
 				end
 
-				PlayMP:AddActionButton( InfoHelpPanel, PlayMP:Str( "Play" ), Color( 60, 60, 60, 255 ), InfoHelpPanel:GetWide() - 190, 15, 80, 30, function() PlayMP:OpenWriteQueueInfoPanel( "https://www.youtube.com/watch?v=" .. v.Uri, false, v.StartTime, v.EndTime ) end)
-				PlayMP:AddActionButton( InfoHelpPanel, PlayMP:Str( "Remove" ), Color(231, 76, 47), InfoHelpPanel:GetWide() - 100, 15, 80, 30, function() 
+				PlayMP:AddActionButton( InfoHelpPanel, "", Color( 60, 60, 60, 255 ), InfoHelpPanel:GetWide() - 90, 11, 34, 34, function() PlayMP:OpenWriteQueueInfoPanel( "https://www.youtube.com/watch?v=" .. v.Uri, false, v.StartTime, v.EndTime ) end, "materials/vgui/playmusic_pro/55.png")
+				PlayMP:AddActionButton( InfoHelpPanel, "", Color(231, 76, 47), InfoHelpPanel:GetWide() - 50, 11, 34, 34, function() 
 					PlayMP:OpenSubFrame( PlayMP:Str( "RemoveMusicFromPlayList" ), "알림 - 삭제 여부 확인", 600, 200, function( mainPanel, scrpanel, ButtonPanel )
 						PlayMP:AddTextBox( scrpanel, scrpanel:GetTall(), FILL, v.Title .. "\n " .. PlayMP:Str( "AreYouSureRemoveThisMusic" ), 0, 20, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_CENTER,function( TextBox, w, t, label ) label:SetWrap( false ) end)
 						PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "Remove" ), Color(231, 76, 47), ButtonPanel:GetWide() - 230, 10, 100, 30, function()
@@ -650,9 +794,9 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 					
 					
 					
-				end)
+				end, "materials/vgui/playmusic_pro/33.png")
 				
-				PlayMP:AddActionButton( InfoHelpPanel, PlayMP:Str( "Edit" ), Color( 60, 60, 60, 255 ), InfoHelpPanel:GetWide() - 280, 15, 80, 30, function() PlayMP:EditLocalPlayListPanel( v.Uri ) end)
+				PlayMP:AddActionButton( InfoHelpPanel, "", Color( 60, 60, 60, 255 ), InfoHelpPanel:GetWide() - 130, 11, 34, 34, function() PlayMP:EditLocalPlayListPanel( v.Uri ) end, "materials/vgui/playmusic_pro/44.png")
 			
 			end
 		
@@ -671,6 +815,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 			PlayMP.VideoListPanel:SetSize( PlayMP.MenuWindowPanel:GetWide(), PlayMP.MenuWindowPanel:GetTall() - 250 )
 			PlayMP.VideoListPanel:SetPos( 0, 50 )
 			PlayMP.VideoListPanel.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 0 ) ) end
+			PlayMP:AddTextBox( PlayMP.VideoListPanel, 300, TOP, PlayMP:Str( "Search_On_Youtube" ), PlayMP.VideoListPanel:GetWide() * 0.5, 5, "BigTitle_PlaymusicPro_Font", Color(150,150,150), Color(255,255,255,0), TEXT_ALIGN_CENTER )
 			
 			local TextEntry = vgui.Create( "DTextEntry", SearchPanel )
 			TextEntry:SetPos( 50, 5 )
@@ -796,7 +941,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 								
 								
 								if v.id.kind == "youtube#video" then -- read error logs no.2 and no.3
-									PlayMP:AddActionButton( VideoInfo, PlayMP:Str( "Save_On_MyPlaylist" ), Color( 60, 60, 60, 255 ), VideoInfo:GetWide() - 310, 70, 200, 30, function() 
+									PlayMP:AddActionButton( VideoInfo, "  " .. PlayMP:Str( "Save_On_MyPlaylist" ), Color( 60, 60, 60, 255 ), VideoInfo:GetWide() - 320, 70, 200, 30, function() 
 										local v = v
 										local stat = PlayMP:ReadVideoAndWritePlayList( v )
 											
@@ -806,7 +951,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 											PlayMP:Notice( PlayMP:Str( "Saved_OnMyPlylist", v.snippet.title ), Color(42, 205, 114), "notice" )
 										end
 										
-									end )
+									end, "materials/vgui/playmusic_pro/11.png" )
 								end
 								
 								local Videoid = ""
@@ -818,9 +963,9 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 								end
 								
 								if v.id.kind == "youtube#video" then
-									PlayMP:AddActionButton( VideoInfo, PlayMP:Str( "Play" ), Color( 60, 60, 60, 255 ), VideoInfo:GetWide() - 100, 70, 80, 30, function() PlayMP:OpenWriteQueueInfoPanel( Videoid ) end)
+									PlayMP:AddActionButton( VideoInfo, "  " .. PlayMP:Str( "Play" ), Color( 60, 60, 60, 255 ), VideoInfo:GetWide() - 110, 70, 90, 30, function() PlayMP:OpenWriteQueueInfoPanel( Videoid ) end, "materials/vgui/playmusic_pro/55.png")
 								else
-									PlayMP:AddActionButton( VideoInfo, PlayMP:Str( "Play" ), Color( 60, 60, 60, 255 ), VideoInfo:GetWide() - 100, 70, 80, 30, function() PlayMP:OpenWriteQueueInfoPanelPlayList( v.id.playlistId ) end)
+									PlayMP:AddActionButton( VideoInfo, "  " .. PlayMP:Str( "Play" ), Color( 60, 60, 60, 255 ), VideoInfo:GetWide() - 110, 70, 90, 30, function() PlayMP:OpenWriteQueueInfoPanelPlayList( v.id.playlistId ) end, "materials/vgui/playmusic_pro/55.png")
 								end
 								
 								if k == table.Count(data.items) then
@@ -863,22 +1008,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 						
 					else -- 검색 결과가 없다면
 					
-						
-					
-						local VideoInfo = vgui.Create( "DPanel", DScrollPanel )
-						VideoInfo:SetSize( DScrollPanel:GetWide(), DScrollPanel:GetTall() - 50 )
-						VideoInfo:Dock( TOP )
-						VideoInfo.Paint = function( self, w, h )
-							surface.SetDrawColor( 30, 30,30, 255 )
-							surface.DrawLine( 30, h - 1, w - 30, h - 1 )
-						end
-			
-						local label = vgui.Create( "DLabel", VideoInfo )
-						label:SetSize( VideoInfo:GetWide(), 40 )
-						label:SetPos( 10, 20 )
-						label:SetFont( "Default_PlaymusicPro_Font" )
-						label:SetColor( Color( 255, 255, 255, 255 ) )
-						label:SetText( PlayMP:Str( "There_Is_No_Result", str ) )
+						PlayMP:AddTextBox( DScrollPanel, 300, TOP, PlayMP:Str( "There_Is_No_Result", str ), DScrollPanel:GetWide() * 0.5, 5, "BigTitle_PlaymusicPro_Font", Color(150,150,150), Color(255,255,255,0), TEXT_ALIGN_CENTER )
 						
 						
 						

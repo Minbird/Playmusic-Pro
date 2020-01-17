@@ -208,3 +208,11 @@ lang.SysNowInBeta = "Playmusic Pro is now in beta!"
 lang.AdminSet_DONOTshowInfoPanel = "Do not show Info Window to all users (but use chat)."
 lang.AdminSet_SavedUser = "All Players"
 lang.AdminSet_OnlineUser = "Online"
+
+lang.Channel = "Tag"
+lang.ThereIsNoPlaylistText = "Where is your Playlist?"
+lang.ThereIsEndOfQueueText = "This is end of Queue"
+lang.ThereIsEndOfQueueText2 = "%s media(s) here."
+lang.ThereIsNoQueueText = "This place is so quiet..."
+lang.Playerror = "Preparations for replay are taking longer than expected. The user may be in poor Internet condition, not participating in the Chromium Branch, or there may be an issue with Adobe Flash Player. Check QnA for more information."
+

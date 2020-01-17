@@ -122,27 +122,21 @@ function PlayMP:CreatFrame( frameTitle, uniqueName )
 	PlayMP.MainMenuPanel:SetSkin( "Default" )
 	PlayMP.MainMenuPanel:ShowCloseButton( false )
 	PlayMP.MainMenuPanel:MakePopup()
-	
+
 	PlayMP.basePanel = vgui.Create( "DPanel", PlayMP.MainMenuPanel )
 	PlayMP.basePanel:SetMouseInputEnabled( true )
 	PlayMP.basePanel:SetPos(0,0)
 	PlayMP.basePanel:SetSize( PlayMP.MainMenuPanel:GetWide(), PlayMP.MainMenuPanel:GetTall())
 	PlayMP.basePanel.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 0 ) ) end
 	
-	local quitbutton = vgui.Create( "DPanel", PlayMP.MainMenuPanel )
-	quitbutton:SetPos( PlayMP.MainMenuPanel:GetWide() - 55, 30 )
-	quitbutton:SetSize( 50, 20 )
-	quitbutton.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, w, h, Color( 150, 0, 0 ) ) end
-	
-	local quitbutton = vgui.Create( "DLabel", quitbutton )
-	quitbutton:SetPos( 19,0 )
-	quitbutton:SetFont( "Trebuchet24" )
-	quitbutton:SetSize( 50, 20 )
-	quitbutton:SetColor( Color( 255, 255, 255, 255 ) )
-	quitbutton:SetText( "X" )
-	quitbutton:SetMouseInputEnabled( true )
 
-	function quitbutton:DoClick()
+	local quitbutton = vgui.Create( "DButton", PlayMP.MainMenuPanel ) 
+	quitbutton:SetText( "X" )		
+	quitbutton:SetFont( "Trebuchet24" )	
+	quitbutton:SetPos( PlayMP.MainMenuPanel:GetWide() - 55, 30 )
+	quitbutton:SetSize( 50, 20 )	
+	quitbutton:SetColor( Color( 255, 255, 255, 255 ) )	
+	quitbutton.DoClick = function()			
 		hook.Remove("HUDPaint", uniqueName)
 		hook.Remove("Tick", "DoNoticeToPlayerOnMenu")
 		PlayMP.MenuWindowPanel:Clear()
@@ -150,6 +144,7 @@ function PlayMP:CreatFrame( frameTitle, uniqueName )
 		PlayMP.MainMenuPanel:Close()
 		PlayMP.MainMenuPanel = nil
 	end
+	quitbutton.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, w, h, Color( 100, 120, 120 ) ) end
 	
 	local windowAlpha = PlayMP:GetSetting( "메인메뉴의불투명도", false, true)
 	
@@ -181,7 +176,7 @@ function PlayMP:CreatFrame( frameTitle, uniqueName )
 	PlayMP.sideMenuPanel = vgui.Create( "DScrollPanel", PlayMP.basePanel )
 	PlayMP.sideMenuPanel:SetMouseInputEnabled( true )
 	PlayMP.sideMenuPanel:SetPos( 0, 56 )
-	PlayMP.sideMenuPanel:SetSize( 300, PlayMP.basePanel:GetTall() - 145 )
+	PlayMP.sideMenuPanel:SetSize( 300, PlayMP.basePanel:GetTall() - 202 )
 	PlayMP.sideMenuPanel.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, w, h, Color( 30, 30, 30, 255 ) ) end
 	
 	local sbar = PlayMP.sideMenuPanel:GetVBar()
@@ -197,6 +192,12 @@ function PlayMP:CreatFrame( frameTitle, uniqueName )
 	function sbar.btnGrip:Paint( w, h )
 		draw.RoundedBox( 5, 3, 0, w - 6, h, Color( 120, 120, 120 ) )
 	end
+	
+	PlayMP.volPanel = vgui.Create( "DPanel", PlayMP.basePanel )
+	PlayMP.volPanel:SetMouseInputEnabled( true )
+	PlayMP.volPanel:SetPos( 0, PlayMP.basePanel:GetTall() - 145 )
+	PlayMP.volPanel:SetSize( 300, 54 )
+	PlayMP.volPanel.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, w, h, Color( 20, 20, 20, 255 ) ) end
 	
 end
 
@@ -342,14 +343,20 @@ end
 		cornerRadius = 14
 	end
 	
-	function PlayMP:AddActionButton( panel, name, colorP, posX, posY, sizeW, sizeT, func )
+	function PlayMP:AddActionButton( panel, name, colorP, posX, posY, sizeW, sizeT, func, icon )	
 		
 			local button = {}
 			button.Color = Color( 255,255,255,0 )
-					
-			local buttonPanel = vgui.Create( "DPanel", panel )
-			buttonPanel:SetSize( sizeW, sizeT )
-			buttonPanel:SetPos( posX, posY )
+			
+			local buttonPanel = vgui.Create( "DButton", panel )
+			if icon then
+				buttonPanel:SetIcon( icon )
+			end
+			buttonPanel:SetText( name )			
+			buttonPanel:SetPos( posX, posY )				
+			buttonPanel:SetSize( sizeW, sizeT )	
+			buttonPanel:SetFont("ButtonDefault_PlaymusicPro_Font")
+			buttonPanel:SetColor(Color( 255, 255, 255, 255 ))
 			
 			local font = "ButtonDefault_PlaymusicPro_Font"
 			surface.SetFont( font )
@@ -387,23 +394,15 @@ end
 					buttonPanelW = buttonPanelW - 50 / PlayMP.CurFrameTime
 				end
 				
-				draw.DrawText( name, "ButtonDefault_PlaymusicPro_Font", buttonPanelW, 5, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER )
+				--draw.DrawText( name, "ButtonDefault_PlaymusicPro_Font", buttonPanelW, 5, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER )
 				
 			end
 			
-			local ButtonLabel = vgui.Create( "DLabel", buttonPanel )
-			ButtonLabel:SetFont( "ButtonDefault_PlaymusicPro_Font" )
-			ButtonLabel:Dock( FILL )
-			ButtonLabel:SetColor( Color( 255, 255, 255, 255 ) )
-			ButtonLabel:SetText("")
-			ButtonLabel:SetMouseInputEnabled( true )
-			ButtonLabel.OnCursorEntered = function( self, w, h )
-				button.OnCursorEntered = true
-			end
-			ButtonLabel.OnCursorExited = function( self, w, h )
-				button.OnCursorEntered = false
-			end
-			ButtonLabel.DoClick = func
+			buttonPanel.DoClick = func
+			
+			
+			
+			return buttonPanel
 				
 		end
 
@@ -429,7 +428,7 @@ end
 		toggleAni.a = 3
 		toggleAni.b = true
 		toggleAni.backCol = Color(150,150,150)
-		
+	
 		local toggleButPanel = vgui.Create( "DPanel", CheckBoxPanel )
 		toggleButPanel:SetSize( 55, 30 )
 		toggleButPanel:SetPos( CheckBoxPanel:GetWide() - 90, 10 )
@@ -765,37 +764,39 @@ end
 			
 		end
 		
-		local VolSlider_DoOpen = false
-		--local VolumeSlider_XPaint = 320
-		local VolumeSlider = vgui.Create( "DNumSlider", PlayMP.MainMenuCtrlPanel )
-		VolumeSlider:SetPos( PlayMP.MainMenuCtrlPanel:GetWide(), PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15 )			
-		VolumeSlider:SetSize( 300, 30 )		
+		local VolumeSlider = vgui.Create( "DNumSlider", PlayMP.volPanel )
+		VolumeSlider:SetPos( -50,12 )			
+		VolumeSlider:SetSize( 340, 30 )		
 		VolumeSlider:SetText( " " )	
 		VolumeSlider:SetMin( 0 )
 		VolumeSlider:SetMax( 100 )				
 		VolumeSlider:SetValue( PlayMP.GetPlayerVolume() )
 		
-		local Button_Vol = vgui.Create( "DImageButton", PlayMP.MainMenuCtrlPanel )
-		Button_Vol:SetPos( PlayMP.MainMenuCtrlPanel:GetWide() - 60, PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15 )
+		local Button_Vol = vgui.Create( "DImageButton", PlayMP.volPanel )
+		Button_Vol:SetPos( 10, 12 )
 		Button_Vol:SetSize( 30, 30 )
 		Button_Vol:SetImage( "vgui/playmusic_pro/vol1" )
 		Button_Vol.DoClick = function()
-			if VolSlider_DoOpen == true then
-				VolSlider_DoOpen = false
-				VolumeSlider:MoveTo( PlayMP.MainMenuCtrlPanel:GetWide() - 340, PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15, 0.2, 0, -1, function()
-					VolumeSlider:MoveTo( PlayMP.MainMenuCtrlPanel:GetWide(), PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15, 0.1)
-				end)
-				Button_Vol:MoveTo( PlayMP.MainMenuCtrlPanel:GetWide() - 270, PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15, 0.2, 0, -1, function()
-					Button_Vol:MoveTo( PlayMP.MainMenuCtrlPanel:GetWide() - 60, PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15, 0.1)
-				end)
-			else
-				VolSlider_DoOpen = true
-				VolumeSlider:MoveTo( PlayMP.MainMenuCtrlPanel:GetWide() - 340, PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15, 0.2, 0, -1, function()
-					VolumeSlider:MoveTo( PlayMP.MainMenuCtrlPanel:GetWide() - 320, PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15, 0.1)
-				end)
-				Button_Vol:MoveTo( PlayMP.MainMenuCtrlPanel:GetWide() - 270, PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15, 0.2, 0, -1, function()
-					Button_Vol:MoveTo( PlayMP.MainMenuCtrlPanel:GetWide() - 250, PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15, 0.1)
-				end)
+			if PlayMP.PlayerHTML then
+				if not PlayMP:isMuted() then
+				
+					PlayMP.PlayerHTML:QueueJavascript([[player.unMute();]])
+					if VolumeSlider:GetValue() > 85 then
+						Button_Vol:SetImage( "vgui/playmusic_pro/vol1" )
+					elseif VolumeSlider:GetValue() > 50 then
+						Button_Vol:SetImage( "vgui/playmusic_pro/vol2" )
+					elseif VolumeSlider:GetValue() > 25 then
+						Button_Vol:SetImage( "vgui/playmusic_pro/vol3" )
+					elseif VolumeSlider:GetValue() == 0 or VolumeSlider:GetValue() < 25 then
+						Button_Vol:SetImage( "vgui/playmusic_pro/vol4" )
+					end
+					
+				else
+				
+					PlayMP.PlayerHTML:QueueJavascript([[player.mute();]])
+					Button_Vol:SetImage( "vgui/playmusic_pro/mute.png" )
+					
+				end
 			end
 		end
 		Button_Vol.Paint = function( self, w, h )
@@ -815,35 +816,23 @@ end
 		VolumeSlider.OnValueChanged = function(  )
 			PlayMP.SetPlayerVolume( VolumeSlider:GetValue() )
 			
-		if VolumeSlider:GetValue() > 85 then
-			Button_Vol:SetImage( "vgui/playmusic_pro/vol1" )
-		elseif VolumeSlider:GetValue() > 50 then
-			Button_Vol:SetImage( "vgui/playmusic_pro/vol2" )
-		elseif VolumeSlider:GetValue() > 25 then
-			Button_Vol:SetImage( "vgui/playmusic_pro/vol3" )
-		elseif VolumeSlider:GetValue() == 0 or VolumeSlider:GetValue() < 25 then
-			Button_Vol:SetImage( "vgui/playmusic_pro/vol4" )
-		end
+			if PlayMP.PlayerIsMuted then return end
+			
+			if VolumeSlider:GetValue() > 85 then
+				Button_Vol:SetImage( "vgui/playmusic_pro/vol1" )
+			elseif VolumeSlider:GetValue() > 50 then
+				Button_Vol:SetImage( "vgui/playmusic_pro/vol2" )
+			elseif VolumeSlider:GetValue() > 25 then
+				Button_Vol:SetImage( "vgui/playmusic_pro/vol3" )
+			elseif VolumeSlider:GetValue() == 0 or VolumeSlider:GetValue() < 25 then
+				Button_Vol:SetImage( "vgui/playmusic_pro/vol4" )
+			end
 			
 		end
 		VolumeSlider.Paint = function( self, w, h )
 			draw.RoundedBox( cornerRadius, 110, 0, w - 110, h, Color(200,200,200,150) )
 		end
 		
-		--[[VolumeSlider.Think = function( )
-			if VolSlider_DoOpen == true and VolumeSlider_XPaint < 320 then
-				VolumeSlider_XPaint = VolumeSlider_XPaint + (VolumeSlider_XPaint + 10) / (PlayMP.CurFrameTime * 0.05)
-			elseif VolSlider_DoOpen == false and VolumeSlider_XPaint > 0 then
-				VolumeSlider_XPaint = VolumeSlider_XPaint - (VolumeSlider_XPaint + 1 )/ (PlayMP.CurFrameTime * 0.1)
-			elseif VolSlider_DoOpen == true and VolumeSlider_XPaint > 320 then
-				VolumeSlider_XPaint = 320
-			elseif VolSlider_DoOpen == false and VolumeSlider_XPaint < 0 then
-				VolumeSlider_XPaint = 0
-			end
-			
-			VolumeSlider:SetPos( PlayMP.MainMenuCtrlPanel:GetWide() - VolumeSlider_XPaint, PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15 )
-			Button_Vol:SetPos( PlayMP.MainMenuCtrlPanel:GetWide() - 60 - (VolumeSlider_XPaint / 320 * 200), PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 15 )
-		end]]
 	
 		if PlayMP.CurVideoInfo then
 			for k, v in pairs( PlayMP.CurVideoInfo ) do

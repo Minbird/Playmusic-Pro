@@ -291,11 +291,17 @@ end
 	
 	util.AddNetworkString("PlayMP:ChangeServerSettings")
 
-	net.Receive( "PlayMP:ChangeServerSettings", function()
+	net.Receive( "PlayMP:ChangeServerSettings", function( len, pl )
+	
 		local ply = net.ReadEntity()
 		local v = net.ReadTable()
 		
-		PlayMP:ChangeSetting( v.UniName, v.Data )
+		local plydata = PlayMP:GetUserInfoBySID(pl:SteamID())[1]
+		if pl:IsAdmin() or plydata.power == true then
+			PlayMP:ChangeSetting( v.UniName, v.Data )
+		else
+			PlayMP:NoticeForPlayer( "Unknown_Error", "red", "warning" , pl )
+		end
 	end)
 
 
@@ -656,11 +662,16 @@ end)
 		local target = net.ReadString()
 		local data = net.ReadTable()
 		
-		local stat = PlayMP:SetUserInfoBySID(target, data)
-		
-		net.Start("PlayMP:SetUserInfoBySID")
-			net.WriteBool( stat )
-		net.Send(ply)
+		local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())[1]
+		if ply:IsAdmin() or plydata.power == true then
+			local stat = PlayMP:SetUserInfoBySID(target, data)
+			
+			net.Start("PlayMP:SetUserInfoBySID")
+				net.WriteBool( stat )
+			net.Send(ply)
+		else
+			PlayMP:NoticeForPlayer( "Unknown_Error", "red", "warning" , ply )
+		end
 		
 	end)
 	

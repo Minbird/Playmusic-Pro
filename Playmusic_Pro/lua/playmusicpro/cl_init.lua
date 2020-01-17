@@ -251,7 +251,7 @@ surface.CreateFont( "BigTitle_PlaymusicPro_Font", {
 	font = "Arial",
 	extended = false,
 	size = 30,
-	weight = 300,
+	weight = 600,
 	blursize = 0,
 	scanlines = 0,
 	antialias = true,
@@ -444,13 +444,14 @@ function PlayMP:ReadVideoAndWritePlayList( v )
 	
 end
 
-function PlayMP:EditLocalPlayList( uniId, title, startTime, endTime )
+function PlayMP:EditLocalPlayList( uniId, title, startTime, endTime, tag )
 
 	local data = PlayMP:ReadLocalPlayList()
 	
 	for k, v in pairs( data ) do
 		if v["Uri"] == uniId or v["PlaylistId"] == uniId then
 			v.Title = title
+			v.Channel = tag
 			v.StartTime = startTime
 			v.EndTime = endTime
 			local CurPlayList = util.TableToJSON( data )
@@ -467,10 +468,16 @@ function PlayMP:EditLocalPlayListPanel( uniId )
 	for k, v in pairs( data ) do
 		if v["Uri"] == uniId or v["PlaylistId"] == uniId then
 	
-		PlayMP:OpenSubFrame( PlayMP:Str( "Edit_PlayLisy" ), "플레이 리스트 수정: " .. v.Title, 600, 240, function( mainPanel, scrpanel, ButtonPanel )
+		PlayMP:OpenSubFrame( PlayMP:Str( "Edit_PlayLisy" ), "플레이 리스트 수정: " .. v.Title, 600, 280, function( mainPanel, scrpanel, ButtonPanel )
 		
 			local title = PlayMP:AddTextEntryBox( scrpanel, TOP, PlayMP:Str( "Media_Title" ), v.Title, scrpanel:GetWide(), 40 )
 			title:SetText(v.Title)
+			local ctitle = PlayMP:AddTextEntryBox( scrpanel, TOP, PlayMP:Str( "Channel" ), v.Title, scrpanel:GetWide(), 40 )
+			if v.Channel then
+				ctitle:SetText( v.Channel )
+			else
+				ctitle:SetText( "???" )
+			end
 			PlayMP:AddTextBox( scrpanel, 40, TOP, PlayMP:Str( "Media_Play_Time" ), scrpanel:GetWide() * 0.5, 15, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_CENTER)
 			local startTime = PlayMP:AddTextEntryBox( scrpanel, TOP, PlayMP:Str( "StartTime" ), string.ToMinutesSeconds(v.StartTime), scrpanel:GetWide(), 40 )
 			local endTime = PlayMP:AddTextEntryBox( scrpanel, TOP, PlayMP:Str( "EndTime" ), string.ToMinutesSeconds(v.EndTime), scrpanel:GetWide(), 40 )
@@ -519,7 +526,7 @@ function PlayMP:EditLocalPlayListPanel( uniId )
 				end
 				
 				if SS != nil and SM != nil and ES != nil and EM != nil then
-					PlayMP:EditLocalPlayList( uniId, title:GetValue(), SS + SM, ES + EM )
+					PlayMP:EditLocalPlayList( uniId, title:GetValue(), SS + SM, ES + EM, ctitle:GetValue() )
 				else
 					PlayMP:Notice( PlayMP:Str( "Error_Edit_Playlist_SomethingWrong" ), Color(231, 76, 47), "warning" )
 				end
@@ -567,7 +574,9 @@ function PlayMP:PlayMusic( uri, startTime, endTime )
 	end
 
 	PlayMP:LoadPlayer()
-	PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. uri .. "?Vol=" .. PlayMP.GetPlayerVolume() .. "?Seek=" .. startTime )
+	local vol = 0
+	if PlayMP.PlayerIsMuted then vol = 0 else vol = PlayMP.GetPlayerVolume() end
+	PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. uri .. "?Vol=" .. vol .. "?Seek=" .. startTime )
 	if PlayMP:GetSetting( "FMem", false, true) then
 		PlayMP.PlayerHTML:QueueJavascript([[player.setPlaybackQuality( "small" );]])
 	end
@@ -877,7 +886,9 @@ function PlayMP:EditMainPlayer()
 			PlayMP:LoadPlayer()
 			for k, v in pairs( PlayMP.CurVideoInfo ) do
 				if v["QueueNum"] == PlayMP.CurPlayNum then
-					PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. v.Uri .. "?Vol=" .. PlayMP.GetPlayerVolume() .. "?Seek=" .. PlayMP.CurPlayTime + v.startTime )
+					local vol = 0
+					if PlayMP.PlayerIsMuted then vol = 0 else vol = PlayMP.GetPlayerVolume() end
+					PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. v.Uri .. "?Vol=" .. vol .. "?Seek=" .. PlayMP.CurPlayTime + v.startTime )
 					if PlayMP:GetSetting( "FMem", false, true) then
 						PlayMP.PlayerHTML:QueueJavascript([[player.setPlaybackQuality( "small" );]])
 					end
@@ -887,6 +898,19 @@ function PlayMP:EditMainPlayer()
 		
 	end)
 	
+end
+
+PlayMP.PlayerIsMuted = false
+function PlayMP:isMuted()
+
+--PlayMP.PlayerHTML:AddFunction( "PlayMP", "isMu", function(d) 
+	--	PlayMP.PlayerIsMuted = d
+	--end)
+	--PlayMP.PlayerHTML:QueueJavascript([[PlayMP.isMu(player.isMuted());]])
+	--
+	if PlayMP.PlayerIsMuted == true then PlayMP.PlayerIsMuted = false else PlayMP.PlayerIsMuted = true end
+	
+	return PlayMP.PlayerIsMuted
 end
 
 
@@ -954,8 +978,8 @@ function PlayMP:VideoTimeThink()
 				if PlayMP.CurPlayTime > PlayMP.RealPlayTime + 10 and nowWait == false then
 					if waitTime > 10 then
 						nowWait = true
-						PlayMP:Notice( "예상보다 재생 준비가 오래 걸리고 있습니다. 사용자의 인터넷 상태가 좋지 않거나, Chromium Branch 참여하지 않았거나, Adobe Flash Player 문제일 수 있습니다. 자세한 내용은 QnA를 확인하십시오.", Color(231, 76, 47), "warning" )
-						chat.AddText("예상보다 재생 준비가 오래 걸리고 있습니다. 사용자의 인터넷 상태가 좋지 않거나, Chromium Branch 참여하지 않았거나, Adobe Flash Player 문제일 수 있습니다. 자세한 내용은 QnA를 확인하십시오.")
+						PlayMP:Notice( PlayMP:Str( "Playerror" ), Color(231, 76, 47), "warning" )
+						chat.AddText(PlayMP:Str( "Playerror" ))
 					end
 					waitTime = waitTime + 0.2
 				end
@@ -963,16 +987,19 @@ function PlayMP:VideoTimeThink()
 				--if PlayMP.PlayerHTML == nil or not PlayMP.PlayerHTML:IsValid() then return end
 				
 				Tick_TimeThink = CurTime()
-
-					if PlayMP:GetSetting( "PlayX01", false, true) then
-						if PlayX != nil and PlayX.Playing and PlayX.VideoRangeStatus == 1 then
-							PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(0)]])
-						else
-							PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. PlayMP.GetPlayerVolume() .. [[)]])
-						end
+					
+				local vol = 0
+				if PlayMP.PlayerIsMuted then vol = 0 else vol = PlayMP.GetPlayerVolume() end
+				
+				if PlayMP:GetSetting( "PlayX01", false, true) then
+					if PlayX != nil and PlayX.Playing and PlayX.VideoRangeStatus == 1 then
+						PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(0)]])
 					else
-						PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. PlayMP.GetPlayerVolume() .. [[)]])
+						PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. vol .. [[)]])
 					end
+				else
+					PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. vol .. [[)]])
+				end
 			
 				if PlayMP.SeekTo != true then
 					PlayMP.PlayerHTML:RunJavascript([[PlayMP.CurTime(player.getCurrentTime());]])
@@ -1580,7 +1607,9 @@ local function changePlayMode( mode )
 	if PlayMP.isPlaying then
 		for k, v in pairs( PlayMP.CurVideoInfo ) do
 			if v["QueueNum"] == PlayMP.CurPlayNum then
-				PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. v.Uri .. "?Vol=" .. PlayMP.GetPlayerVolume() .. "?Seek=" .. PlayMP.CurPlayTime + v.startTime )
+				local vol = 0
+				if PlayMP.PlayerIsMuted then vol = 0 else vol = PlayMP.GetPlayerVolume() end
+				PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. v.Uri .. "?Vol=" .. vol .. "?Seek=" .. PlayMP.CurPlayTime + v.startTime )
 				if PlayMP:GetSetting( "FMem", false, true) then
 					PlayMP.PlayerHTML:QueueJavascript([[player.setPlaybackQuality( "small" );]])
 				end
