@@ -649,6 +649,20 @@ end
 
 local v = PlayMP:GetSetting( "MainPlayerData", false, true)
 
+if v == nil then
+	v = {
+			X=10,
+			Y=10,
+			W=160,
+			H=80
+		}
+	PlayMP:ChangeSetting( "MainPlayerData",v)
+	chat.AddText("[Playmusic Pro Error] " ..  PlayMP:Str( "PlayerDataError" ))
+	PlayMP:Notice( PlayMP:Str( "PlayerDataError" ), Color(231, 76, 47), "warning" )
+
+end
+	
+
 PlayMP.PlayerMainPanel = vgui.Create( "DFrame" )
 PlayMP.PlayerMainPanel:SetPos( v.X, v.Y )
 PlayMP.PlayerMainPanel:SetSize( v.W, v.H )
@@ -1198,15 +1212,15 @@ function PlayMP:ShowNotchInfoPanel( boo, text )
 		PlayMP.PlayerVideoTitlePanel:SetSize( PlayMP.MainNotchInfoPanel:GetWide() - (24 + w), PlayMP.MainNotchInfoPanel:GetTall() )
 		PlayMP.PlayerVideoTitlePanel.Paint = function()end
 		
-		surface.SetFont( "NotchInfoPanel_PlaymusicPro_Font" )
+		--[[surface.SetFont( "NotchInfoPanel_PlaymusicPro_Font" )
 		local w, h = surface.GetTextSize( text )
 		
-		local PlayerVideoTitle = vgui.Create( "DLabel", PlayMP.PlayerVideoTitlePanel )
-		PlayerVideoTitle:SetPos( PlayMP.PlayerVideoTitlePanel:GetWide() / 2 - w / 2, PlayMP.PlayerVideoTitlePanel:GetTall() / 2 - h / 2 )
-		PlayerVideoTitle:SetFont( "NotchInfoPanel_PlaymusicPro_Font" )
-		PlayerVideoTitle:SetSize( w, h )
-		PlayerVideoTitle:SetColor( Color( 255, 255, 255, 255 ) )
-		PlayerVideoTitle:SetText( text )
+		PlayMP.PlayerVideoTitle = vgui.Create( "DLabel", PlayMP.PlayerVideoTitlePanel )
+		PlayMP.PlayerVideoTitle:SetPos( PlayMP.PlayerVideoTitlePanel:GetWide() / 2 - w / 2, PlayMP.PlayerVideoTitlePanel:GetTall() / 2 - h / 2 )
+		PlayMP.PlayerVideoTitle:SetFont( "NotchInfoPanel_PlaymusicPro_Font" )
+		PlayMP.PlayerVideoTitle:SetSize( w, h )
+		PlayMP.PlayerVideoTitle:SetColor( Color( 255, 255, 255, 255 ) )
+		PlayMP.PlayerVideoTitle:SetText( text )]]
 		
 		local aniImage_Think = {}
 		
@@ -1221,12 +1235,12 @@ function PlayMP:ShowNotchInfoPanel( boo, text )
 			
 				if PlayMP.isPlaying == nil or PlayMP.isPlaying == false then
 					nowplayingText = prepareplay
-					PlayMP:ChangeNowPlayingText(nowplayingText)
+					--PlayMP:ChangeNowPlayingText(nowplayingText)
 					--aniIamge:SetPos( 2, PlayMP.MainNotchInfoPanel:GetTall() / 2 - 8 )
 					return
 				else
 					nowplayingText = nowplaying
-					PlayMP:ChangeNowPlayingText(nowplayingText)
+					--PlayMP:ChangeNowPlayingText(nowplayingText)
 					--aniIamge:SetPos( 2, PlayMP.MainNotchInfoPanel:GetTall() / 2 - 8 )
 				end
 				
@@ -1252,14 +1266,14 @@ function PlayMP:ShowNotchInfoPanel( boo, text )
 			end
 		end)
 		
-		if w > PlayMP.PlayerVideoTitlePanel:GetWide() then
+		--[[if w > PlayMP.PlayerVideoTitlePanel:GetWide() then
 			
-			local PlayerVideoTitle2 = vgui.Create( "DLabel", PlayMP.PlayerVideoTitlePanel )
-			PlayerVideoTitle2:SetPos( 5, PlayMP.PlayerVideoTitlePanel:GetWide() / 2 - h / 2 )
-			PlayerVideoTitle2:SetFont( "NotchInfoPanel_PlaymusicPro_Font" )
-			PlayerVideoTitle2:SetSize( w, h )
-			PlayerVideoTitle2:SetColor( Color( 255, 255, 255, 255 ) )
-			PlayerVideoTitle2:SetText( text )
+			PlayMP.PlayerVideoTitle2 = vgui.Create( "DLabel", PlayMP.PlayerVideoTitlePanel )
+			PlayMP.PlayerVideoTitle2:SetPos( 5, PlayMP.PlayerVideoTitlePanel:GetWide() / 2 - h / 2 )
+			PlayMP.PlayerVideoTitle2:SetFont( "NotchInfoPanel_PlaymusicPro_Font" )
+			PlayMP.PlayerVideoTitle2:SetSize( w, h )
+			PlayMP.PlayerVideoTitle2:SetColor( Color( 255, 255, 255, 255 ) )
+			PlayMP.PlayerVideoTitle2:SetText( text )
 			
 			local PlayerVideoTitle_TextSliderThink = {}
 			
@@ -1285,12 +1299,14 @@ function PlayMP:ShowNotchInfoPanel( boo, text )
 					PlayerVideoTitle_TextSliderThink.Pos = w + 100
 				end
 				
-				PlayerVideoTitle:SetPos( PlayerVideoTitle_TextSliderThink.Pos, asdfasdf )
-				PlayerVideoTitle2:SetPos( PlayerVideoTitle_TextSliderThink.Pos2, asdfasdf )
+				PlayMP.PlayerVideoTitle:SetPos( PlayerVideoTitle_TextSliderThink.Pos, asdfasdf )
+				PlayMP.PlayerVideoTitle2:SetPos( PlayerVideoTitle_TextSliderThink.Pos2, asdfasdf )
 				
 			end)
 			
-		end
+		end]]
+		
+		--PlayMP.UpdateNotchInfoPanel( text, "" )
 		
 		PlayMP.timebarBack = vgui.Create( "DPanel", PlayMP.PlayerVideoTitlePanel )
 		PlayMP.timebarBack:SetPos( 10, PlayMP.PlayerVideoTitlePanel:GetTall() - 5 )
@@ -1318,7 +1334,6 @@ function PlayMP:ShowNotchInfoPanel( boo, text )
 			PlayMP.NotchInfoPanel_PlayerVideoImage:SetAlpha(0)
 			PlayMP.NotchInfoPanel:AlphaTo( 0, 1 )
 			PlayMP.NotchInfoPanel:MoveTo( ScrW() * 0.5 - ScrW() * 0.2, 0, 1)
-			chat.AddText("[Playmusic Pro] " .. text)
 		end
 		
 	else
@@ -1364,6 +1379,75 @@ end)
 
 
 PlayMP:ShowNotchInfoPanel( true, "PlayMusic Pro" )
+
+function PlayMP.UpdateNotchInfoPanel( text, img )
+
+	if PlayMP.InfoPanelPlayerVideoTitle != nil then 
+		--PlayMP.InfoPanelPlayerVideoTitle:Clear()
+		PlayMP.InfoPanelPlayerVideoTitle:Remove()
+	end
+	
+	if PlayMP.InfoPanelPlayerVideoTitle2 != nil then 
+		--PlayMP.InfoPanelPlayerVideoTitle2:Clear()
+		PlayMP.InfoPanelPlayerVideoTitle2:Remove() 
+		hook.Remove("Think", "PlayerVideoTitle_TextSliderThink")
+	end
+	
+	surface.SetFont( "NotchInfoPanel_PlaymusicPro_Font" )
+	local w, h = surface.GetTextSize( text )
+		
+	PlayMP.InfoPanelPlayerVideoTitle = vgui.Create( "DLabel", PlayMP.PlayerVideoTitlePanel )
+	PlayMP.InfoPanelPlayerVideoTitle:SetPos( PlayMP.PlayerVideoTitlePanel:GetWide() / 2 - w / 2, PlayMP.PlayerVideoTitlePanel:GetTall() / 2 - h / 2 )
+	PlayMP.InfoPanelPlayerVideoTitle:SetFont( "NotchInfoPanel_PlaymusicPro_Font" )
+	PlayMP.InfoPanelPlayerVideoTitle:SetSize( w, h )
+	PlayMP.InfoPanelPlayerVideoTitle:SetColor( Color( 255, 255, 255, 255 ) )
+	PlayMP.InfoPanelPlayerVideoTitle:SetText( text )
+	
+	local asdfasdf = (PlayMP.PlayerVideoTitlePanel:GetTall() / 2 - h / 2)
+	
+	if w > PlayMP.PlayerVideoTitlePanel:GetWide() then
+			
+		PlayMP.InfoPanelPlayerVideoTitle2 = vgui.Create( "DLabel", PlayMP.PlayerVideoTitlePanel )
+		PlayMP.InfoPanelPlayerVideoTitle2:SetPos( 5, PlayMP.PlayerVideoTitlePanel:GetWide() / 2 - h / 2 )
+		PlayMP.InfoPanelPlayerVideoTitle2:SetFont( "NotchInfoPanel_PlaymusicPro_Font" )
+		PlayMP.InfoPanelPlayerVideoTitle2:SetSize( w, h )
+		PlayMP.InfoPanelPlayerVideoTitle2:SetColor( Color( 255, 255, 255, 255 ) )
+		PlayMP.InfoPanelPlayerVideoTitle2:SetText( text )
+			
+		local PlayerVideoTitle_TextSliderThink = {}
+			
+		PlayerVideoTitle_TextSliderThink.Pos = 5
+		PlayerVideoTitle_TextSliderThink.Pos2 = w + 100
+		PlayerVideoTitle_TextSliderThink.Think_TimeThink = CurTime()
+		PlayerVideoTitle_TextSliderThink.StopTime = 0
+			
+		hook.Add( "Think", "PlayerVideoTitle_TextSliderThink", function()
+			
+			if 0.05 + PlayerVideoTitle_TextSliderThink.StopTime > CurTime() - PlayerVideoTitle_TextSliderThink.Think_TimeThink then return end
+			PlayerVideoTitle_TextSliderThink.Think_TimeThink = CurTime()
+			
+			PlayerVideoTitle_TextSliderThink.Pos = PlayerVideoTitle_TextSliderThink.Pos - 1
+			PlayerVideoTitle_TextSliderThink.Pos2 = PlayerVideoTitle_TextSliderThink.Pos2 - 1
+			PlayerVideoTitle_TextSliderThink.StopTime = 0
+				
+			if PlayerVideoTitle_TextSliderThink.Pos == 5 then
+				PlayerVideoTitle_TextSliderThink.StopTime = 5
+				PlayerVideoTitle_TextSliderThink.Pos2 = w + 100
+			elseif PlayerVideoTitle_TextSliderThink.Pos2 == 5 then
+				PlayerVideoTitle_TextSliderThink.StopTime = 5
+				PlayerVideoTitle_TextSliderThink.Pos = w + 100
+			end
+				
+			PlayMP.InfoPanelPlayerVideoTitle:SetPos( PlayerVideoTitle_TextSliderThink.Pos, asdfasdf )
+			PlayMP.InfoPanelPlayerVideoTitle2:SetPos( PlayerVideoTitle_TextSliderThink.Pos2, asdfasdf )
+				
+		end)
+			
+	end
+	
+	PlayMP.NotchInfoPanel_PlayerVideoImage:SetHTML( "<img src=\"" .. img .. "\" width=\" " .. PlayMP.NotchInfoPanel:GetWide() + 10 .. " \" height=\" " .. PlayMP.NotchInfoPanel:GetWide() / 16 * 9 + 10 .. "\">" )
+
+end
 
 
 
@@ -1492,9 +1576,15 @@ function PlayMP:ReceiveMusicDataAndPlay( num, curvinfo, time )
 	
 	for k, v in pairs( PlayMP.CurVideoInfo ) do
 		if v["QueueNum"] == PlayMP.CurPlayNum then
-			
+			local image
+			if PlayMP:GetSetting( "FMem", false, true) then
+				image = v["ImageLow"]
+			else
+				image = v["Image"]
+			end
 			PlayMP.timeError = 0
-			PlayMP:ShowNotchInfoPanel( true, v["Title"] )
+			--PlayMP:ShowNotchInfoPanel( true, v["Title"] )
+
 			if time then
 				PlayMP:PlayMusic( v["Uri"], time, v.endTime )
 				PlayMP.timeError = time
@@ -1505,35 +1595,29 @@ function PlayMP:ReceiveMusicDataAndPlay( num, curvinfo, time )
 			
 			local function ChangeState()
 				if PlayMP.CurVideoInfo then
-					for k, v in pairs( PlayMP.CurVideoInfo ) do
-						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
-							local image
-							if PlayMP:GetSetting( "FMem", false, true) then
-								image = v["ImageLow"]
-							else
-								image = v["Image"]
-							end
+					--for k, v in pairs( PlayMP.CurVideoInfo ) do
+						--if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
 							PlayMP.PlayerVideoImage:SetHTML( "<img src=\"" .. image .. "\" width=\" " .. ScrW() * 0.8 .. " \" height=\" " .. ScrH() * 0.8 .. "\">" )
 							PlayMP.PlayerVideoTitle:SetText( v["Title"] )
 							PlayMP.PlayerVideoChannel:SetText( v["Channel"] )
-							PlayMP.NotchInfoPanel_PlayerVideoImage:SetHTML( "<img src=\"" .. image .. "\" width=\" " .. PlayMP.NotchInfoPanel:GetWide() + 10 .. " \" height=\" " .. PlayMP.NotchInfoPanel:GetWide() / 16 * 9 + 10 .. "\">" )
-						end
-					end
+							--PlayMP.NotchInfoPanel_PlayerVideoImage:SetHTML( "<img src=\"" .. image .. "\" width=\" " .. PlayMP.NotchInfoPanel:GetWide() + 10 .. " \" height=\" " .. PlayMP.NotchInfoPanel:GetWide() / 16 * 9 + 10 .. "\">" )
+						--end
+					--end
 				end
 			end
 			
 			if PlayMP.MainMenuPanel == nil then
-				for k, v in pairs( PlayMP.CurVideoInfo ) do
-					if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
-						local image
-						if PlayMP:GetSetting( "FMem", false, true) then
-							image = v["ImageLow"]
-						else
-							image = v["Image"]
-						end
-						PlayMP.NotchInfoPanel_PlayerVideoImage:SetHTML( "<img src=\"" .. image .. "\" width=\" " .. PlayMP.NotchInfoPanel:GetWide() + 10 .. " \" height=\" " .. PlayMP.NotchInfoPanel:GetWide() / 16 * 9 + 10 .. "\">" )
-					end
-				end
+				--for k, v in pairs( PlayMP.CurVideoInfo ) do
+					--if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+						--local image
+						--if PlayMP:GetSetting( "FMem", false, true) then
+							--image = v["ImageLow"]
+						--else
+							--image = v["Image"]
+						--end
+						--PlayMP.NotchInfoPanel_PlayerVideoImage:SetHTML( "<img src=\"" .. image .. "\" width=\" " .. PlayMP.NotchInfoPanel:GetWide() + 10 .. " \" height=\" " .. PlayMP.NotchInfoPanel:GetWide() / 16 * 9 + 10 .. "\">" )
+					--end
+				--end
 			elseif PlayMP.MainMenuPanel:IsValid() then
 				ChangeState()
 				
@@ -1541,6 +1625,8 @@ function PlayMP:ReceiveMusicDataAndPlay( num, curvinfo, time )
 					PlayMP:ChangeMenuWindow( "queueList" )
 				end
 			end
+			
+			PlayMP.UpdateNotchInfoPanel( v["Title"], image )
 			
 		end
 	end

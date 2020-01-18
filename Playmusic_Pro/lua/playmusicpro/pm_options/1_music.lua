@@ -348,22 +348,26 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 								end)
 								
 								if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
-									net.Receive( "PlayMP:GetUserInfoBySID", function( len, ply )
-										local data = net.ReadTable()
+									if not v["PlayUser"]:IsPlayer() or not v["PlayUser"]:IsValid() then
+										
+									else
+										net.Receive( "PlayMP:GetUserInfoBySID", function( len, ply )
+											local data = net.ReadTable()
 
-										
-										PlayMP:AddTextBox( scrpanel, 48, TOP, PlayMP:Str( "Music" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
-										local check1 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_Qeeue" ), nil, true, data[1], "qeeue" )
-										local check2 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_Skip" ), nil, true, data[1], "skip" )
-										local check3 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_seekTo" ), nil, true, data[1], "seekto" )
-										local check4 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_Ban" ), nil, true, data[1], "ban" )
-										
-										PlayMP:AddTextBox( scrpanel, 48, TOP, PlayMP:Str( "Admin" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
-										local check5 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_AdminLicense" ), nil, true, data[1], "power" )
-										
-										PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "AdminSet_SyncData" ), Color(42, 205, 114), ButtonPanel:GetWide() - 280, 10, 180, 30, function() PlayMP:SetUserInfoBySID(v["PlayUser"]:SteamID(), data) end)
-									end)
-									PlayMP:GetUserInfoBySID(v["PlayUser"]:SteamID())
+											
+											PlayMP:AddTextBox( scrpanel, 48, TOP, PlayMP:Str( "Music" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+											local check1 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_Qeeue" ), nil, true, data[1], "qeeue" )
+											local check2 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_Skip" ), nil, true, data[1], "skip" )
+											local check3 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_seekTo" ), nil, true, data[1], "seekto" )
+											local check4 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_Ban" ), nil, true, data[1], "ban" )
+											
+											PlayMP:AddTextBox( scrpanel, 48, TOP, PlayMP:Str( "Admin" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+											local check5 = PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "AdminSet_AdminLicense" ), nil, true, data[1], "power" )
+											
+											PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "AdminSet_SyncData" ), Color(42, 205, 114), ButtonPanel:GetWide() - 280, 10, 180, 30, function() PlayMP:SetUserInfoBySID(v["PlayUser"]:SteamID(), data) end)
+										end)
+										PlayMP:GetUserInfoBySID(v["PlayUser"]:SteamID())
+									end
 								end
 								
 							end)

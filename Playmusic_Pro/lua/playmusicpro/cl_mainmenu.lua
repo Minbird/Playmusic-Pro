@@ -1269,7 +1269,8 @@ function PlayMP:DoNoticeToPlayer( text, color, type )
 				end)
 				end)
 				end)
-
+			else
+				PlayMP.NotchInfoPanel:MoveTo( ScrW() * 0.5 - ScrW() * 0.2, 20, 1, 0, -1)
 			end
 		elseif ivbasGener == true then
 			chat.AddText("[Playmusic Pro] " .. text)
@@ -1285,7 +1286,8 @@ function PlayMP:DoNoticeToPlayer( text, color, type )
 				end)
 				end)
 				end)
-
+			else
+				PlayMP.NotchInfoPanel:MoveTo( ScrW() * 0.5 - ScrW() * 0.2, 20, 1, 0, -1)
 			end
 		end
 		

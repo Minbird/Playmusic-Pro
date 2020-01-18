@@ -966,8 +966,6 @@ function PlayMP:EndMusic()
 	hook.Remove("Think", "PMP Video Time Think")
 	PlayMP.isPlaying = false
 	
-	PlayMP:NoticeForPlayer( "MusicStoped", "red", "warning" )
-	
 	PlayMP:StopMusic()
 	
 	if table.Count( PlayMP.CurrentQueueInfo ) == PlayMP.CurPlayNum then
@@ -975,6 +973,7 @@ function PlayMP:EndMusic()
 			PlayMP.CurPlayNum = 0
 			PlayMP:Playmusic()
 		else
+			PlayMP:NoticeForPlayer( "MusicStoped", "red", "warning" )
 			return
 		end
 	else

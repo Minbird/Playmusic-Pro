@@ -214,5 +214,5 @@ lang.ThereIsNoPlaylistText = "Where is your Playlist?"
 lang.ThereIsEndOfQueueText = "This is end of Queue"
 lang.ThereIsEndOfQueueText2 = "%s media(s) here."
 lang.ThereIsNoQueueText = "This place is so quiet..."
-lang.Playerror = "Preparations for replay are taking longer than expected. The user may be in poor Internet condition, not participating in the Chromium Branch, or there may be an issue with Adobe Flash Player. Check QnA for more information."
-
+lang.Playerror = "Preparations for playback are taking longer than expected. The user may be in poor Internet condition, not participating in the Chromium Branch, or this media is not available. Check QnA for more information."
+lang.PlayerDataError = "Error occurred while creating main media player panel... Player Size was restored to default."
