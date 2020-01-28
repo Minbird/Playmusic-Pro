@@ -34,6 +34,7 @@ function PlayMP:AddLanguage( name, uniName )
 end
 
 
+
 function PlayMP:ChangeLang(uniName)
 			
 	if uniName == "SystemLang" then
@@ -323,6 +324,7 @@ if data == nil or data == "" then
 	PlayMP:AddSetting( "MainMenu_Alpha", 255 )
 	
 	PlayMP:AddSetting( "시스템언어", "SystemLang" )
+	PlayMP:AddSetting( "mainMenuBind", 100 )
 
 end
 
@@ -1499,13 +1501,19 @@ end
 		return entName
 	end
 	
+	PlayMP.PlayMPMenuBind = PlayMP:GetSetting( "mainMenuBind", false, true )
+	if PlayMP.PlayMPMenuBind == nil then 
+		PlayMP:ChangeSetting( "mainMenuBind", 100 )
+		PlayMP.PlayMPMenuBind = 100 
+	end
+	
 	hook.Add( "Tick", "PMP_KeyDown", function()
-		if input.IsKeyDown(KEY_F9) and PlayMP.MainMenuPanel == nil then
+		if input.IsKeyDown(PlayMP.PlayMPMenuBind) and PlayMP.MainMenuPanel == nil then
 			if PlayMP.OpenMenuByKeyPress == nil or PlayMP.OpenMenuByKeyPress == true then return end
 			PlayMP.OpenMenuByKeyPress = true
 			PlayMP:CreatFrame( "Playmusic Pro", "PlaymusicP_MainMenu" )
 			PlayMP:MainMenu()
-		elseif input.IsKeyDown(KEY_F9) and PlayMP.MainMenuPanel then
+		elseif input.IsKeyDown(PlayMP.PlayMPMenuBind) and PlayMP.MainMenuPanel then
 			if PlayMP.OpenMenuByKeyPress == nil or PlayMP.OpenMenuByKeyPress == true then return end
 			PlayMP.OpenMenuByKeyPress = true
 			hook.Remove("HUDPaint", "PlaymusicP_MainMenu")
@@ -1525,8 +1533,13 @@ net.Receive( "PlayMP:NoticeForPlayer", function()
 	local tag = net.ReadString() 
 	local color = net.ReadTable()
 	local type = net.ReadString()
+	local data = net.ReadTable()
 	
-	PlayMP:Notice( PlayMP:Str( tag ), color, type )
+	if data then
+		PlayMP:Notice( PlayMP:Str( tag, data[1] ), color, type )
+	else
+		PlayMP:Notice( PlayMP:Str( tag ), color, type )
+	end
 	
 end)
 
@@ -1756,6 +1769,15 @@ end
 function PlayMP:RemoveCache()
 	net.Start("PlayMP:RemoveCache")
 	net.SendToServer()
+end
+
+function PlayMP:ChangConVar( name, value )
+
+	net.Start("PlayMP:ChangConVar")
+		net.WriteString(name)
+		net.WriteFloat(tonumber(value))
+	net.SendToServer()
+
 end
 
 net.Receive( "PlayMP:ChangePlayerMode", function( len, ply )

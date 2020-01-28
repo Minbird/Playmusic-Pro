@@ -307,7 +307,7 @@ end
 
 	util.AddNetworkString( "PlayMP:NoticeForPlayer" )
 
-function PlayMP:NoticeForPlayer( str, msgtype, type, target )
+function PlayMP:NoticeForPlayer( str, msgtype, type, target, ... )
 
 	net.Start("PlayMP:NoticeForPlayer")
 		net.WriteString( str )
@@ -324,6 +324,10 @@ function PlayMP:NoticeForPlayer( str, msgtype, type, target )
 		end
 		
 		net.WriteString( type )
+		
+		if ... then
+			net.WriteTable( ... )
+		end
 		
 	if target then
 		net.Send(target)
@@ -357,6 +361,10 @@ end
 	end
 
 	util.AddNetworkString( "PlayMP:AddQueue" )
+	
+	PlayMP.QueueLimit = GetConVar( "playmp_queue" ):GetFloat() 
+	PlayMP.QueueLimitPerUser = GetConVar( "playmp_queue_user" ):GetFloat() 
+	PlayMP.TimeLimit = GetConVar( "playmp_media_time" ):GetFloat() 
 
 function PlayMP:AddQueue( url, startTime, endTime, ply )
 	
@@ -368,12 +376,27 @@ function PlayMP:AddQueue( url, startTime, endTime, ply )
 		return
 	end
 	
-	PlayMP.QueueLimit = 500000
+	PlayMP.QueueLimit = GetConVar( "playmp_queue" ):GetFloat() 
+	PlayMP.QueueLimitPerUser = GetConVar( "playmp_queue_user" ):GetFloat() 
+	PlayMP.TimeLimit = GetConVar( "playmp_media_time" ):GetFloat() 
 	
-	if table.Count( PlayMP.CurrentQueueInfo ) - PlayMP.CurPlayNum >= PlayMP.QueueLimit then
+	if PlayMP.QueueLimit != 0 and table.Count( PlayMP.CurrentQueueInfo ) >= PlayMP.QueueLimit then
 		PlayMP:NoticeForPlayer( "TooManyQueue", "red", "warning", ply )
 		return
 	end
+	
+	if PlayMP.QueueLimitPerUser != 0 then
+		local plycount = 0
+		for k, v in pairs(PlayMP.CurrentQueueInfo) do
+			if v.PlayUser == ply then plycount = plycount + 1 end
+		end
+		if PlayMP.QueueLimitPerUser <= plycount then
+			PlayMP:NoticeForPlayer( "TooManyQueue", "red", "warning", ply )
+			return
+		end
+	end
+	
+	
 	
 	local queue = {}
 	queue.Uri = uri
@@ -394,7 +417,7 @@ function PlayMP:AddQueue( url, startTime, endTime, ply )
 			PlayMP:NoticeForPlayer( "CantPlayLiveCont", "red", "warning", ply )
 			return 
 		elseif er == "ok" then
-			--PlayMP:NoticeForPlayer( "QueueAdded", "green", "notice", ply )
+			--PlayMP:NoticeForPlayer( "QueueAdded", "green", "notice", ply,   )
 			PlayMP:Playmusic()
 			PlayMP:WriteLog("User '" .. ply:Nick() .. "'(" .. ply:SteamID() .. ") add music to queue! (" .. url .. ")")
 		end
@@ -735,6 +758,11 @@ function PlayMP:ReadVideoInfo( uri, startTime, endTime, ply )
 			if cache.Len != nil and startTime > endTime or startTime > cache.Len then
 				startTime = 0
 			end
+			
+			if PlayMP.TimeLimit!= 0 and PlayMP.TimeLimit < tonumber(cache.Len) then
+				PlayMP:NoticeForPlayer( "ThisMeidaIsTooLong", "red", "warning", ply )
+				return
+			end
 		
 			local video = {
 				Length = cache.Len, 
@@ -757,6 +785,7 @@ function PlayMP:ReadVideoInfo( uri, startTime, endTime, ply )
 			
 			PlayMP:Playmusic()
 			PlayMP:WriteLog("User '" .. ply:Nick() .. "'(" .. ply:SteamID() .. ") add music to queue! (" .. uri .. ")")
+			PlayMP:NoticeForPlayer( "QueueAdded", "green", "notice", ply, {cache.Name} )
 			return
 	end
 
@@ -812,6 +841,11 @@ function PlayMP:ReadVideoInfo( uri, startTime, endTime, ply )
 		end
 		
 		video.VideoLength = video.Sec + video.Min * 60 + video.Hour * 3600 + 1
+		
+			if PlayMP.TimeLimit != 0 and PlayMP.TimeLimit < video.VideoLength then
+				PlayMP:NoticeForPlayer( "ThisMeidaIsTooLong", "red", "warning", ply )
+				return
+			end
 		
 		--http.Fetch("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" .. uri .. "&key=" .. API_KEY, function(data,code,headers)
 				
@@ -901,7 +935,7 @@ function PlayMP:ReadVideoInfo( uri, startTime, endTime, ply )
 			elseif PlayMP.IsliveBroadcast then
 				PlayMP:NoticeForPlayer( "CantPlayLiveCont", "red", "warning", ply )
 			else
-				--PlayMP:NoticeForPlayer( "QueueAdded", "green", "notice", ply )
+				PlayMP:NoticeForPlayer( "QueueAdded", "green", "notice", ply, {video.Title} )
 				PlayMP:Playmusic()
 				PlayMP:WriteLog("User '" .. ply:Nick() .. "'(" .. ply:SteamID() .. ") add music to queue! (" .. uri .. ")")
 			end
@@ -1118,6 +1152,19 @@ net.Receive( "PlayMP:RemoveCache", function()
 			
 		end
 		
+	end
+
+end)
+
+util.AddNetworkString( "PlayMP:ChangConVar" )
+net.Receive( "PlayMP:ChangConVar", function( len, ply )
+
+	local name = net.ReadString()
+	local value = net.ReadFloat()
+	
+	local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())[1]
+	if ply:IsAdmin() or plydata.power == true then
+		GetConVar(name):SetFloat(value)
 	end
 
 end)

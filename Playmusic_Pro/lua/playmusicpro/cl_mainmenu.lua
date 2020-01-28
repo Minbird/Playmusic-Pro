@@ -618,6 +618,171 @@ end
 	end
 	
 	
+	function PlayMP:CreatNumScroll( panel, x, y, mn, mx, wide, numEntry, name)
+	
+		local trackMouse = false
+		local myData = 0
+		local wide = wide
+		
+		local numscrollPanel = vgui.Create( "DPanel", panel )
+		numscrollPanel:SetPos(x,y)
+		numscrollPanel:SetSize(wide,24)
+		numscrollPanel:SetBackgroundColor( Color(0,0,0,0) )
+		
+		local numscrollMain = vgui.Create( "DPanel", numscrollPanel )
+		numscrollMain:SetPos(0,4)
+		numscrollMain:SetSize(wide,16)
+		numscrollMain:SetBackgroundColor( Color(0,0,0,0) )
+		
+		local numscrollSec = vgui.Create( "DPanel", numscrollMain )
+		numscrollSec:SetPos(2,6)
+		numscrollSec:SetSize(wide-4,4)
+		numscrollSec.Paint = function( self, w, h ) draw.RoundedBox( 2, 0, 0, w, h, Color( 150, 150, 150, 255 ) ) end
+		numscrollSec:AlphaTo( 50, 0.2 ) 
+		
+		local numscrollFir = vgui.Create( "DPanel", numscrollMain )
+		numscrollFir:SetPos(2,6)
+		numscrollFir:SetSize(wide-4,4)
+		numscrollFir.Paint = function( self, w, h ) draw.RoundedBox( 2, 0, 0, w, h, Color( 255, 255, 255, 255 ) ) end
+		
+		local numscrollBut = vgui.Create( "DPanel", numscrollMain )
+		numscrollBut:SetPos(2,7)
+		numscrollBut:SetSize(8,8)
+		numscrollBut:SetAlpha(0)
+		numscrollBut.Paint = function( self, w, h ) draw.RoundedBox( 4, 0, 0, w, h, Color( 255, 255, 255, 255 ) ) end
+		
+		numscrollMain.OnCursorEntered = function( self, w, h )
+			numscrollBut:AlphaTo( 255, 0.2 ) 
+			numscrollSec:AlphaTo( 200, 0.2 ) 
+			trackMouse = true
+		end
+		numscrollMain.OnCursorExited = function( self, w, h )
+			numscrollBut:AlphaTo( 0, 0.2 ) 
+			numscrollSec:AlphaTo( 50, 0.2 ) 
+			trackMouse = false
+		end
+		
+		numscrollSec.OnCursorEntered = function( self, w, h )
+			numscrollBut:AlphaTo( 255, 0.2 )
+			numscrollSec:AlphaTo( 200, 0.2 ) 
+			trackMouse = true
+		end
+		numscrollSec.OnCursorExited = function( self, w, h )
+			numscrollBut:AlphaTo( 0, 0.2 ) 
+			numscrollSec:AlphaTo( 50, 0.2 ) 
+			trackMouse = false
+		end
+		
+		numscrollFir.OnCursorEntered = function( self, w, h )
+			numscrollBut:AlphaTo( 255, 0.2 ) 
+			numscrollSec:AlphaTo( 200, 0.2 ) 
+			trackMouse = true
+		end
+		numscrollFir.OnCursorExited = function( self, w, h )
+			numscrollBut:AlphaTo( 0, 0.2 ) 
+			numscrollSec:AlphaTo( 50, 0.2 ) 
+			trackMouse = false
+		end
+		
+		numscrollBut.OnCursorEntered = function( self, w, h )
+			numscrollBut:AlphaTo( 255, 0.2 ) 
+			numscrollSec:AlphaTo( 200, 0.2 ) 
+			trackMouse = true
+		end
+		numscrollBut.OnCursorExited = function( self, w, h )
+			numscrollBut:AlphaTo( 0, 0.2 ) 
+			numscrollSec:AlphaTo( 50, 0.2 ) 
+			
+			trackMouse = false
+		end
+		
+		local nscroll = {}
+		
+		local numscrollEntry
+		
+		if numEntry then
+		
+			wide = wide - 40
+			numscrollMain:SetSize(wide,16)
+			numscrollSec:SetSize(wide-4,4)
+			numscrollFir:SetSize(wide-4,4)
+			
+			numscrollEntry = vgui.Create( "DTextEntry", numscrollPanel )
+			numscrollEntry:SetPos(wide+5,0)
+			numscrollEntry:SetSize(30,24)
+			numscrollEntry:SetFont("DermaDefault")
+			numscrollEntry:SetText(mx)
+			numscrollEntry:SetDrawBackground(false)
+			numscrollEntry:SetTextColor( Color( 255, 255, 255, 255 ) )
+			
+			numscrollEntry.OnEnter = function( self )
+				numscrollFir:SetSize((wide-2)*(self:GetValue()/mx),4)
+				numscrollBut:SetPos((wide-4)*(self:GetValue()/mx)-4,4)
+				numscrollEntry:SetText(self:GetValue())
+				
+				nscroll.ValueChanged(self:GetValue())
+			end
+			
+		end
+		
+		local datachange = false
+		local curx, cury = 0,0
+		local alphato = false
+		
+		numscrollMain.Think = function()
+			if trackMouse then
+				if input.IsMouseDown(MOUSE_LEFT) then
+					curx, cury = numscrollMain:LocalCursorPos()
+					if curx >= 2 and curx <= wide - 2 then
+						numscrollFir:SetSize(curx-2,4)
+						numscrollBut:SetPos(curx-4,4)
+						nscroll.ValueChanged(math.Round((curx/wide)*mx))
+						numscrollEntry:SetText(math.Round((curx/wide)*mx))
+					elseif curx < 2 then
+						numscrollFir:SetSize(0,4)
+						numscrollBut:SetPos(0,4)
+						nscroll.ValueChanged(mn)
+						numscrollEntry:SetText(mn)
+					elseif curx > wide - 2 then
+						numscrollFir:SetSize(wide-4,4)
+						numscrollBut:SetPos(wide-8,4)
+						nscroll.ValueChanged(mx)
+						numscrollEntry:SetText(mx)
+					end
+					datachange = true
+				else
+					if datachange then
+						trackMouse = false
+						datachange = false
+					end
+				end
+			else
+			end
+		
+			if alphato == true then
+				numscrollBut:AlphaTo( 255, 0.3 )
+				alphato = false
+			end
+		end
+		
+		nscroll.SetNum = function( a, num ) 
+			numscrollFir:SetSize((wide-4)*(num/mx),4)
+			numscrollBut:SetPos((wide-4)*(num/mx)-4,4)
+			if num == 0 then
+				numscrollFir:SetSize(0,4)
+				numscrollBut:SetPos(0,4)
+			end
+			numscrollEntry:SetText(num)
+		end
+		
+		nscroll.GetValue = function(  ) 
+			return math.Round((numscrollFir:GetWide()/(wide-4))*mx)
+		end
+		
+		return nscroll
+	end
+	
+	
 	function PlayMP:MainMenu()
 
 		PlayMP.MainMenuCtrlPanel = vgui.Create( "DPanel", PlayMP.MainMenuPanel )
@@ -764,13 +929,16 @@ end
 			
 		end
 		
-		local VolumeSlider = vgui.Create( "DNumSlider", PlayMP.volPanel )
+		--[[local VolumeSlider = vgui.Create( "DNumSlider", PlayMP.volPanel )
 		VolumeSlider:SetPos( -50,12 )			
 		VolumeSlider:SetSize( 340, 30 )		
 		VolumeSlider:SetText( " " )	
 		VolumeSlider:SetMin( 0 )
 		VolumeSlider:SetMax( 100 )				
-		VolumeSlider:SetValue( PlayMP.GetPlayerVolume() )
+		VolumeSlider:SetValue( PlayMP.GetPlayerVolume() )]]
+		
+		local VolumeSlider = PlayMP:CreatNumScroll( PlayMP.volPanel, 50, 16, 0, 100, 240, true)
+		VolumeSlider:SetNum(PlayMP.GetPlayerVolume())
 		
 		local Button_Vol = vgui.Create( "DImageButton", PlayMP.volPanel )
 		Button_Vol:SetPos( 10, 12 )
@@ -779,21 +947,24 @@ end
 		Button_Vol.DoClick = function()
 			if PlayMP.PlayerHTML then
 				if not PlayMP:isMuted() then
-				
-					PlayMP.PlayerHTML:QueueJavascript([[player.unMute();]])
+					
+					if PlayMP.PlayerHTML != nil and PlayMP.PlayerHTML:Valid() then
+						PlayMP.PlayerHTML:QueueJavascript([[player.unMute();]])
+					end
 					if VolumeSlider:GetValue() > 85 then
 						Button_Vol:SetImage( "vgui/playmusic_pro/vol1" )
 					elseif VolumeSlider:GetValue() > 50 then
 						Button_Vol:SetImage( "vgui/playmusic_pro/vol2" )
-					elseif VolumeSlider:GetValue() > 25 then
+					elseif VolumeSlider:GetValue() > 10 then
 						Button_Vol:SetImage( "vgui/playmusic_pro/vol3" )
-					elseif VolumeSlider:GetValue() == 0 or VolumeSlider:GetValue() < 25 then
+					elseif VolumeSlider:GetValue() == 0 or VolumeSlider:GetValue() < 10 then
 						Button_Vol:SetImage( "vgui/playmusic_pro/vol4" )
 					end
 					
 				else
-				
-					PlayMP.PlayerHTML:QueueJavascript([[player.mute();]])
+					if PlayMP.PlayerHTML != nil and PlayMP.PlayerHTML:Valid() then
+						PlayMP.PlayerHTML:QueueJavascript([[player.mute();]])
+					end
 					Button_Vol:SetImage( "vgui/playmusic_pro/mute.png" )
 					
 				end
@@ -807,13 +978,13 @@ end
 			Button_Vol:SetImage( "vgui/playmusic_pro/vol1" )
 		elseif VolumeSlider:GetValue() > 50 then
 			Button_Vol:SetImage( "vgui/playmusic_pro/vol2" )
-		elseif VolumeSlider:GetValue() > 25 then
+		elseif VolumeSlider:GetValue() > 10 then
 			Button_Vol:SetImage( "vgui/playmusic_pro/vol3" )
-		elseif VolumeSlider:GetValue() == 0 or VolumeSlider:GetValue() < 25 then
+		elseif VolumeSlider:GetValue() == 0 or VolumeSlider:GetValue() <= 10 then
 			Button_Vol:SetImage( "vgui/playmusic_pro/vol4" )
 		end
 		
-		VolumeSlider.OnValueChanged = function(  )
+		VolumeSlider.ValueChanged = function(  )
 			PlayMP.SetPlayerVolume( VolumeSlider:GetValue() )
 			
 			if PlayMP.PlayerIsMuted then return end
@@ -822,15 +993,12 @@ end
 				Button_Vol:SetImage( "vgui/playmusic_pro/vol1" )
 			elseif VolumeSlider:GetValue() > 50 then
 				Button_Vol:SetImage( "vgui/playmusic_pro/vol2" )
-			elseif VolumeSlider:GetValue() > 25 then
+			elseif VolumeSlider:GetValue() > 10 then
 				Button_Vol:SetImage( "vgui/playmusic_pro/vol3" )
-			elseif VolumeSlider:GetValue() == 0 or VolumeSlider:GetValue() < 25 then
+			elseif VolumeSlider:GetValue() == 0 or VolumeSlider:GetValue() <= 10 then
 				Button_Vol:SetImage( "vgui/playmusic_pro/vol4" )
 			end
 			
-		end
-		VolumeSlider.Paint = function( self, w, h )
-			draw.RoundedBox( cornerRadius, 110, 0, w - 110, h, Color(200,200,200,150) )
 		end
 		
 	

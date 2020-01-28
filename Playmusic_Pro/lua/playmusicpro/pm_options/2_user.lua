@@ -208,6 +208,31 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ) )
 			
 			PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "System" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 			
+			PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "CSet_openMenuBind" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
+				
+				local binder = vgui.Create( "DBinder", self )
+				binder:SetSize( 200, 30 )
+				binder:SetPos( self:GetWide() - 220, 12.5 )
+				local bindkey = PlayMP:GetSetting( "mainMenuBind", false, true )
+				if bindkey == nil then 
+					PlayMP:ChangeSetting( "mainMenuBind", 100 )
+					bindkey = 100 
+				end
+				binder:SetValue( bindkey )
+
+				binder.OnChange = function( self, num )
+					if num != nil then
+						PlayMP:ChangeSetting( "mainMenuBind", num )
+					end
+					PlayMP.PlayMPMenuBind = num
+					--chat.AddText(input.GetKeyName(num))
+				end
+				
+				self.Paint = function( self, w, h )
+					surface.SetDrawColor( 70, 70, 70, 255 )
+					surface.DrawLine( 30, h - 1, w - 30, h - 1 )
+				end
+			end)
 			PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "CSet_Language" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
 			
 				local DComboBox = vgui.Create( "DComboBox", self )

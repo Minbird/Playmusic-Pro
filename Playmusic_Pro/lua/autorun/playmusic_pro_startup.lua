@@ -16,7 +16,7 @@ if PlayMP then -- 초기화
 		if PlayMP.PlayerHTML != nil then
 			PlayMP.PlayerHTML:Remove()
 		end
-		
+	
 		if PlayMP.PlayerMainPanel != nil then
 			PlayMP.MainMenuCtrlPanel:Clear()
 			PlayMP.PlayerMainPanel:Remove()
@@ -35,6 +35,7 @@ if PlayMP then -- 초기화
 	
 	end
 
+
 	if SERVER then
 		PrintMessage( HUD_PRINTTALK, "[Playmusic Pro] 플레이 뮤직 프로가 초기화되었습니다." )
 	end
@@ -46,8 +47,8 @@ PlayMP = {}
 PlayMP.CurSystemVersion = {}
 PlayMP.CurSystemVersion.isBeta = true
 PlayMP.CurSystemVersion.ResetOptionAnytime = false
-PlayMP.CurSystemVersion.Ver = "2.0.0 - 8 (beta)"
-PlayMP.CurSystemVersion.VerE = "0.17"
+PlayMP.CurSystemVersion.Ver = "2.0.0 - 9 (beta)"
+PlayMP.CurSystemVersion.VerE = "0.18"
 PlayMP.NewerVer = "unknown"
 PlayMP.NewerVerE = 0
 PlayMP.SysStartTime = CurTime()
@@ -68,6 +69,9 @@ print("[PlayM Pro] Try add Client side File: playmusicpro/cl_mainmenu.lua")
 AddCSLuaFile("playmusicpro/cl_mainmenu.lua")
 print("[PlayM Pro] Try add Client side File: playmusicpro/cl_option.lua")
 AddCSLuaFile("playmusicpro/cl_option.lua")
+print("[PlayM Pro] Try add Client side File: playmusicpro/shared.lua")
+AddCSLuaFile("playmusicpro/shared.lua")
+include( "playmusicpro/shared.lua" )
 
 print("[PlayM Pro] Loading Entities...")
 print("[PlayM Pro] Try add Client side File: entities/tv.lua")
@@ -194,7 +198,13 @@ timer.Simple( 1, function()
 		
 		--include( "playmusicpro/pm_lang/" .. PlayMP.CurLang .. ".lua" )
 		
-		chat.AddText(Color(255,150,100),PlayMP:Str( "Welcome_Messages1" ),Color(255,255,255),PlayMP:Str( "Welcome_Messages2" ),Color(255,150,100),PlayMP:Str( "Welcome_Messages3" ),Color(255,255,255),PlayMP:Str( "Welcome_Messages4" ),Color(255,150,100),PlayMP:Str( "Welcome_Messages5" ),Color(255,255,255),PlayMP:Str( "Welcome_Messages6" ))
+		local PlayMPMenuBind = PlayMP:GetSetting( "mainMenuBind", false, true )
+		if PlayMPMenuBind == nil then 
+			PlayMP:ChangeSetting( "mainMenuBind", 100 )
+			PlayMPMenuBind = 100 
+		end
+		
+		chat.AddText(Color(255,150,100),PlayMP:Str( "Welcome_Messages1" ),Color(255,255,255),PlayMP:Str( "Welcome_Messages2" ),Color(255,150,100),PlayMP:Str( "Welcome_Messages3", input.GetKeyName(PlayMPMenuBind) ),Color(255,255,255),PlayMP:Str( "Welcome_Messages4" ),Color(255,150,100),PlayMP:Str( "Welcome_Messages5" ),Color(255,255,255),PlayMP:Str( "Welcome_Messages6" ))
 		chat.AddText(Color(255,255,255),PlayMP:Str( "Welcome_Messages7" ), Color(255,150,100), PlayMP.CurSystemVersion.Ver, Color(255,255,255), PlayMP:Str( "Welcome_Messages8" ))
 		if not PlayMP:GetSetting( "NoUpdateNotice", false, true) and PlayMP.NewerVer != nil then
 			if tonumber(PlayMP.NewerVerE) > tonumber(PlayMP.CurSystemVersion.VerE) then
