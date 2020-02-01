@@ -1,4 +1,4 @@
-PlayMP:AddSeparator( PlayMP:Str( "User" ) )
+PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 		
 		PlayMP:AddOption( PlayMP:Str( "Options_myState" ), "myState", "", function( DScrollPanel )  
 		
@@ -109,6 +109,43 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ) )
 				end
 			end, PlayMP:Str( "CSet_Show_InfoPanel_Always" ), "Show_InfPan_Always" )
 			--PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_No_Show_InfoPanel" ), "No_Show_InfoPanel" )
+			PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "CSet_VolChangeWhenPlayerStartVChatOri" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT)
+			local CSet_VolChangeWhenPlayerStartVChatOriLabel = PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "CSet_VolChangeWhenPlayerStartVChatOri" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT)
+				PlayMP:AddTextBox( DScrollPanel, 44, TOP, "", 40, 0, "Trebuchet24", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
+					
+					local numslider = PlayMP:CreatNumScroll( self, 100, 0, 0, 100, self:GetWide()-200, true)
+					numslider:SetNum( PlayMP:GetSetting("VolConWhenPlyStVo", false, true) * 100 )
+					CSet_VolChangeWhenPlayerStartVChatOriLabel:SetColor(Color(255,255,255,50))
+					local CSet_VolChangeWhenPlayerStartVChatOriLabelPosX, CSet_VolChangeWhenPlayerStartVChatOriLabelPosY = CSet_VolChangeWhenPlayerStartVChatOriLabel:GetPos()
+					CSet_VolChangeWhenPlayerStartVChatOriLabel:SetPos(CSet_VolChangeWhenPlayerStartVChatOriLabelPosX+60,CSet_VolChangeWhenPlayerStartVChatOriLabelPosY)
+					
+					if numslider:GetValue() == 0 then
+						CSet_VolChangeWhenPlayerStartVChatOriLabel:SetText(PlayMP:Str( "CSet_MuteWhenPlayerStartVChat" ))
+					elseif numslider:GetValue() == 100 then
+						CSet_VolChangeWhenPlayerStartVChatOriLabel:SetText(PlayMP:Str( "CSet_NoVolChangeWhenPlayerStartVChat" ))
+					else
+						CSet_VolChangeWhenPlayerStartVChatOriLabel:SetText(PlayMP:Str( "CSet_VolChangeWhenPlayerStartVChat", numslider:GetValue()/100 ))
+					end
+					
+					numslider.ValueChanged = function( d )
+						
+						--PlayMP:ChangConVar( "playmp_queue_user", math.floor(d) )
+						if math.floor(d) == 0 then
+							CSet_VolChangeWhenPlayerStartVChatOriLabel:SetText(PlayMP:Str( "CSet_MuteWhenPlayerStartVChat" ))
+						elseif math.floor(d) == 100 then
+							CSet_VolChangeWhenPlayerStartVChatOriLabel:SetText(PlayMP:Str( "CSet_NoVolChangeWhenPlayerStartVChat" ))
+						else
+							CSet_VolChangeWhenPlayerStartVChatOriLabel:SetText(PlayMP:Str( "CSet_VolChangeWhenPlayerStartVChat", math.floor(d)/100 ))
+						end
+						PlayMP:ChangeSetting( "VolConWhenPlyStVo", math.floor(d)/100 )
+						CSet_VolChangeWhenPlayerStartVChatOriLabel:SetColor(Color(255,255,255,255))
+						CSet_VolChangeWhenPlayerStartVChatOriLabel:ColorTo(Color(255,255,255,50), 1)
+					end
+					self.Paint = function( self, w, h )
+					surface.SetDrawColor( 70, 70, 70, 255 )
+					surface.DrawLine( 30, h - 1, w - 30, h - 1 )
+				end
+			end)
 			
 			
 			PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "CSet_Queue" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )

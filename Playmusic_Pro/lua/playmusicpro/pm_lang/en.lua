@@ -223,3 +223,8 @@ lang.Media_Time_Limit = "Time limit for media(sec) (If set to 0, no limit.)"
 lang.Media_Limit_User = "Limit number for media per user (If set to 0, no limit.)"
 
 lang.CSet_openMenuBind = "Main Menu Toggle Key"
+
+lang.CSet_VolChangeWhenPlayerStartVChatOri = "Media Volume when player(s) start voice chat."
+lang.CSet_VolChangeWhenPlayerStartVChat = "Volume down to %sx"
+lang.CSet_MuteWhenPlayerStartVChat = "Mute."
+lang.CSet_NoVolChangeWhenPlayerStartVChat = "No mute. I don't care."

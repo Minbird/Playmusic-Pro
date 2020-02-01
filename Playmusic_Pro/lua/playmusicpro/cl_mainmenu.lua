@@ -202,22 +202,55 @@ function PlayMP:CreatFrame( frameTitle, uniqueName )
 end
 
 	PlayMP.MenuWindows = {}
-	
+		
 	function PlayMP:AddOption( name, uniqueName, image, func )
+		local f = PlayMP:AddOptionToPanel( name, uniqueName, image, func )
+
+		if uniqueName == "systemInfo" or uniqueName == "updateLog" then
+			if PlayMP.NewerVerE != nil and tonumber(PlayMP.NewerVerE) > tonumber(PlayMP.CurSystemVersion.VerE) then
+				f.Notion(true)
+			end
+		end
+	end
+
+	function PlayMP:AddOptionToPanel( name, uniqueName, image, func )
+	
+		local AddOption_funcd = {}
 	
 		local button = {}
 		button.Color = Color(255,255,255,0)
 	
-		local optionButton = PlayMP.sideMenuPanel:Add( "DPanel" )
+		local optionButtonMain = PlayMP.sideMenuPanel:Add( "DPanel" )
+		optionButtonMain:SetMouseInputEnabled( true )
+		optionButtonMain:SetSize( PlayMP.sideMenuPanel:GetWide(), 40 )
+		optionButtonMain:Dock( TOP )
+		optionButtonMain:SetBackgroundColor(Color(0,0,0,0))
+		
+		local optionButton = vgui.Create( "DPanel", optionButtonMain )
 		optionButton:SetMouseInputEnabled( true )
-		optionButton:SetSize( PlayMP.sideMenuPanel:GetWide(), 35 )
-		optionButton:Dock( TOP )
+		optionButton:SetSize( PlayMP.sideMenuPanel:GetWide()-20, 35 )
+		optionButton:SetPos( 10, 5 )
 		
 		local sel = vgui.Create( "DPanel", optionButton )
 		sel:SetMouseInputEnabled( true )
-		sel:SetSize( 0, 35 )
-		sel:SetPos( -5, 0 )
+		sel:SetSize( 5, 35 )
+		sel:SetPos( 10, 0 )
 		sel:SetBackgroundColor( Color(255,150,100,255) )
+		sel:SetAlpha(0)
+		
+		local notion = vgui.Create( "DPanel", optionButton )
+		notion:SetMouseInputEnabled( true )
+		notion:SetSize( 4, 4 )
+		notion:SetPos( 18, 4 )
+		notion:SetBackgroundColor( Color(255,150,100,255) )
+		notion:SetAlpha(0)
+		
+		local notion2 = vgui.Create( "DPanel", optionButton )
+		notion2:SetMouseInputEnabled( true )
+		notion2:SetSize( 8, 8 )
+		notion2:SetPos( 16, 2 )
+		notion2.Paint = function(self, w, h) draw.RoundedBox( w/2, 0, 0, w, h, Color(255,150,100,255) ) end
+		notion2:SetAlpha(0)
 		
 		local TextPos = 0
 		
@@ -227,108 +260,133 @@ end
 		breen_img:SetImage( "image/playlist.png" )]]
 		
 		local label = vgui.Create( "DLabel", optionButton )
-		label:SetSize( optionButton:GetWide(), 35 )
-		label:SetPos( 15,0 )
+		label:SetSize( optionButton:GetWide() - 45, 35 )
+		label:SetPos( 25,0 )
 		label:SetFont( "OptionsButtonDefault_PlaymusicPro_Font" )
 		label:SetColor( Color( 255, 255, 255, 255 ) )
 		label:SetText( name )
 		label:SetMouseInputEnabled( true )
 		
 		optionButton.Paint = function( self, w, h )
-		
-				if button.OnCursorEntered == nil then
-					button.Color.a = 0
-				elseif button.OnCursorEntered == true and button.Color.a < 50 then
-					button.Color.a = button.Color.a + 400 / PlayMP.CurFrameTime
-				elseif button.OnCursorEntered == false and button.Color.a > 0 then
-					button.Color.a = button.Color.a - 400 / PlayMP.CurFrameTime
-				elseif button.OnCursorEntered == true then
-					button.Color.a = 50
-				elseif button.OnCursorEntered == false then
-					button.Color.a = 0
-				end
-				
-				--[[if button.OnCursorEntered == nil then
-					button.Color.a = 0
-				elseif button.OnCursorEntered == true then
-					button.Color.a = 50
-				elseif button.OnCursorEntered == false then
-					button.Color.a = 0
-				end]]
-				
-				if PlayMP.MenuWindowPanel_Clear then
-				
-					if button.isVaild then
-						if sel:GetWide() > 15 then
-							button.isVaild = false
-							PlayMP.MenuWindowPanel_Clear = false
-							sel:SetSize( 15, 35 )
-							label:SetColor( Color(255,150,100,200) )
-						else
-							sel:SetSize( sel:GetWide() + 300 / PlayMP.CurFrameTime, 35 )
-							--breen_img:SetPos( 10, 0 )
-							label:SetPos( 25,0 )
-							label:SetText( name )
-						end
-
-					else
-					
-						if sel:GetWide() > 0 then
-							label:SetColor( Color( 255, 255, 255, 255 ) )
-							sel:SetSize( sel:GetWide() - 300 / PlayMP.CurFrameTime, 35 )
-							--breen_img:SetPos( 5, 0 )
-							label:SetPos( 15,0 )
-							label:SetText( name )
-						end
-					
-					end
-				end
-				
-			draw.RoundedBox( 6, 0, 0, w, h, button.Color )
-			
 		end
-		
+	
 		label.OnCursorEntered = function( self, w, h )
 			button.OnCursorEntered = true
+			optionButton:AlphaTo(50,0.05)
 		end
 		label.OnCursorExited = function( self, w, h )
 			button.OnCursorEntered = false
+			optionButton:AlphaTo(255,0.1)
 		end
 		
+		AddOption_funcd.Changed = function(d) end
+		
+		AddOption_funcd.ColorTo = function( d, col, ti )
+			label:ColorTo(col, ti)
+		end
+		
+		AddOption_funcd.DoNotion = false
+		AddOption_funcd.Notion = function( bool )
+			
+			for k, v in pairs(PlayMP.MenuWindows) do
+				if v.UniqueName == uniqueName then
+					if v.DoNotion == nil then
+						AddOption_funcd.DoNotion = bool
+						v.DoNotion = bool
+						chat.AddText(tostring(v.DoNotion))
+					else
+						AddOption_funcd.DoNotion = v.DoNotion
+					end
+				end
+			end
+				
+				local function doRepeat()
+					notion:SetAlpha(255)
+					notion2:SetAlpha(255)
+					notion2:SetSize( 4, 4 )
+					notion2:SetPos( 18, 4 )
+					notion2:MoveTo( 15, 1, 0.1)
+					notion2:SizeTo( 10, 10, 0.1 )
+					notion2:AlphaTo( 0, 1, 0, 
+					function() 
+						if AddOption_funcd.DoNotion then 
+							notion2:AlphaTo( 0, 1, 0, function() doRepeat() end)
+						else 
+							notion:AlphaTo(0, 1)
+							notion2:AlphaTo(0, 1)
+						end 
+					end)
+				end
+				
+				doRepeat()
+			--end
+		end
+
 		function label:DoClick()
 		
 			PlayMP:ChangeMenuWindow( uniqueName )
 			button.isVaild = true
+			AddOption_funcd.Changed(uniqueName)
+			
+			AddOption_funcd.DoNotion = false
+			
+			for k, v in pairs(PlayMP.MenuWindows) do
+				if v.UniqueName == uniqueName then
+					v.DoNotion = false
+				end
+			end
 
 		end
 		
+		local function MenuChanged(d)
+			if d == uniqueName then 
+				label:ColorTo(Color(255,150,100), 0.1) 
+				sel:AlphaTo(255, 0.1)
+				label:MoveTo( 35,0,0.1 )
+			else 
+				label:ColorTo(Color(255,255,255), 0.1) 
+				sel:AlphaTo(0, 0.1)
+				label:MoveTo( 25,0,0.1 )
+			end
+		end
+		
+		hook.Add("MenuChanged_PMP", "MenuChanged_" .. uniqueName, function(d) MenuChanged(d) end)
+		
 		for k, v in pairs(PlayMP.MenuWindows) do
 			if v.UniqueName == uniqueName then
-				return
+				AddOption_funcd.DoNotion = v.DoNotion
+				return AddOption_funcd
 			end
 		end
 		
 		table.insert( PlayMP.MenuWindows, {
 			Func = func,
 			UniqueName = uniqueName,
+			DoNotion = nil
 		}
 		)
 		
+		return AddOption_funcd
+		
 	end
 	
-	function PlayMP:AddSeparator( name )
+	function PlayMP:AddSeparator( name, icon )
 	
 		local Separator = PlayMP.sideMenuPanel:Add( "DPanel" )
 		Separator:SetSize( PlayMP.sideMenuPanel:GetWide(), 50 )
 		Separator:Dock( TOP )
 		
 		Separator.Paint = function( self, w, h )
-			draw.RoundedBox( 0, 0, 0, w, h, Color(0,0,0,0) )
 		end
+		
+		--[[local iconImg = vgui.Create( "DImage", Separator )
+		iconImg:SetPos( 10, 33 )
+		iconImg:SetSize( 16, 16 )
+		iconImg:SetImage( icon )]]
 		
 		local label = vgui.Create( "DLabel", Separator )
 		label:SetSize( Separator:GetWide(), 40 )
-		label:SetPos( 10, 20)
+		label:SetPos( 20, 20)
 		label:SetFont( "Default_PlaymusicPro_Font" )
 		label:SetColor( Color( 255, 255, 255, 255 ) )
 		label:SetText( name )
@@ -348,11 +406,13 @@ end
 			local button = {}
 			button.Color = Color( 255,255,255,0 )
 			
+			local name = name
+			
 			local buttonPanel = vgui.Create( "DButton", panel )
 			if icon then
 				buttonPanel:SetIcon( icon )
 			end
-			buttonPanel:SetText( name )			
+			buttonPanel:SetText( "" )			
 			buttonPanel:SetPos( posX, posY )				
 			buttonPanel:SetSize( sizeW, sizeT )	
 			buttonPanel:SetFont("ButtonDefault_PlaymusicPro_Font")
@@ -372,18 +432,6 @@ end
 					
 			buttonPanel.Paint = function( self, w, h )
 				
-				if button.OnCursorEntered == nil then
-					button.Color.a = 0
-				elseif button.OnCursorEntered == true and button.Color.a < 50 then
-					button.Color.a = button.Color.a + 500 / PlayMP.CurFrameTime
-				elseif button.OnCursorEntered == false and button.Color.a > 0 then
-					button.Color.a = button.Color.a - 500 / PlayMP.CurFrameTime
-				elseif button.OnCursorEntered == true then
-					button.Color.a = 50
-				elseif button.OnCursorEntered == false then
-					button.Color.a = 0
-				end
-				
 				draw.RoundedBox( cornerRadius, 0, 0, w, h, colorP )
 				draw.RoundedBox( cornerRadius, 0, 0, w, h, button.Color )
 
@@ -394,11 +442,13 @@ end
 					buttonPanelW = buttonPanelW - 50 / PlayMP.CurFrameTime
 				end
 				
-				--draw.DrawText( name, "ButtonDefault_PlaymusicPro_Font", buttonPanelW, 5, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER )
+				draw.DrawText( name, "ButtonDefault_PlaymusicPro_Font", buttonPanelW, 6, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER )
 				
 			end
 			
 			buttonPanel.DoClick = func
+			
+			buttonPanel.SetText = function(t, str) name = str end
 			
 			
 			
@@ -618,11 +668,17 @@ end
 	end
 	
 	
-	function PlayMP:CreatNumScroll( panel, x, y, mn, mx, wide, numEntry, name)
+	function PlayMP:CreatNumScroll( panel, x, y, mn, mx, wide, numEntry, name, doFloor)
 	
 		local trackMouse = false
 		local myData = 0
 		local wide = wide
+		
+		local doFloor = doFloor
+		
+		if doFloor == nil then
+			doFloor = true
+		end
 		
 		local numscrollPanel = vgui.Create( "DPanel", panel )
 		numscrollPanel:SetPos(x,y)
@@ -659,7 +715,7 @@ end
 		numscrollMain.OnCursorExited = function( self, w, h )
 			numscrollBut:AlphaTo( 0, 0.2 ) 
 			numscrollSec:AlphaTo( 50, 0.2 ) 
-			trackMouse = false
+			--trackMouse = false
 		end
 		
 		numscrollSec.OnCursorEntered = function( self, w, h )
@@ -670,7 +726,7 @@ end
 		numscrollSec.OnCursorExited = function( self, w, h )
 			numscrollBut:AlphaTo( 0, 0.2 ) 
 			numscrollSec:AlphaTo( 50, 0.2 ) 
-			trackMouse = false
+			--trackMouse = false
 		end
 		
 		numscrollFir.OnCursorEntered = function( self, w, h )
@@ -681,7 +737,7 @@ end
 		numscrollFir.OnCursorExited = function( self, w, h )
 			numscrollBut:AlphaTo( 0, 0.2 ) 
 			numscrollSec:AlphaTo( 50, 0.2 ) 
-			trackMouse = false
+			--trackMouse = false
 		end
 		
 		numscrollBut.OnCursorEntered = function( self, w, h )
@@ -693,12 +749,14 @@ end
 			numscrollBut:AlphaTo( 0, 0.2 ) 
 			numscrollSec:AlphaTo( 50, 0.2 ) 
 			
-			trackMouse = false
+			--trackMouse = false
 		end
 		
 		local nscroll = {}
 		
-		local numscrollEntry
+		local numscrollEntry = {}
+		
+		numscrollEntry.SetText = function() end
 		
 		if numEntry then
 		
@@ -720,6 +778,7 @@ end
 				numscrollBut:SetPos((wide-4)*(self:GetValue()/mx)-4,4)
 				numscrollEntry:SetText(self:GetValue())
 				
+				nscroll.ValueChanging(self:GetValue())
 				nscroll.ValueChanged(self:GetValue())
 			end
 			
@@ -728,35 +787,51 @@ end
 		local datachange = false
 		local curx, cury = 0,0
 		local alphato = false
+		local curData
 		
 		numscrollMain.Think = function()
 			if trackMouse then
+				curx, cury = numscrollMain:LocalCursorPos()
+				
+				if cury < -20 or cury > 36 then trackMouse = false end
+				
 				if input.IsMouseDown(MOUSE_LEFT) then
-					curx, cury = numscrollMain:LocalCursorPos()
 					if curx >= 2 and curx <= wide - 2 then
 						numscrollFir:SetSize(curx-2,4)
 						numscrollBut:SetPos(curx-4,4)
-						nscroll.ValueChanged(math.Round((curx/wide)*mx))
-						numscrollEntry:SetText(math.Round((curx/wide)*mx))
+						if doFloor then
+							nscroll.ValueChanging(math.Round((curx/wide)*mx))
+							curData = math.Round((curx/wide)*mx)
+							numscrollEntry:SetText(math.Round((curx/wide)*mx))
+						else
+							nscroll.ValueChanging((curx/wide)*mx)
+							curData = (curx/wide)*mx
+							numscrollEntry:SetText((curx/wide)*mx)
+						end
 					elseif curx < 2 then
 						numscrollFir:SetSize(0,4)
 						numscrollBut:SetPos(0,4)
-						nscroll.ValueChanged(mn)
+						nscroll.ValueChanging(mn)
+						curData = mn
 						numscrollEntry:SetText(mn)
 					elseif curx > wide - 2 then
 						numscrollFir:SetSize(wide-4,4)
 						numscrollBut:SetPos(wide-8,4)
-						nscroll.ValueChanged(mx)
+						nscroll.ValueChanging(mx)
+						curData = mx
 						numscrollEntry:SetText(mx)
 					end
 					datachange = true
 				else
 					if datachange then
 						trackMouse = false
-						datachange = false
 					end
 				end
 			else
+				if datachange then
+					datachange = false
+					nscroll.ValueChanged(curData)
+				end
 			end
 		
 			if alphato == true then
@@ -775,8 +850,16 @@ end
 			numscrollEntry:SetText(num)
 		end
 		
+		nscroll.ValueChanged = function() end
+		
+		nscroll.ValueChanging = function() end
+		
 		nscroll.GetValue = function(  ) 
-			return math.Round((numscrollFir:GetWide()/(wide-4))*mx)
+			if doFloor then
+				return math.Round((numscrollFir:GetWide()/(wide-4))*mx)
+			else
+				return (numscrollFir:GetWide()/(wide-4))*mx
+			end
 		end
 		
 		return nscroll
@@ -832,25 +915,30 @@ end
 				draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 220 ) )
 			end
 		end
+		
+		PlayMP.MainMenuCtrlPanel_Button = vgui.Create( "DPanel", PlayMP.MainMenuCtrlPanel )
+		PlayMP.MainMenuCtrlPanel_Button:SetPos( 0, 0 )
+		PlayMP.MainMenuCtrlPanel_Button:SetSize( 150,PlayMP.MainMenuCtrlPanel:GetTall() )
+		PlayMP.MainMenuCtrlPanel_Button.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, 5, h, Color( 205, 114, 42 ) ) end
 	
 		PlayMP.PlayerVideoTitle = vgui.Create( "DLabel", PlayMP.MainMenuCtrlPanel )
-		PlayMP.PlayerVideoTitle:SetPos( 30, 7 )
+		PlayMP.PlayerVideoTitle:SetPos( 160, 0 )
 		PlayMP.PlayerVideoTitle:SetFont( "Default_PlaymusicPro_Font" )
-		PlayMP.PlayerVideoTitle:SetSize( PlayMP.MainMenuCtrlPanel:GetWide() / 3, 50 )
+		PlayMP.PlayerVideoTitle:SetSize( PlayMP.MainMenuCtrlPanel:GetWide() - 500, 50 )
 		PlayMP.PlayerVideoTitle:SetColor( Color( 255, 255, 255, 255 ) )
 		PlayMP.PlayerVideoTitle:SetText( "PlayMusic Pro" )
 		PlayMP.PlayerVideoTitle:SetMouseInputEnabled( true )
 		
 		PlayMP.PlayerVideoChannel = vgui.Create( "DLabel", PlayMP.MainMenuCtrlPanel )
-		PlayMP.PlayerVideoChannel:SetPos( 30, 30 )
+		PlayMP.PlayerVideoChannel:SetPos( 160, 24 )
 		PlayMP.PlayerVideoChannel:SetFont( "Default_PlaymusicPro_Font" )
-		PlayMP.PlayerVideoChannel:SetSize( PlayMP.MainMenuCtrlPanel:GetWide() / 4, 50 )
+		PlayMP.PlayerVideoChannel:SetSize( PlayMP.MainMenuCtrlPanel:GetWide() - 500, 50 )
 		PlayMP.PlayerVideoChannel:SetColor( Color( 150, 150, 150, 255 ) )
 		PlayMP.PlayerVideoChannel:SetText( "" )
 		PlayMP.PlayerVideoChannel:SetMouseInputEnabled( true )
 	
-			local Button_Skip = vgui.Create( "DLabel", PlayMP.MainMenuCtrlPanel )
-			Button_Skip:SetPos( PlayMP.MainMenuCtrlPanel:GetWide() / 2 - 15, PlayMP.MainMenuCtrlPanel:GetTall() * 0.5 - 25 )
+			local Button_Skip = vgui.Create( "DLabel", PlayMP.MainMenuCtrlPanel_Button )
+			Button_Skip:SetPos( PlayMP.MainMenuCtrlPanel_Button:GetWide() / 2 - 15, PlayMP.MainMenuCtrlPanel_Button:GetTall() * 0.5 - 15 )
 			Button_Skip:SetSize( 30, 30 )	
 			Button_Skip:SetText("")
 			local playpoly = PlayMP.GetPoly("TriangleToRight30")
@@ -893,7 +981,7 @@ end
 				
 			end)
 			
-			local Button_repeat = vgui.Create( "DImageButton", PlayMP.MainMenuCtrlPanel )
+			local Button_repeat = vgui.Create( "DImageButton", PlayMP.MainMenuCtrlPanel_Button )
 			local Button_repeat_Vail = PlayMP:GetSetting( "RepeatQueue", false, true )
 			
 			if Button_repeat_Vail then
@@ -939,7 +1027,7 @@ end
 		
 		local VolumeSlider = PlayMP:CreatNumScroll( PlayMP.volPanel, 50, 16, 0, 100, 240, true)
 		VolumeSlider:SetNum(PlayMP.GetPlayerVolume())
-		
+	
 		local Button_Vol = vgui.Create( "DImageButton", PlayMP.volPanel )
 		Button_Vol:SetPos( 10, 12 )
 		Button_Vol:SetSize( 30, 30 )
@@ -984,7 +1072,7 @@ end
 			Button_Vol:SetImage( "vgui/playmusic_pro/vol4" )
 		end
 		
-		VolumeSlider.ValueChanged = function(  )
+		VolumeSlider.ValueChanging = function(  )
 			PlayMP.SetPlayerVolume( VolumeSlider:GetValue() )
 			
 			if PlayMP.PlayerIsMuted then return end
@@ -1019,18 +1107,29 @@ end
 			end
 		end
 		
-		local seektoMain = vgui.Create( "DPanel", PlayMP.MainMenuCtrlPanel  )
-		seektoMain:SetPos( PlayMP.MainMenuCtrlPanel:GetWide() / 2 - 320, 50 )
-		seektoMain:SetSize( 640, 40 )
+		local seektoMain = vgui.Create( "DPanel", PlayMP.MainMenuCtrlPanel )
+		seektoMain:SetPos( 210, 53 )
+		seektoMain:SetSize( PlayMP.MainMenuCtrlPanel:GetWide() - 400, 40 )
 		seektoMain.Paint = function( self, w, h ) 
 			--draw.RoundedBox( 0, 0, 0, w, h, Color( 255, 255, 255, 15 ) )
 		end
 		
-		local seektoMainX, seektoMainY = seektoMain:GetPos()
-		local seektoMainW, seektoMainH = seektoMain:GetSize()
-		
 		surface.SetFont( "Default_PlaymusicPro_Font" )
 		local w, h = surface.GetTextSize( "--:--" )
+		
+		local seektoTimeView = vgui.Create( "DPanel", PlayMP.MainMenuCtrlPanel )
+		seektoTimeView:SetPos( 210, 53 - h + 4 )
+		seektoTimeView:SetSize( w + 10, h + 4 )
+		seektoTimeView:SetAlpha(0)
+		seektoTimeView.Paint = function( self, w, h ) draw.RoundedBox( 4, 0, 0, w, h, Color( 0, 0, 0, 200 ) ) end
+		
+		local seektoTimeViewText = vgui.Create( "DLabel", seektoTimeView )
+		seektoTimeViewText:SetPos(seektoTimeView:GetWide()/2 - w/2)
+		seektoTimeViewText:SetText("--:--")
+		
+		
+		local seektoMainX, seektoMainY = seektoMain:GetPos()
+		local seektoMainW, seektoMainH = seektoMain:GetSize()
 		
 		local playtime = vgui.Create( "DLabel", PlayMP.MainMenuCtrlPanel )
 		playtime:SetSize( w, h )
@@ -1071,8 +1170,36 @@ end
 				remaintime:SetPos( seektoMainX + seektoMainW + 10, seektoMainY + (seektoMainH/2) - (h/2))
 			end
 		end
+		
+		local seekto = PlayMP:CreatNumScroll( seektoMain, 0, 8, 0, 1, seektoMain:GetWide(), false, nil, false)
+		seekto:SetNum( PlayMP.CurPlayTime / PlayMP.CurVideoLength )
+		seekto.ValueChanged = function( d ) 
+			PlayMP:DoSeekToVideo( d * PlayMP.CurVideoLength )
+			seektoTimeView:AlphaTo(0,1,1)
+		end
+		seekto.ValueChanging = function( d )
+			seektoTimeView:SetAlpha(255)
+			surface.SetFont( "Default_PlaymusicPro_Font" )
+			local w, h = surface.GetTextSize(string.ToMinutesSeconds(d * PlayMP.CurVideoLength))
+			seektoTimeViewText:SetText(string.ToMinutesSeconds(d * PlayMP.CurVideoLength))
+			seektoTimeView:SetPos( (210 + (seektoMain:GetWide() * d)) - (w/2) - 5, 53 - h + 4 )
+			seektoTimeView:SetSize( w + 10, h + 4 )
+			seektoTimeViewText:SetPos(seektoTimeView:GetWide()/2 - w/3)
+		end
+		
+		hook.Add("Think", "Menu Time Seekto bar Think", function()
+			
+			if PlayMP.MainMenuPanel == nil then hook.Remove("Think", "Menu Time Seekto bar Think") return end
+			--if not PlayMP.MainMenuPanel:IsValid() then hook.Remove("Think", "Menu Time Seekto bar Think") end
+			
+			if PlayMP.CurPlayTime == nil then return end
+			if PlayMP.CurVideoLength == nil then return end
+			
+			seekto:SetNum( PlayMP.CurPlayTime / PlayMP.CurVideoLength )
+			
+		end)
 
-		local seekto_f = vgui.Create( "DPanel", seektoMain  )
+		--[[local seekto_f = vgui.Create( "DPanel", seektoMain  )
 		seekto_f:SetPos( 0, 18 )
 		seekto_f:SetSize( seektoMain:GetWide(), 4 )
 		seekto_f.Paint = function( self, w, h ) 
@@ -1128,63 +1255,7 @@ end
 		seekto_b.OnCursorEntered = function( self, w, h )
 			seekto_c_TrackMouse = true
 			seekto_c_ClickColor = Color( 50, 50, 50, 170 )
-		end
-		
-		hook.Add("Tick", "Menu Time Seekto bar Think", function()
-			
-			if PlayMP.MainMenuPanel == nil then return end
-			if not PlayMP.MainMenuPanel:IsValid() then return end
-			
-			if PlayMP.CurPlayTime == nil then return end
-			if PlayMP.CurVideoLength == nil then return end
-			
-			local curtime = PlayMP.CurPlayTime / PlayMP.CurVideoLength
-		
-			local curx, cury = seektoMain:LocalCursorPos()
-			local w = seektoMain:GetWide()
-			local curPos = seektoMain:GetWide() * curtime
-			
-			if seekto_c_TrackMouse != nil and seekto_c_TrackMouse then
-				
-				if input.IsMouseDown(MOUSE_LEFT)  or input.IsMouseDown(MOUSE_RIGHT) then
-					doseekto = true
-					
-					if curx < 0 then
-						curx = 0
-					elseif	curx > seektoMain:GetWide() then
-						curx = seektoMain:GetWide()
-					end
-					seekto_c:SetPos( curx - 10, 10 )
-					seekto_f:SetSize( curx - 11, 4 )
-					seekto_b:SetPos( curx + 11, 18 )
-					seekto_b:SetSize( seektoMain:GetWide() - curx - 12, 4 )
-					return
-				else
-					
-					if doseekto == true then
-						doseekto = false
-						seekto_c_TrackMouse = false
-						local x, y = seekto_c:GetPos()
-						x = x + 10
-						PlayMP:DoSeekToVideo( ( x / seektoMain:GetWide()) * PlayMP.CurVideoLength )
-					end
-					
-				end
-				
-			else
-			
-				doseekto = false
-				
-			end
-			
-			if seektoMain:GetWide() < curPos or 0 > curPos then return end
-			
-			seekto_c:SetPos( curPos - 10, 10 )
-			seekto_f:SetSize( curPos - 11 , 4 )
-			seekto_b:SetPos( curPos + 11, 18 )
-			seekto_b:SetSize( seektoMain:GetWide() - curPos - 11, 4 )
-			
-		end)
+		end]]
 		
 		PlayMP.MenuWindowPanel = vgui.Create( "DPanel", PlayMP.basePanel )
 		PlayMP.MenuWindowPanel:SetPos( PlayMP.sideMenuPanel:GetWide(), 56 )
@@ -1405,7 +1476,7 @@ function PlayMP:OpenWriteQueueInfoPanel( url, force, sT, eT )
 						
 					end)
 						
-					PlayMP:AddActionButton( ButtonPanel, "취소", Color(231, 76, 47), ButtonPanel:GetWide() - 90, 10, 80, 30, function() 
+					PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "Cancel" ), Color(231, 76, 47), ButtonPanel:GetWide() - 90, 10, 80, 30, function() 
 						hook.Remove("HUDPaint", "OpenRequestQueueWindow")
 						mainPanel:Close() 
 					end)

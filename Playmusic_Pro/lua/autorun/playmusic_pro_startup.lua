@@ -4,6 +4,7 @@ print("[PlayM Pro] Thanks for using PlayMusic Pro. \n 플레이뮤직 Pro를 이
 
 if PlayMP then -- 초기화
 
+
 	hook.Remove( "Think", "PMP Video Time Think")
 
 	if CLIENT then
@@ -47,8 +48,8 @@ PlayMP = {}
 PlayMP.CurSystemVersion = {}
 PlayMP.CurSystemVersion.isBeta = true
 PlayMP.CurSystemVersion.ResetOptionAnytime = false
-PlayMP.CurSystemVersion.Ver = "2.0.0 - 9 (beta)"
-PlayMP.CurSystemVersion.VerE = "0.18"
+PlayMP.CurSystemVersion.Ver = "2.0.0 - 10 (beta)"
+PlayMP.CurSystemVersion.VerE = "0.19"
 PlayMP.NewerVer = "unknown"
 PlayMP.NewerVerE = 0
 PlayMP.SysStartTime = CurTime()

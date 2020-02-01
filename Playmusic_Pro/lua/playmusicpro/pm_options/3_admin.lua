@@ -1,6 +1,6 @@
 if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 		
-	PlayMP:AddSeparator( PlayMP:Str( "Admin" ) )
+	PlayMP:AddSeparator( PlayMP:Str( "Admin" ), "icon16/cog.png" )
 	PlayMP:AddOption( PlayMP:Str( "AdminSet_UserAdmin" ), "userAdministration", "", function( DScrollPanel )
 	
 		if not LocalPlayer():IsAdmin() and not PlayMP.LocalPlayerData[1]["power"] then

@@ -1,6 +1,6 @@
 local API_KEY = "AIzaSyBek-uYZyjZfn2uyHwsSQD7fyKIRCeXifU"
 
-PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
+PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 	
 	PlayMP:AddOption( PlayMP:Str( "Options_queueList" ), "queueList", "", function( DScrollPanel )
 		
@@ -109,8 +109,8 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 			
 			end
 			
-			DScrollPanel:SetPos( 0, 100 )
-			DScrollPanel:SetSize( DScrollPanel:GetWide(), DScrollPanel:GetTall() - 100 )
+			DScrollPanel:SetPos( 10, 100 )
+			DScrollPanel:SetSize( DScrollPanel:GetWide()-20, DScrollPanel:GetTall() - 100 )
 	
 			
 			if table.Count(PlayMP.CurVideoInfo) == 0 then
@@ -600,8 +600,8 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 			
 			TextEntry:RequestFocus() 
 			
-			DScrollPanel:SetPos( 0, 90 )
-			DScrollPanel:SetSize( DScrollPanel:GetWide(), DScrollPanel:GetTall() - 90 )
+			DScrollPanel:SetPos( 10, 90 )
+			DScrollPanel:SetSize( DScrollPanel:GetWide()-20, DScrollPanel:GetTall() - 90 )
 			
 			local SearchIcon = vgui.Create( "DImage", SearchPanel )
 			SearchIcon:SetPos( 10, 5 )
@@ -861,8 +861,8 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ) )
 				PlayMP.VideoListPanel.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 0 ) ) end
 				
 				local DScrollPanel = vgui.Create( "DScrollPanel", PlayMP.VideoListPanel )
-				DScrollPanel:SetSize( PlayMP.VideoListPanel:GetWide(), PlayMP.VideoListPanel:GetTall() )
-				DScrollPanel:SetPos( 0, 0 )
+				DScrollPanel:SetSize( PlayMP.VideoListPanel:GetWide()-20, PlayMP.VideoListPanel:GetTall() )
+				DScrollPanel:SetPos( 10, 0 )
 				DScrollPanel.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 0 ) ) end
 				DScrollPanel:SetPadding( 10 )
 				

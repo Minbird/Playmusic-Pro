@@ -977,6 +977,7 @@ function PlayMP:VideoTimeThink()
 			local Tick_TimeThink = CurTime()
 			local nowWait = false
 			local waitTime = 0
+			local Muted = false
 			hook.Add( "Think", "PMP Video Time Think", function()
 			
 				if PlayMP.PlayerHTML == nil then 
@@ -1010,11 +1011,15 @@ function PlayMP:VideoTimeThink()
 				if PlayMP:GetSetting( "PlayX01", false, true) then
 					if PlayX != nil and PlayX.Playing and PlayX.VideoRangeStatus == 1 then
 						PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(0)]])
+						Muted = true
 					else
-						PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. vol .. [[)]])
+						if Muted == true then
+							PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. vol .. [[)]])
+						end
+						Muted = false
 					end
 				else
-					PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. vol .. [[)]])
+					--PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. vol .. [[)]])
 				end
 			
 				if PlayMP.SeekTo != true then
@@ -1457,7 +1462,7 @@ end
 	
 		if ( ply and LocalPlayer() and ply == LocalPlayer() ) then
 		
-			if string.Left(text, 3) == "!pm" then
+			if string.Left(string.lower(text), 3) == "!pm" then
 			
 				local entName = PlayMP:ExtractCommandArgs(text)
 
@@ -1488,7 +1493,7 @@ end
 	
 	function PlayMP:ExtractCommandArgs(text)
 	
-		if string.Left(text, 3) == "!pm" then
+		if string.Left(string.lower(text), 3) == "!pm" then
 			if string.len(text) <= 3 then
 				return "", ""
 			end
@@ -1507,23 +1512,34 @@ end
 		PlayMP.PlayMPMenuBind = 100 
 	end
 	
+	PlayMP.UserOnChatNow = false
+	hook.Add( "StartChat", "OpenedChatBox_PMP", function( isTeamChat )
+		PlayMP.UserOnChatNow = true
+	end )
+	
+	hook.Add( "FinishChat", "ClosedChatBox_PMP", function()
+		PlayMP.UserOnChatNow = false
+	end)
+	
 	hook.Add( "Tick", "PMP_KeyDown", function()
-		if input.IsKeyDown(PlayMP.PlayMPMenuBind) and PlayMP.MainMenuPanel == nil then
-			if PlayMP.OpenMenuByKeyPress == nil or PlayMP.OpenMenuByKeyPress == true then return end
-			PlayMP.OpenMenuByKeyPress = true
-			PlayMP:CreatFrame( "Playmusic Pro", "PlaymusicP_MainMenu" )
-			PlayMP:MainMenu()
-		elseif input.IsKeyDown(PlayMP.PlayMPMenuBind) and PlayMP.MainMenuPanel then
-			if PlayMP.OpenMenuByKeyPress == nil or PlayMP.OpenMenuByKeyPress == true then return end
-			PlayMP.OpenMenuByKeyPress = true
-			hook.Remove("HUDPaint", "PlaymusicP_MainMenu")
-			hook.Remove("Tick", "DoNoticeToPlayerOnMenu")
-			PlayMP.MenuWindowPanel:Clear()
-			PlayMP.MainMenuPanel:Remove()
-			PlayMP.MainMenuPanel:Close()
-			PlayMP.MainMenuPanel = nil
-		else
-			PlayMP.OpenMenuByKeyPress = false
+		if PlayMP.UserOnChatNow == false then
+			if input.IsKeyDown(PlayMP.PlayMPMenuBind) and PlayMP.MainMenuPanel == nil then
+				if PlayMP.OpenMenuByKeyPress == nil or PlayMP.OpenMenuByKeyPress == true then return end
+				PlayMP.OpenMenuByKeyPress = true
+				PlayMP:CreatFrame( "Playmusic Pro", "PlaymusicP_MainMenu" )
+				PlayMP:MainMenu()
+			elseif input.IsKeyDown(PlayMP.PlayMPMenuBind) and PlayMP.MainMenuPanel then
+				if PlayMP.OpenMenuByKeyPress == nil or PlayMP.OpenMenuByKeyPress == true then return end
+				PlayMP.OpenMenuByKeyPress = true
+				hook.Remove("HUDPaint", "PlaymusicP_MainMenu")
+				hook.Remove("Tick", "DoNoticeToPlayerOnMenu")
+				PlayMP.MenuWindowPanel:Clear()
+				PlayMP.MainMenuPanel:Remove()
+				PlayMP.MainMenuPanel:Close()
+				PlayMP.MainMenuPanel = nil
+			else
+				PlayMP.OpenMenuByKeyPress = false
+			end
 		end
 	end )
 
@@ -1645,6 +1661,61 @@ function PlayMP:ReceiveMusicDataAndPlay( num, curvinfo, time )
 	end
 	
 end
+
+local PlayMP_VolumeTo_isWorking = false
+function PlayMP:VolumeToWithNoChangeSetting( vol, ti, startVol )
+
+	if PlayMP_VolumeTo_isWorking then
+		hook.Remove( "Think", "VolumeToWithNoChangeSetting" )
+	end
+	
+	if PlayMP.PlayerHTML == nil then return end
+	
+	PlayMP_VolumeTo_isWorking = true
+	
+	if ti then
+		local curVol = startVol
+		local volTo = vol
+		local volTonNum = (curVol - vol) * -1
+		local curTime = CurTime()
+		local chTime = 0
+		hook.Add( "Think", "VolumeToWithNoChangeSetting", function() 
+			if PlayMP.PlayerHTML == nil then hook.Remove( "Think", "VolumeToWithNoChangeSetting" ) end
+			chTime = (CurTime() - curTime)/ti
+			PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. curVol + (volTonNum * chTime) .. [[)]])
+			
+			if chTime >= 1 then
+				PlayMP_VolumeTo_isWorking = false
+				PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. vol .. [[)]])
+				hook.Remove( "Think", "VolumeToWithNoChangeSetting" )
+			end
+		end )
+	else
+		PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. vol .. [[)]])
+		PlayMP_VolumeTo_isWorking = false
+	end
+	
+end
+
+local VolConWhenPlyStVo = PlayMP:GetSetting( "VolConWhenPlyStVo", false, true)
+if not isnumber(VolConWhenPlyStVo) then
+	VolConWhenPlyStVo = 0.15
+	PlayMP:ChangeSetting("VolConWhenPlyStVo", VolConWhenPlyStVo)
+end
+
+local PlayerStartVoice_PlayMP_StartPlayer = 0
+hook.Add( "PlayerStartVoice", "PlayerStartVoice_PlayMP", function() 
+	PlayerStartVoice_PlayMP_StartPlayer = PlayerStartVoice_PlayMP_StartPlayer + 1
+	if PlayerStartVoice_PlayMP_StartPlayer == 1 then
+		PlayMP:VolumeToWithNoChangeSetting( PlayMP:GetPlayerVolume() * PlayMP:GetSetting( "VolConWhenPlyStVo", false, true), 0.2, PlayMP:GetPlayerVolume() )
+	end
+end)
+hook.Add( "PlayerEndVoice", "PlayerEndVoice_PlayMP", function()
+	PlayerStartVoice_PlayMP_StartPlayer = PlayerStartVoice_PlayMP_StartPlayer - 1
+	if PlayerStartVoice_PlayMP_StartPlayer == 0 then
+		PlayMP:VolumeToWithNoChangeSetting( PlayMP:GetPlayerVolume(), 0.5, PlayMP:GetPlayerVolume() * PlayMP:GetSetting( "VolConWhenPlyStVo", false, true)  )
+	end
+end)
 
 net.Receive( "PlayMP:GetQueueData", function()
 	PlayMP.CurVideoInfo = net.ReadTable()

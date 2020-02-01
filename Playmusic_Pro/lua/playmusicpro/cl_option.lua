@@ -10,8 +10,6 @@ end
 
 function PlayMP:DoAnimaOption( aim, posX, posY, endPoxX, endPoxY, remove, panel, panelNew, mother, time )
 	
-	PlayMP.MenuWindowPanel_Clear = true
-	
 	if not PlayMP:GetSetting( "Use_Animation", false, true ) then
 		panel:Clear()
 		panelNew:SetPos( posX, posY )
@@ -56,7 +54,9 @@ function PlayMP:DoAnimaOption( aim, posX, posY, endPoxX, endPoxY, remove, panel,
 	
 end
 
-function PlayMP:ChangeMenuWindow( panelName )
+function PlayMP:ChangeMenuWindow( panelName, funcd )
+
+			hook.Run( "MenuChanged_PMP", panelName )
 			
 			local MenuWindowPanelNew = vgui.Create( "DPanel", PlayMP.basePanel )
 			MenuWindowPanelNew:SetPos( PlayMP.sideMenuPanel:GetWide(), 56 )
@@ -104,6 +104,10 @@ function PlayMP:ChangeMenuWindow( panelName )
 					hook.Run( panelName, DScrollPanel )
 					hook.Remove( panelName, panelName )
 					
+					--v.MenuFuncion:ColorTo(Color(255,150,100,255),0.1)
+					
+				else
+					--v.MenuFuncion:ColorTo(Color(255,255,255,255),0.1)
 				end
 				if v["UniqueName"] == PlayMP.CurMenuPage then
 					oldPanel = k
@@ -111,5 +115,7 @@ function PlayMP:ChangeMenuWindow( panelName )
 			end
 			
 			PlayMP.CurMenuPage = panelName
+			
+			return MenuChan
 			
 		end

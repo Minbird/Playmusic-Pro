@@ -1,4 +1,4 @@
-PlayMP:AddSeparator( PlayMP:Str( "System" ) )
+PlayMP:AddSeparator( PlayMP:Str( "System" ), "icon16/application.png" )
 PlayMP:AddOption( PlayMP:Str( "UpdateLog" ), "updateLog", "", function( DScrollPanel ) 
 	local HTML = vgui.Create("DHTML", DScrollPanel )
 	HTML:SetPos( 0, 0 )

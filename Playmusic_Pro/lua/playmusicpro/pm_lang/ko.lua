@@ -223,3 +223,8 @@ lang.Media_Time_Limit = "대기열에 등록할 수 있는 미디어의 최대 �
 lang.Media_Limit_User = "사용자당 등록할 수 있는 최대 미디어의 수 (0이면 사용 안함)"
 
 lang.CSet_openMenuBind = "메인 메뉴를 열고 닫을 때 사용할 단축키"
+
+lang.CSet_VolChangeWhenPlayerStartVChatOri = "음성 채팅 사용 시 미디어의 볼륨"
+lang.CSet_VolChangeWhenPlayerStartVChat = "음성 채팅 사용 시 미디어의 볼륨을 %s 배로 줄입니다."
+lang.CSet_MuteWhenPlayerStartVChat = "음성 채팅 사용 시 미디어를 음소거합니다."
+lang.CSet_NoVolChangeWhenPlayerStartVChat = "사람들이 말을 하든지 말든지 저는 노래나 듣습니다."
