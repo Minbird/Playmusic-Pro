@@ -1680,7 +1680,16 @@ function PlayMP:VolumeToWithNoChangeSetting( vol, ti, startVol )
 		local curTime = CurTime()
 		local chTime = 0
 		hook.Add( "Think", "VolumeToWithNoChangeSetting", function() 
-			if PlayMP.PlayerHTML == nil then hook.Remove( "Think", "VolumeToWithNoChangeSetting" ) end
+			if PlayMP.PlayerHTML == nil then 
+				hook.Remove( "Think", "VolumeToWithNoChangeSetting" ) 
+				chat.AddText("1")
+				return
+			end
+			if not PlayMP.PlayerHTML:Valid() then 
+				hook.Remove( "Think", "VolumeToWithNoChangeSetting" ) 
+				return
+				chat.AddText("2")
+			end
 			chTime = (CurTime() - curTime)/ti
 			PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. curVol + (volTonNum * chTime) .. [[)]])
 			
