@@ -1704,13 +1704,15 @@ if not isnumber(VolConWhenPlyStVo) then
 end
 
 local PlayerStartVoice_PlayMP_StartPlayer = 0
-hook.Add( "PlayerStartVoice", "PlayerStartVoice_PlayMP", function() 
+hook.Add( "PlayerStartVoice", "PlayerStartVoice_PlayMP", function( ply ) 
+	if ply == LocalPlayer() then return end
 	PlayerStartVoice_PlayMP_StartPlayer = PlayerStartVoice_PlayMP_StartPlayer + 1
 	if PlayerStartVoice_PlayMP_StartPlayer == 1 then
 		PlayMP:VolumeToWithNoChangeSetting( PlayMP:GetPlayerVolume() * PlayMP:GetSetting( "VolConWhenPlyStVo", false, true), 0.2, PlayMP:GetPlayerVolume() )
 	end
 end)
-hook.Add( "PlayerEndVoice", "PlayerEndVoice_PlayMP", function()
+hook.Add( "PlayerEndVoice", "PlayerEndVoice_PlayMP", function( ply )
+	if ply == LocalPlayer() then return end
 	PlayerStartVoice_PlayMP_StartPlayer = PlayerStartVoice_PlayMP_StartPlayer - 1
 	if PlayerStartVoice_PlayMP_StartPlayer == 0 then
 		PlayMP:VolumeToWithNoChangeSetting( PlayMP:GetPlayerVolume(), 0.5, PlayMP:GetPlayerVolume() * PlayMP:GetSetting( "VolConWhenPlyStVo", false, true)  )
