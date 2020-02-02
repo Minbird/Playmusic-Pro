@@ -293,7 +293,6 @@ end
 					if v.DoNotion == nil then
 						AddOption_funcd.DoNotion = bool
 						v.DoNotion = bool
-						chat.AddText(tostring(v.DoNotion))
 					else
 						AddOption_funcd.DoNotion = v.DoNotion
 					end
