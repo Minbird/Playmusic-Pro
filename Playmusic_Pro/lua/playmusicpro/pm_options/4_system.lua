@@ -148,6 +148,7 @@ PlayMP:AddOption( PlayMP:Str( "PMPNotice" ), "notice", "", function( DScrollPane
 	HTML:SetSize( DScrollPanel:GetWide(), DScrollPanel:GetTall() )
 	HTML:SetEnabled(true)
 	HTML:OpenURL("https://sites.google.com/view/minbirdworkshop/playmusic/notice")
+	PlayMP:ChangeSetting("NoticeReadCount", PlayMP.noticecountOnInternet)
 end)
 
 PlayMP:AddOption( "QnA", "qna", "", function( DScrollPanel ) 

@@ -1,5 +1,5 @@
 
-local API_KEY = "AIzaSyBek-uYZyjZfn2uyHwsSQD7fyKIRCeXifU"
+local API_KEY = "AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0"
 local playerDataSaved = {}
 PlayMP.CurrentQueueInfo = {}
 PlayMP.CurPlayNum = 0
@@ -430,10 +430,10 @@ end
 
 function PlayMP:AddPlaylistQueue( id, ply, nextPageTokenOld )
 
-	local url = "https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId=" .. id .. "&key=AIzaSyBek-uYZyjZfn2uyHwsSQD7fyKIRCeXifU"
+	local url = "https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId=" .. id .. "&key=AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0"
 
 	if nextPageTokenOld != nil then
-		url = "https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId=" .. id .. "&key=AIzaSyBek-uYZyjZfn2uyHwsSQD7fyKIRCeXifU&pageToken=" .. nextPageTokenOld
+		url = "https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId=" .. id .. "&key=AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0&pageToken=" .. nextPageTokenOld
 	end
 
 	http.Fetch(url, function(data,code,headers)
@@ -951,6 +951,7 @@ end
 	PlayMP.isPlaying = false
 	util.AddNetworkString( "PlayMP:Playmusic" )
 
+PlayMP.isPending = false
 function PlayMP:Playmusic()
 
 	if PlayMP.isPlaying == true then return end
@@ -984,13 +985,31 @@ function PlayMP:Playmusic()
 	
 	PlayMP.SeekToTimeThink = 0
 	
-	PlayMP:VideoTimeThink()
+	PlayMP.isPending = true
 	
 	net.Start("PlayMP:Playmusic")
 		--net.WriteTable( PlayMP.CurrentQueueInfo )
 		net.WriteString( PlayMP.CurPlayNum )
 	net.Broadcast()
-
+	
+	print("[PlayM Pro] Playback Pending...")
+	
+	local pendingTimeCount = 0
+	local function CheakPlayer()
+		if PlayMP.isPending then
+			pendingTimeCount = pendingTimeCount + 1
+		end
+		
+		if pendingTimeCount == 10 then
+			timer.Remove( "PendingTimePlayMP" )
+			pendingTimeCount = 0
+			PlayMP:StartMedia()
+			print("[PlayM Pro] Starting, but some user(s) not ready to start playing!")
+		end
+		
+	end
+	timer.Create( "PendingTimePlayMP", 1, 0, function() CheakPlayer() end )
+	
 end
 
 
@@ -1168,3 +1187,69 @@ net.Receive( "PlayMP:ChangConVar", function( len, ply )
 	end
 
 end)
+
+local PlayMPpendingUsersCount = 0
+local PlayMPpendingUsers = {}
+local FirstTime
+util.AddNetworkString( "PlayMP:PlayerIsReady" )
+net.Receive( "PlayMP:PlayerIsReady", function( len, ply )
+
+	if PlayMP.isPending then
+	
+		local steamID = ply:SteamID()
+		local alreadyReady = false
+		
+		if table.IsEmpty(PlayMPpendingUsers) then
+			FirstTime = CurTime()
+			table.insert( PlayMPpendingUsers, {ID = steamID} )
+			PlayMPpendingUsersCount = PlayMPpendingUsersCount + 1
+			print("[PlayM Pro] User " .. ply:Nick() .. " is ready to play media! (ID: " .. steamID .. ", Count: ".. PlayMPpendingUsersCount .."/" .. #player.GetHumans() ..", CurTime: " .. CurTime() - FirstTime .."s )")
+		
+		else
+			for k, v in pairs(PlayMPpendingUsers) do
+
+				if v.ID == steamID then
+					alreadyReady = true
+				end
+				
+				if k == #PlayMPpendingUsers then
+					if alreadyReady == false then
+						table.insert( PlayMPpendingUsers, {ID = steamID} )
+						PlayMPpendingUsersCount = PlayMPpendingUsersCount + 1
+						PrintMessage(HUD_PRINTTALK, "[PlayM Pro] 2: User " .. ply:Nick() .. " is ready to play media! (ID: " .. steamID .. ", Count: ".. PlayMPpendingUsersCount .."/" .. #player.GetHumans() ..", CurTime: " .. CurTime() - FirstTime .."s )")
+					end
+				end
+				
+			end
+		end
+		
+		--player.GetCount() 
+		if #player.GetHumans() <= PlayMPpendingUsersCount then
+			PlayMP:StartMedia()
+		end
+	
+	elseif PlayMP.isPending == false and PlayMP.isPlaying then
+	
+		net.Start("PlayMP:StartMedia")
+		net.Send(ply)
+		
+	end
+
+end)
+
+util.AddNetworkString( "PlayMP:StartMedia" )
+function PlayMP:StartMedia()
+
+	PlayMP.isPending = false
+	PlayMPpendingUsersCount = 0
+	table.Empty(PlayMPpendingUsers)
+	
+	net.Start("PlayMP:StartMedia")
+	net.Broadcast()
+	
+	print("[PlayM Pro] All players ready! Starting.")
+	
+	PlayMP:VideoTimeThink()
+
+end
+

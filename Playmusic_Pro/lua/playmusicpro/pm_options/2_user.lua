@@ -81,12 +81,13 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 			PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_No_Play_Always" ), "No_Play_Always" )
 			PlayMP:AddCheckBox( DScrollPanel, function()
 				if PlayMP.isPlaying != true then return end
+				if PlayMP.PlayerMode == "worldScr" then return end
 					PlayMP.PlayerHTML:Remove()
 					PlayMP.PlayerMainPanel:Close()
 					PlayMP:LoadPlayer()
 					for k, v in pairs( PlayMP.CurVideoInfo ) do
 						if v["QueueNum"] == PlayMP.CurPlayNum then
-							PlayMP.PlayerHTML:OpenURL("https://cdn.rawgit.com/Minbird/minbird.github.io/a67c4d7e/html/app/Pro_youtube.html?uri=" .. v.Uri .. "?Vol=" .. 50 .. "?Seek=" .. PlayMP.CurPlayTime )
+							PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. v.Uri .. "?Vol=" .. PlayMP:GetPlayerVolume() .. "?Seek=" .. PlayMP.CurPlayTime )
 						end
 					end
 				end, PlayMP:Str( "CSet_Show_MediaPlayer" ), "Show_MediaPlayer" )
@@ -365,8 +366,8 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 						if RealPlayTime == nil then RealPlayTime = 0 end
 						local VideoStartTime = PlayMP.VideoStartTime
 						if VideoStartTime == nil then VideoStartTime = "null" end
-						local text = "CurFPS:" .. PlayMP.CurFrameTime .. "\nFunctionLoad:" .. tostring(tobool(PlayMP.MenuWindows)) .. "\nLanguages:" .. table.Count(PlayMP.Lang) .. "\nCurLanguage:" .. PlayMP.CurLang .. "\nMediaStartTime:" .. VideoStartTime .. "\nPlayMP.isPlaying:" .. tostring(PlayMP.isPlaying) .. "\nRealPlayTime:" .. RealPlayTime .. "\nCurPlayTime:" .. tostring(PlayMP.CurPlayTime) .. "\nCurTimeError:" .. PlayMP.CurPlayTime - RealPlayTime .. "\nCurPlayNum:" .. CurPlayNum .. "\nCurMenuPage:" .. tostring(CurMenuPage)
-						draw.DrawText( text, "Default_PlaymusicPro_Font", 50, 50, Color( 255, 255, 255, 255 ), TEXT_ALIGN_LEFT )
+						local text = "CurFPS:" .. PlayMP.CurFrameTime .. "\nFunctionLoad:" .. tostring(tobool(PlayMP.MenuWindows)) .. "\nLanguages:" .. table.Count(PlayMP.Lang) .. "\nCurLanguage:" .. PlayMP.CurLang .. "\nMediaStartTime:" .. VideoStartTime .. "\nPlayMP.isPlaying:" .. tostring(PlayMP.isPlaying) .. "\nRealPlayTime:" .. RealPlayTime .. "\nCurPlayTime:" .. tostring(PlayMP.CurPlayTime) .. "\nCurTimeError:" .. PlayMP.CurPlayTime - RealPlayTime .. "\nCurPlayNum:" .. CurPlayNum .. "\nCurMenuPage:" .. tostring(CurMenuPage) .. "\nPending:" .. tostring(PlayMP.isPending) .. "\nPlayerStatusNumber:" .. tostring(PlayMP.PlayerStatus)
+						draw.DrawText( text, "ChatFont", 50, 50, Color( 255, 255, 255, 255 ), TEXT_ALIGN_LEFT )
 					end)
 				else
 					hook.Remove("HUDPaint", "PlayMProDebug")

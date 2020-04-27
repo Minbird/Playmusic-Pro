@@ -7,6 +7,12 @@ PlayMP.LocalPlayerData = {}
 
 CreateClientConVar("playmp_volume", 15, true, false)
 
+PlayMP.noticecountOnInternet = 0
+http.Fetch( "https://minbird.github.io/pmproNewNotice", function(data)
+	local a = util.JSONToTable(data)
+	PlayMP.noticecountOnInternet = a["NoticeCount"]
+end)
+
 function PlayMP:AddLanguage( name, uniName )
 	
 	for k, v in pairs(PlayMP.CurLangData) do
@@ -407,7 +413,7 @@ function PlayMP:RemoveQueue( num )
 	net.SendToServer()
 end
 
-local API_KEY = "AIzaSyBek-uYZyjZfn2uyHwsSQD7fyKIRCeXifU"
+local API_KEY = "AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0"
 
 function PlayMP:ReadVideoAndWritePlayList( v )
 
@@ -567,33 +573,71 @@ function PlayMP:RemoveLocalPlayList( Uri )
 end
 
 
-
-function PlayMP:PlayMusic( uri, startTime, endTime )
+PlayMP.isPending = false
+function PlayMP:PlayMusic( uri, startTime, endTime, newPlayer )
 
 	if PlayMP:GetSetting( "No_Play_Always", false, true ) then 
 		
 		return 
 	end
+	
+	if newPlayer then
+		PlayMP.isPending = false
+	else
+		PlayMP.isPending = true
+	end
 
 	PlayMP:LoadPlayer()
 	local vol = 0
 	if PlayMP.PlayerIsMuted then vol = 0 else vol = PlayMP.GetPlayerVolume() end
-	PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. uri .. "?Vol=" .. vol .. "?Seek=" .. startTime )
+	PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. uri .. "?Vol=" .. 0 .. "?Seek=" .. startTime )
 	if PlayMP:GetSetting( "FMem", false, true) then
 		PlayMP.PlayerHTML:QueueJavascript([[player.setPlaybackQuality( "small" );]])
 	end
 	
 	PlayMP.SeekToTimeThink = 0
 	
-	PlayMP:VideoTimeThink()
-	
 	PlayMP.VideoStartTime = CurTime()
 	
 	PlayMP.isPlaying = true
 	
+	if PlayMP.isPending then
+		local Tick_TimeThink = CurTime()
+		hook.Add( "Think", "PendingPlayMP", function()
+			if 0.2 > CurTime() - Tick_TimeThink then return end
+			PlayMP.PlayerHTML:RunJavascript([[PlayMP.PlayState(player.getPlayerState());]])
+			Tick_TimeThink = CurTime()
+		end )
+	end
+	
 end
 
 function PlayMP:PlayerIsReady()
+	
+	if PlayMP.isPending then
+	
+		net.Start("PlayMP:PlayerIsReady")
+		net.SendToServer()
+		
+		PlayMP.PlayerHTML:QueueJavascript([[player.pauseVideo();]])
+		
+	end
+	
+end
+
+function PlayMP:StartMedia()
+
+	PlayMP.isPending = false
+	if PlayMP.Already_VideoTimeThink == false then
+		PlayMP:VideoTimeThink()
+		PlayMP.VideoStartTime = CurTime()
+	else
+
+	end
+	hook.Remove( "Think", "PendingPlayMP")
+
+	PlayMP.PlayerHTML:QueueJavascript([[player.playVideo();]])
+	PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. PlayMP.GetPlayerVolume() .. [[)]])
 	
 end
 
@@ -602,6 +646,7 @@ function PlayMP:StopMusic()
 	if PlayMP.PlayerMode != nil and PlayMP.PlayerMode == "worldScr" then
 		PlayMP.isPlaying = false
 		PlayMP.WorldPlayerHTML:OpenURL("https://minbird.github.io/html/app/player.html")
+		PlayMP.Already_VideoTimeThink = false
 		hook.Remove( "Think", "PMP Video Time Think")
 		return
 	end
@@ -612,6 +657,8 @@ function PlayMP:StopMusic()
 	if PlayMP.PlayerMainPanel != nil then
 		PlayMP.PlayerMainPanel:Remove()
 	end
+	
+	PlayMP.Already_VideoTimeThink = false
 	hook.Remove( "Think", "PMP Video Time Think")
 	
 	PlayMP.isPlaying = false
@@ -629,18 +676,29 @@ if PlayMP.PlayerMode != nil and PlayMP.PlayerMode == "worldScr" then
 					return 
 				end
 				if state != st then
-				
+					
 					local stns = {}
-					stns[1] = "시작되지 않음"
+					stns[1] = PlayMP:Str( "PS_unstarted" )
 					stns[2] = PlayMP:Str( "Prepare_Play" )
 					stns[3] = PlayMP:Str( "Now_Playing" )
-					stns[4] = "일시중지"
-					stns[5] = "버퍼링"
+					stns[4] = PlayMP:Str( "PS_paused" )
+					stns[5] = PlayMP:Str( "PS_buffering" )
 					stns[6] = "???"
-					stns[7] = "동영상 신호"
+					stns[7] = PlayMP:Str( "PS_videoCued" )
 					
 					state = st
 					PlayMP:ChangeNowPlayingText(stns[tonumber(st)+2])
+					
+					PlayMP.PlayerStatus = tonumber(st)+2
+					
+					if PlayMP.PlayerStatus == 3 then
+						if PlayMP.isPending then
+							PlayMP:PlayerIsReady()
+						else
+							PlayMP:StartMedia()
+						end
+					end
+					
 				end
 			end)
 			
@@ -684,6 +742,7 @@ PlayMP.PlayerHTML:SetHTML("")
 local setError = PlayMP:GetSetting( "SyncMediaAndPlayer", false, true)
 
 local state
+PlayMP.PlayerStatus = 2
 
 PlayMP.PlayerHTML:AddFunction("PlayMP", "PlayState", function( st )
 	if st == nil then 
@@ -692,16 +751,24 @@ PlayMP.PlayerHTML:AddFunction("PlayMP", "PlayState", function( st )
 	if state != st then
 	
 		local stns = {}
-		stns[1] = "시작되지 않음"
+		stns[1] = PlayMP:Str( "PS_unstarted" )
 		stns[2] = PlayMP:Str( "Prepare_Play" )
 		stns[3] = PlayMP:Str( "Now_Playing" )
-		stns[4] = "일시중지"
-		stns[5] = "버퍼링"
+		stns[4] = PlayMP:Str( "PS_paused" )
+		stns[5] = PlayMP:Str( "PS_buffering" )
 		stns[6] = "???"
-		stns[7] = "동영상 신호"
+		stns[7] = PlayMP:Str( "PS_videoCued" )
 		
 		state = st
 		PlayMP:ChangeNowPlayingText(stns[tonumber(st)+2])
+		PlayMP.PlayerStatus = tonumber(st)+2
+		if PlayMP.PlayerStatus == 3 then
+			if PlayMP.isPending then
+				PlayMP:PlayerIsReady()
+			else
+				PlayMP:StartMedia()
+			end
+		end
 	end
 end)
 
@@ -758,25 +825,39 @@ function PlayMP:EditMainPlayer()
 
 	hook.Remove("HUDPaint", "PlaymusicP_MainMenu")
 	hook.Remove("Tick", "DoNoticeToPlayerOnMenu")
-	PlayMP.MenuWindowPanel:Clear()
-	PlayMP.MainMenuPanel:Remove()
-	PlayMP.MainMenuPanel:Close()
-	PlayMP.MainMenuPanel = nil
+	PlayMP.MainMenuPanel:AlphaTo(0,0.1,0, function()
+		PlayMP.MenuWindowPanel:Clear()
+		PlayMP.MainMenuPanel:Remove()
+		PlayMP.MainMenuPanel:Close()
+		PlayMP.MainMenuPanel = nil
+	end)
 	
-	if PlayMP.PlayerMainPanel != nil then
-		PlayMP.PlayerHTML:Remove()
-		PlayMP.PlayerMainPanel:Remove()
+	if PlayMP.PlayerMainPanel != nil and PlayMP.PlayerMainPanel:Valid() then
+		PlayMP.PlayerMainPanel:SetAlpha(0)
+		PlayMP.PlayerMainPanel:SetMouseInputEnabled(false)
+	end 
+	
+	local vv = PlayMP:GetSetting( "MainPlayerData", false, true)
+	
+	local editPanel = vgui.Create( "DFrame" )
+	editPanel:SetMouseInputEnabled(true)
+	editPanel:SetPaintedManually(false)
+	editPanel:SetSizable( true )
+	editPanel:SetPos( vv.X, vv.Y )
+	editPanel:SetSize( vv.W, vv.H )
+	if vv.H < 144 then
+		editPanel:SetSize( 256, 144 )
 	end
+	editPanel.Paint = function( self, w, h ) draw.RoundedBox( 5, 0, 0, w, h, Color( 0, 0, 0, 230 ) ) end
+	editPanel:ShowCloseButton( false )
+	editPanel:MakePopup()
+	editPanel:SetAlpha(0)
+	editPanel:AlphaTo(255,0.3,0)
 	
-	PlayMP:LoadPlayer( true )
-	
-	local w, h = PlayMP.PlayerMainPanel:GetSize()
-	
-	PlayMP.PlayerMainPanel:MakePopup()
-	PlayMP.PlayerMainPanel:SetMouseInputEnabled(true)
-	PlayMP.PlayerMainPanel:SetPaintedManually(false)
-	PlayMP.PlayerHTML:SetPaintedManually(false)
-	PlayMP.PlayerHTML:SetPos( 0, 150 )
+	local editPanelPanel = vgui.Create( "DPanel", editPanel )
+	editPanelPanel:SetBackgroundColor(Color(0,0,0,0))
+	editPanelPanel:SetSize(vv.W, 30)
+	editPanelPanel:SetPos(20, vv.H/2-50)
 	
 	--[[local panelSizeBut = vgui.Create( "DPanel" )
 	panelSizeBut:SetSize( 30, 30 )
@@ -793,22 +874,102 @@ function PlayMP:EditMainPlayer()
 	end]]
 	
 	
-	local window = vgui.Create( "DFrame" )
+	--[[local window = vgui.Create( "DFrame" )
 	window:SetSize( 600, 140 )
 	window:Center()
 	window.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 100 ) ) end
 	window:SetMouseInputEnabled(true)
 	window:ShowCloseButton( false )
-	window:MakePopup()
+	window:MakePopup()]]
 	
 	local wW, hH
 	local xX, yY
-	local x, y = PlayMP.PlayerMainPanel:GetPos()
+	local x, y = editPanel:GetPos()
 	
-	window.Think = function( self )
+	local label = vgui.Create( "DLabel", editPanelPanel )
+		label:SetPos( editPanel:GetWide() * 0.5, 15 )
+		label:SetSize( editPanel:GetWide()-x, editPanel:GetTall()-y )
 		
-		w, h = PlayMP.PlayerMainPanel:GetSize()
-		x, y = PlayMP.PlayerMainPanel:GetPos()
+		surface.SetFont( "Default_PlaymusicPro_Font" )
+		local w, h = surface.GetTextSize( PlayMP:Str( "Edit_PlyMainPanel_Explain" ) )
+	
+		local center = editPanel:GetWide()/2
+		label:SetPos( center-w/2,0 )
+		label:SetSize( w, editPanel:GetTall() )
+	
+		
+		label:SetFont( "Default_PlaymusicPro_Font" )
+		label:SetColor( Color( 255, 255, 255 ) )
+		label:SetText( PlayMP:Str( "Edit_PlyMainPanel_Explain" ) )
+		label:SetWrap( true )
+		
+	local actionbutton = PlayMP:AddActionButton( editPanelPanel, PlayMP:Str( "Apply" ), Color(231, 76, 47), editPanelPanel:GetWide() * 0.5 -50, 80, 100, 30, function()
+		
+			local x, y = editPanel:GetPos()
+			local w, h = editPanel:GetSize()
+			
+			if w > h then
+				h = (w / 16) * 9
+			else
+				w = (h / 9) * 16
+			end
+			
+			PlayMP:ChangeSetting( "MainPlayerData", {
+					X=x,
+					Y=y,
+					W=w,
+					H=h
+				} 
+			)
+			
+			if PlayMP:GetSetting( "디버그모드", false, true) then
+				chat.AddText("w:" .. w .. " h:" .. h .. " x:" .. x .. " y:" .. y)
+			end
+		
+		hook.Remove("Think", "editPanel.Think.PMPRO")
+		
+		editPanel:Close()
+		
+		if PlayMP.PlayerMainPanel != nil then
+			PlayMP.PlayerHTML:Remove()
+			PlayMP.PlayerMainPanel:Remove()
+		end -- 이걸 수정하고 나서 하게 할까?
+		
+		PlayMP:CreatFrame( "Playmusic Pro", "PlaymusicP_MainMenu" )
+		PlayMP:MainMenu()
+		PlayMP:ChangeMenuWindow( "ClientOptions" )
+		
+		if PlayMP.isPlaying then
+			PlayMP:LoadPlayer()
+			for k, v in pairs( PlayMP.CurVideoInfo ) do
+				if v["QueueNum"] == PlayMP.CurPlayNum then
+					local vol = 0
+					if PlayMP.PlayerIsMuted then vol = 0 else vol = PlayMP.GetPlayerVolume() end
+					PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. v.Uri .. "?Vol=" .. vol .. "?Seek=" .. PlayMP.CurPlayTime + v.startTime )
+					if PlayMP:GetSetting( "FMem", false, true) then
+						PlayMP.PlayerHTML:QueueJavascript([[player.setPlaybackQuality( "small" );]])
+					end
+				end
+			end
+		end
+		
+	end)
+	
+	local w
+	local h
+	local x
+	local y
+	
+	editPanel.Print = function( self, ww, hh )
+	
+		draw.RoundedBox( 5, 0, 0, ww, hh, Color( 0, 0, 0, 230 ) )
+	
+	end
+	
+	hook.Add("Think", "editPanel.Think.PMPRO", function()
+		
+		w, h = editPanel:GetSize()
+		x, y = editPanel:GetPos()
 		
 		if w > h then
 			h = (w / 16) * 9
@@ -818,28 +979,33 @@ function PlayMP:EditMainPlayer()
 		
 		if x < 0 then
 			x = 0
-		elseif x + PlayMP.PlayerMainPanel:GetWide() > ScrW() then
-			x = ScrW() - PlayMP.PlayerMainPanel:GetWide()
+		elseif x + editPanel:GetWide() > ScrW() then
+			x = ScrW() - editPanel:GetWide()
 		elseif y < 0 then
 			y = 0
-		elseif y + PlayMP.PlayerMainPanel:GetTall() > ScrH() then
-			y = ScrH() - PlayMP.PlayerMainPanel:GetTall()
+		elseif y + editPanel:GetTall() > ScrH() then
+			y = ScrH() - editPanel:GetTall()
 		end
 		
 		
 		
-		if w < 73 then
-			w = 128
-			h = 72
+		if h < 144 then
+			w = 256
+			h = 144
 		end
 		
-		--if w!=wW or h!=hH then
-			PlayMP.PlayerMainPanel:SetSize( w, h )
-		--elseif x!=xX or y!=yY then
-			PlayMP.PlayerMainPanel:SetPos( x, y )
-		--end
+		editPanel:SetSize( w, h )
+		editPanel:SetPos( x, y )
 		
-		self:MoveToFront()
+		editPanelPanel:SetSize(w, 80)
+		editPanelPanel:SetPos(0, h/2-40)
+		
+		surface.SetFont( "Default_PlaymusicPro_Font" )
+		local sw, sh = surface.GetTextSize( PlayMP:Str( "Edit_PlyMainPanel_Explain" ) )
+		
+		label:SetPos( w/2-sw/2,30 )
+		label:SetSize( sw, editPanelPanel:GetTall() )
+		actionbutton:SetPos( w/2-50, editPanelPanel:GetTall()/2 - 15 )
 		
 		--[[draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 100 ) )
 		
@@ -865,54 +1031,11 @@ function PlayMP:EditMainPlayer()
 			return
 		end]]
 		
-	end
-	
-	PlayMP:AddTextBox( PlayMP.PlayerMainPanel, 40, TOP, PlayMP:Str( "Edit_PlyMainPanel_Explain" ), PlayMP.PlayerMainPanel:GetWide() * 0.5, 15, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_CENTER, function(self, w, h) 
-	
 	end)
-	PlayMP:AddTextBox( window, 40, TOP, PlayMP:Str( "Edit_PlyMainPanel_Explain2" ), window:GetWide() * 0.5, 15, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-	PlayMP:AddActionButton( window, PlayMP:Str( "Apply" ), Color(231, 76, 47), window:GetWide() * 0.5 -50, 80, 100, 30, function()
-		
-			local x, y = PlayMP.PlayerMainPanel:GetPos()
-			local w, h = PlayMP.PlayerMainPanel:GetSize()
-			
-			if w > h then
-				h = (w / 16) * 9
-			else
-				w = (h / 9) * 16
-			end
-			
-			PlayMP:ChangeSetting( "MainPlayerData", {
-					X=x,
-					Y=y,
-					W=w,
-					H=h
-				} 
-			)
-			
-			if PlayMP:GetSetting( "디버그모드", false, true) then
-				chat.AddText("w:" .. w .. " h:" .. h .. " x:" .. x .. " y:" .. y)
-			end
-
-		PlayMP.PlayerHTML:Remove()
-		PlayMP.PlayerMainPanel:Close()
-		window:Close()
-		
-		if PlayMP.isPlaying then
-			PlayMP:LoadPlayer()
-			for k, v in pairs( PlayMP.CurVideoInfo ) do
-				if v["QueueNum"] == PlayMP.CurPlayNum then
-					local vol = 0
-					if PlayMP.PlayerIsMuted then vol = 0 else vol = PlayMP.GetPlayerVolume() end
-					PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. v.Uri .. "?Vol=" .. vol .. "?Seek=" .. PlayMP.CurPlayTime + v.startTime )
-					if PlayMP:GetSetting( "FMem", false, true) then
-						PlayMP.PlayerHTML:QueueJavascript([[player.setPlaybackQuality( "small" );]])
-					end
-				end
-			end
-		end
-		
-	end)
+	
+	--PlayMP:AddTextBox( editPanel, 40, TOP, PlayMP:Str( "Edit_PlyMainPanel_Explain" ), editPanel:GetWide() * 0.5, 15, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_CENTER, function(self, w, h) 
+	
+	--PlayMP:AddTextBox( editPanel, 40, TOP, PlayMP:Str( "Edit_PlyMainPanel_Explain2" ), window:GetWide() * 0.5, 15, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_CENTER )
 	
 end
 
@@ -965,7 +1088,10 @@ function PlayMP:SkipMusic()
 	
 end
 
+PlayMP.Already_VideoTimeThink = false
 function PlayMP:VideoTimeThink()
+
+	PlayMP.Already_VideoTimeThink = true
 
 	for k, v in pairs( PlayMP.CurVideoInfo ) do
 		if v["QueueNum"] == PlayMP.CurPlayNum then
@@ -1615,7 +1741,8 @@ function PlayMP:ReceiveMusicDataAndPlay( num, curvinfo, time )
 			--PlayMP:ShowNotchInfoPanel( true, v["Title"] )
 
 			if time then
-				PlayMP:PlayMusic( v["Uri"], time, v.endTime )
+				PlayMP:PlayMusic( v["Uri"], time, v.endTime, true )
+				PlayMP:VideoTimeThink()
 				PlayMP.timeError = time
 			else
 				PlayMP:PlayMusic( v["Uri"], v.startTime, v.endTime )
@@ -1781,9 +1908,8 @@ local function changePlayMode( mode )
 		end
 	end
 	
-	PlayMP:LoadPlayer()
-	
 	if PlayMP.isPlaying then
+		PlayMP:LoadPlayer()
 		for k, v in pairs( PlayMP.CurVideoInfo ) do
 			if v["QueueNum"] == PlayMP.CurPlayNum then
 				local vol = 0
@@ -1798,6 +1924,7 @@ local function changePlayMode( mode )
 	else
 	
 		PlayMP.WorldPlayerHTML:OpenURL("https://minbird.github.io/html/app/player.html")
+		PlayMP.ChangeStrOnWorldVideoViewer(PlayMP:Str( "Enable_The_Player" ))
 		
 	end
 	
@@ -1869,9 +1996,6 @@ net.Receive( "PlayMP:ChangePlayerMode", function( len, ply )
 end)
 
 function PlayMP:ChangePlayerMode( mode, panel )
-
-
-	chat.AddText(PlayMP:Str( "Changed_PlayMode" ))
 	
 	if mode == "nomal" then
 		chat.AddText(PlayMP:Str( "PMod_Now_NomalMode" ))
@@ -1942,6 +2066,10 @@ net.Receive( "PlayMP:GetUserInfoBySID2", function( len, ply )
 				return
 			end
 		end)
+		
+net.Receive( "PlayMP:StartMedia", function( len, ply )
+	PlayMP:StartMedia()
+end)
 
 net.Start("player_connect_PlayMP:Playmusic")
 net.SendToServer()

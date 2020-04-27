@@ -211,6 +211,14 @@ end
 				f.Notion(true)
 			end
 		end
+		
+		if uniqueName == "notice" then
+			local readNoticeCount = PlayMP:GetSetting( "NoticeReadCount", false, true )
+			if not isnumber(readNoticeCount) then readNoticeCount = 0 end
+			if tonumber(PlayMP.noticecountOnInternet) > tonumber(readNoticeCount) then
+				f.Notion(true)
+			end
+		end
 	end
 
 	function PlayMP:AddOptionToPanel( name, uniqueName, image, func )
@@ -428,6 +436,13 @@ end
 			end
 			
 			local buttonPanelW = buttonPanel:GetWide() * 0.5
+			
+			buttonPanel.OnCursorExited = function( self, w, h )
+				buttonPanel:AlphaTo(255,0.1)
+			end
+			buttonPanel.OnCursorEntered = function( self, w, h )
+				buttonPanel:AlphaTo(50,0.1)
+			end
 					
 			buttonPanel.Paint = function( self, w, h )
 				
@@ -1030,7 +1045,11 @@ end
 		local Button_Vol = vgui.Create( "DImageButton", PlayMP.volPanel )
 		Button_Vol:SetPos( 10, 12 )
 		Button_Vol:SetSize( 30, 30 )
-		Button_Vol:SetImage( "vgui/playmusic_pro/vol1" )
+		if PlayMP.PlayerIsMuted then
+			Button_Vol:SetImage( "vgui/playmusic_pro/mute.png" )
+		else
+			Button_Vol:SetImage( "vgui/playmusic_pro/vol1" )
+		end
 		Button_Vol.DoClick = function()
 			if PlayMP.PlayerHTML then
 				if not PlayMP:isMuted() then
@@ -1161,12 +1180,14 @@ end
 		remaintime.Think = function()
 			if math.Round(PlayMP.CurVideoLength - PlayMP.CurPlayTime) != remaintimetime then
 				remaintimetime = math.Round( PlayMP.CurVideoLength - PlayMP.CurPlayTime )
-				local Strtime = string.ToMinutesSeconds(remaintimetime)
-				remaintime:SetText( Strtime )
-				surface.SetFont( "Default_PlaymusicPro_Font" )
-				local w, h = surface.GetTextSize( Strtime )
-				remaintime:SetSize( w, h )
-				remaintime:SetPos( seektoMainX + seektoMainW + 10, seektoMainY + (seektoMainH/2) - (h/2))
+				if remaintimetime >= 0 then
+					local Strtime = string.ToMinutesSeconds(remaintimetime)
+					remaintime:SetText( Strtime )
+					surface.SetFont( "Default_PlaymusicPro_Font" )
+					local w, h = surface.GetTextSize( Strtime )
+					remaintime:SetSize( w, h )
+					remaintime:SetPos( seektoMainX + seektoMainW + 10, seektoMainY + (seektoMainH/2) - (h/2))
+				end
 			end
 		end
 		
@@ -1562,10 +1583,13 @@ function PlayMP:DoNoticeToPlayer( text, color, type )
 					PlayMP.NotchInfoPanel_PlayerVideoImage:SetAlpha(0)
 					PlayMP.NotchInfoPanel:AlphaTo( 0, 1 )
 					PlayMP.NotchInfoPanel:MoveTo( ScrW() * 0.5 - ScrW() * 0.2, 0, 1, 0, -1, function() 
-						NotichLable:Clear()
-						NoticePanel:Clear()
 					end)
 				end
+				
+				NotichLable:Clear()
+				NoticePanel:Clear()
+				NotichLable:Remove()
+				NoticePanel:Remove()
 				
 			end) 
 		end)

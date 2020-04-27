@@ -53,7 +53,7 @@ PlayMP:AddOption( "장르별 추천", "home", "", function( DScrollPanel )
 									for k, v in pairs(json.items) do
 										--v.contentDetails.videoId
 										
-										http.Fetch("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" .. v.contentDetails.videoId .. "&key=AIzaSyBek-uYZyjZfn2uyHwsSQD7fyKIRCeXifU", function(data,code,headers)
+										http.Fetch("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" .. v.contentDetails.videoId .. "&key=AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0", function(data,code,headers)
 											local strJson = data
 											local json = util.JSONToTable(strJson)
 											
@@ -147,7 +147,7 @@ PlayMP:AddOption( "장르별 추천", "home", "", function( DScrollPanel )
 		for k, v in pairs(tabledata.items) do
 										--v.contentDetails.videoId
 										
-			http.Fetch("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" .. v.contentDetails.videoId .. "&key=AIzaSyBek-uYZyjZfn2uyHwsSQD7fyKIRCeXifU", function(data,code,headers)
+			http.Fetch("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" .. v.contentDetails.videoId .. "&key=AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0", function(data,code,headers)
 			local strJson = data
 			json = util.JSONToTable(strJson)
 											
@@ -202,7 +202,7 @@ PlayMP:AddOption( "장르별 추천", "home", "", function( DScrollPanel )
 
 					PlayMP:AddActionButton( nextPageTokenPanel, "+ 항목 더보기", Color( 60, 60, 60, 255 ), nextPageTokenPanel:GetWide() * 0.5 - 70, 10, 140, 30, function()
 								nextPageTokenPanel:Clear()
-								http.Fetch("https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=10&playlistId=" .. vt .. "&key=AIzaSyBek-uYZyjZfn2uyHwsSQD7fyKIRCeXifU&pageToken=" .. tabledata["nextPageToken"], function(data,code,headers) -- 정보를 가져오기
+								http.Fetch("https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=10&playlistId=" .. vt .. "&key=AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0&pageToken=" .. tabledata["nextPageToken"], function(data,code,headers) -- 정보를 가져오기
 									local strJson = data
 									json = util.JSONToTable(strJson)
 									if json == nil then return end
@@ -228,7 +228,7 @@ PlayMP:AddOption( "장르별 추천", "home", "", function( DScrollPanel )
 	
 	
 
-	http.Fetch("https://www.googleapis.com/youtube/v3/channelSections?channelId=UC-9-kyTW8ZkZNDHQJ6FgpwQ&part=contentDetails,localizations&key=AIzaSyBek-uYZyjZfn2uyHwsSQD7fyKIRCeXifU", function(data,code,headers) -- 정보를 가져오기
+	http.Fetch("https://www.googleapis.com/youtube/v3/channelSections?channelId=UC-9-kyTW8ZkZNDHQJ6FgpwQ&part=contentDetails,localizations&key=AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0", function(data,code,headers) -- 정보를 가져오기
 		local strJson = data
 		local json = util.JSONToTable(strJson)
 		PlayMP.Home_Data.sections = json.items
@@ -291,7 +291,7 @@ PlayMP:AddOption( "장르별 추천", "home", "", function( DScrollPanel )
 					
 						--if PlayMP.Home_Data.playlistItems != nil then return end
 					
-						http.Fetch("https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=10&playlistId=" .. tostring(v["contentDetails"]["playlists"][1]) .. "&key=AIzaSyBek-uYZyjZfn2uyHwsSQD7fyKIRCeXifU", function(data,code,headers)
+						http.Fetch("https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=10&playlistId=" .. tostring(v["contentDetails"]["playlists"][1]) .. "&key=AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0", function(data,code,headers)
 						
 							local strJson = data
 							local json = util.JSONToTable(strJson)
@@ -303,7 +303,7 @@ PlayMP:AddOption( "장르별 추천", "home", "", function( DScrollPanel )
 								return
 							end
 							
-							http.Fetch("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" .. json.items[1]["contentDetails"]["videoId"] .. "&key=AIzaSyBek-uYZyjZfn2uyHwsSQD7fyKIRCeXifU", function(data,code,headers)
+							http.Fetch("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" .. json.items[1]["contentDetails"]["videoId"] .. "&key=AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0", function(data,code,headers)
 								local strJson = data
 								local json = util.JSONToTable(strJson)
 											

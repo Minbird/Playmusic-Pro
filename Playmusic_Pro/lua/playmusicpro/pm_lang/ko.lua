@@ -171,7 +171,7 @@ lang.AdminSet_UserDefaultSet6 = "서버에 저장된 캐시를 삭제합니다."
 lang.AdminSet_UserDefaultSet7 = "관리자만 Playmusic Pro 사용 가능"
 lang.RemoveCache = "캐시 삭제"
 lang.Cache = "캐시"
-lang.Cache_Ex = "Playmusic Pro는 재생했던 미디어 정보를 저장, 다음에 다시 재생할 때 이용하여 서버의 네트워크와 API 요청을 절약할 수 있습니다.\nPlaymusic Pro가 지금 %s개의 미디어 정보를 저장했고, 서버의 저장 공간 중 약 %sKB 사용 중입니다."
+lang.Cache_Ex = "Playmusic Pro는 재생했던 미디어 정보를 저장, 다음에 다시 재생할 때 이용하여 서버의 네트워크와 API 요청을 절약할 수 있습니다.\nPlaymusic Pro가 지금 %s개의 미디어 정보를 저장했습니다." -- 서버의 저장 공간 중 약 %sKB 사용 중입니다.
 lang.QeeueMedia_Plyst = "대기열에 등록하기 - 재생목록"
 lang.DoYouWantQeeueThisPlyst = "위 재생목록을 대기열에 추가하겠습니까?"
 lang.QeeueMedia = "대기열에 등록하기"
@@ -228,3 +228,8 @@ lang.CSet_VolChangeWhenPlayerStartVChatOri = "음성 채팅 사용 시 미디어
 lang.CSet_VolChangeWhenPlayerStartVChat = "음성 채팅 사용 시 미디어의 볼륨을 %s 배로 줄입니다."
 lang.CSet_MuteWhenPlayerStartVChat = "음성 채팅 사용 시 미디어를 음소거합니다."
 lang.CSet_NoVolChangeWhenPlayerStartVChat = "사람들이 말을 하든지 말든지 저는 노래나 듣습니다."
+
+lang.PS_unstarted = "시작되지 않음"
+lang.PS_paused = "일시중지"
+lang.PS_buffering = "버퍼링"
+lang.PS_videoCued = "동영상 신호"

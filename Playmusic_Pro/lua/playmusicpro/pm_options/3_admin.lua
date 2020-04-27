@@ -387,7 +387,7 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 			net.Receive( "PlayMP:GetCacheSize", function( len, ply )
 				
 				local data = net.ReadTable()
-				PlayMP:AddTextBox( DScrollPanel, 80, TOP, PlayMP:Str( "Cache_Ex", data.f, math.Round(data.s / 1024, 2) ), 30, 0, "Default_PlaymusicPro_Font", Color(255,255,255), Color(40, 40, 40, 0), TEXT_ALIGN_LEFT )
+				PlayMP:AddTextBox( DScrollPanel, 80, TOP, PlayMP:Str( "Cache_Ex", data.f ), 30, 0, "Default_PlaymusicPro_Font", Color(255,255,255), Color(40, 40, 40, 0), TEXT_ALIGN_LEFT ) --  math.Round(data.s / 1024, 2)
 				--label:SetText("Playmusic Pro는 재생했던 미디어 정보를 저장, 다음에 다시 재생할 때 이용하여 서버의 네트워크와 API 요청을 절약할 수 있습니다.\nPlaymusic Pro가 지금 " .. data.f .. "개의 미디어 정보를 저장했고, 서버의 저장 공간 중 약 " .. math.Round(data.s / 1024, 2) .. " KB 사용 중입니다.")
 			end)
 			

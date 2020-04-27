@@ -40,6 +40,7 @@ if PlayMP then -- 초기화
 	if SERVER then
 		PrintMessage( HUD_PRINTTALK, "[Playmusic Pro] 플레이 뮤직 프로가 초기화되었습니다." )
 	end
+	
 
 end
 
@@ -48,8 +49,8 @@ PlayMP = {}
 PlayMP.CurSystemVersion = {}
 PlayMP.CurSystemVersion.isBeta = true
 PlayMP.CurSystemVersion.ResetOptionAnytime = false
-PlayMP.CurSystemVersion.Ver = "2.0.0 - 12 (beta)"
-PlayMP.CurSystemVersion.VerE = "0.21"
+PlayMP.CurSystemVersion.Ver = "2.0.0 - 14 (beta)"
+PlayMP.CurSystemVersion.VerE = "0.23"
 PlayMP.NewerVer = "unknown"
 PlayMP.NewerVerE = 0
 PlayMP.SysStartTime = CurTime()
@@ -75,10 +76,12 @@ AddCSLuaFile("playmusicpro/shared.lua")
 include( "playmusicpro/shared.lua" )
 
 print("[PlayM Pro] Loading Entities...")
-print("[PlayM Pro] Try add Client side File: entities/tv.lua")
-AddCSLuaFile("entities/tv.lua")
-print("[PlayM Pro] Try add Client side File: entities/billboard.lua")
-AddCSLuaFile("entities/billboard.lua")
+print("[PlayM Pro] Try add Client side File: entities/tv_pm.lua")
+AddCSLuaFile("entities/tv_pm.lua")
+print("[PlayM Pro] Try add Client side File: entities/billboard_pm.lua")
+AddCSLuaFile("entities/billboard_pm.lua")
+print("[PlayM Pro] Try add Client side File: entities/fence002d_pm.lua")
+AddCSLuaFile("entities/fence002d_pm.lua")
 
 print("[PlayM Pro] Loading Language Files...")
 local folder = "playmusicpro/pm_lang/"
@@ -87,7 +90,6 @@ for _, file in ipairs( files ) do
 	print("[PlayM Pro] Try add Client side Language File: " .. file)
 	AddCSLuaFile( folder .. "/" .. file )
 end
-
 
 print("[PlayM Pro] Loading Options Files...")
 local folder = "playmusicpro/pm_options/"
@@ -115,17 +117,25 @@ timer.Simple( 1, function()
 		print("[PlayM Pro] Server side system is loading...")
 		print("[PlayM Pro] Loading Init...")
 		include("playmusicpro/init.lua")
-		resource.AddSingleFile( "vgui/Playmusic_Pro/Search.vmt" )
-		resource.AddSingleFile( "vgui/Playmusic_Pro/vol1.vmt" )
-		resource.AddSingleFile( "vgui/Playmusic_Pro/vol2.vmt" )
-		resource.AddSingleFile( "vgui/Playmusic_Pro/vol3.vmt" )
-		resource.AddSingleFile( "vgui/Playmusic_Pro/vol4.vmt" )
-		resource.AddSingleFile( "vgui/Playmusic_Pro/11.png" )
-		resource.AddSingleFile( "vgui/Playmusic_Pro/22.png" )
-		resource.AddSingleFile( "vgui/Playmusic_Pro/33.png" )
-		resource.AddSingleFile( "vgui/Playmusic_Pro/44.png" )
-		resource.AddSingleFile( "vgui/Playmusic_Pro/55.png" )
-		resource.AddSingleFile( "vgui/Playmusic_Pro/mute.png" )
+		resource.AddFile( "materials/vgui/Playmusic_Pro/Search.vmt" )
+		resource.AddFile( "materials/vgui/Playmusic_Pro/vol1.vmt" )
+		resource.AddFile( "materials/vgui/Playmusic_Pro/vol2.vmt" )
+		resource.AddFile( "materials/vgui/Playmusic_Pro/vol3.vmt" )
+		resource.AddFile( "materials/vgui/Playmusic_Pro/vol4.vmt" )
+		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/11.png" )
+		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/22.png" )
+		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/33.png" )
+		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/44.png" )
+		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/55.png" )
+		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/mute.png" )
+		resource.AddFile( "materials/vgui/Playmusic_Pro/Search.vmt" )
+		
+		resource.AddFile( "materials/vgui/entities/billboard_pm.vmt" )
+		resource.AddFile( "materials/vgui/entities/fence002d_pm.vmt" )
+		resource.AddFile( "materials/vgui/entities/tv_pm.vmt" )
+		resource.AddFile( "materials/vgui/entities/billboard_pm.png" )
+		resource.AddFile( "materials/vgui/entities/fence002d_pm.png" )
+		resource.AddFile( "materials/vgui/entities/tv_pm.png" )
 		
 		resource.AddWorkshop( "1909043673" ) -- missing texture...
 		
