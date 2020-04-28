@@ -424,6 +424,7 @@ end
 			buttonPanel:SetSize( sizeW, sizeT )	
 			buttonPanel:SetFont("ButtonDefault_PlaymusicPro_Font")
 			buttonPanel:SetColor(Color( 255, 255, 255, 255 ))
+			buttonPanel.ButtonTextColor = Color( 255, 255, 255, 255 )
 			
 			local font = "ButtonDefault_PlaymusicPro_Font"
 			surface.SetFont( font )
@@ -456,7 +457,7 @@ end
 					buttonPanelW = buttonPanelW - 50 / PlayMP.CurFrameTime
 				end
 				
-				draw.DrawText( name, "ButtonDefault_PlaymusicPro_Font", buttonPanelW, 6, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER )
+				draw.DrawText( name, "ButtonDefault_PlaymusicPro_Font", buttonPanelW, 6, buttonPanel.ButtonTextColor, TEXT_ALIGN_CENTER )
 				
 			end
 			
@@ -600,7 +601,7 @@ end
 
 	
 	
-	function PlayMP:AddTextBox( panel, tall, dock, text, x, y, font, color, boxColor, align, func )
+	function PlayMP:AddTextBox( panel, tall, dock, text, x, y, font, color, boxColor, align, func, returnAllPanel )
 		
 		local align = align
 		
@@ -1045,11 +1046,6 @@ end
 		local Button_Vol = vgui.Create( "DImageButton", PlayMP.volPanel )
 		Button_Vol:SetPos( 10, 12 )
 		Button_Vol:SetSize( 30, 30 )
-		if PlayMP.PlayerIsMuted then
-			Button_Vol:SetImage( "vgui/playmusic_pro/mute.png" )
-		else
-			Button_Vol:SetImage( "vgui/playmusic_pro/vol1" )
-		end
 		Button_Vol.DoClick = function()
 			if PlayMP.PlayerHTML then
 				if not PlayMP:isMuted() then
@@ -1088,6 +1084,10 @@ end
 			Button_Vol:SetImage( "vgui/playmusic_pro/vol3" )
 		elseif VolumeSlider:GetValue() == 0 or VolumeSlider:GetValue() <= 10 then
 			Button_Vol:SetImage( "vgui/playmusic_pro/vol4" )
+		end
+		
+		if PlayMP.PlayerIsMuted then
+			Button_Vol:SetImage( "vgui/playmusic_pro/mute.png" )
 		end
 		
 		VolumeSlider.ValueChanging = function(  )
@@ -1683,7 +1683,6 @@ local loadAnima = [[
 				opacity: 0;
 			  }
 			}
-
 
 		</style>
 	</head>

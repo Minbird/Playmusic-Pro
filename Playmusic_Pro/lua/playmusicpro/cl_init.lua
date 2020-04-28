@@ -637,7 +637,11 @@ function PlayMP:StartMedia()
 	hook.Remove( "Think", "PendingPlayMP")
 
 	PlayMP.PlayerHTML:QueueJavascript([[player.playVideo();]])
-	PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. PlayMP.GetPlayerVolume() .. [[)]])
+	if PlayMP.PlayerIsMuted then
+		PlayMP.PlayerHTML:QueueJavascript([[player.mute();]])
+	else
+		PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. PlayMP.GetPlayerVolume() .. [[)]])
+	end
 	
 end
 
