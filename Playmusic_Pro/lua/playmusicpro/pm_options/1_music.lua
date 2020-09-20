@@ -1,5 +1,6 @@
 local API_KEY = "AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0"
 
+
 PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 	
 	PlayMP:AddOption( PlayMP:Str( "Options_queueList" ), "queueList", "", function( DScrollPanel )
@@ -439,15 +440,16 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 						local abD2 = PlayMP:AddActionButton( ActionButConta, "  " ..PlayMP:Str( "Info_Details" ), Color( 60, 60, 60, 255 ), abX, abY, abW, abT, function() 
 							PlayMP:OpenSubFrame( PlayMP:Str( "Info_Details" ), "상세 정보", 600, 360, function( mainPanel, scrpanel, ButtonPanel )
 							
-								PlayMP:AddTextBox( scrpanel, 30, TOP, "Title", scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
-								PlayMP:AddTextBox( scrpanel, 60, TOP, v["Title"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-								PlayMP:AddTextBox( scrpanel, 30, TOP, "Channel", scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
-								PlayMP:AddTextBox( scrpanel, 30, TOP, v["Channel"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-								PlayMP:AddTextBox( scrpanel, 30, TOP, "Real Playback Time", scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
-								PlayMP:AddTextBox( scrpanel, 30, TOP, v["Length"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-								PlayMP:AddTextBox( scrpanel, 30, TOP, "URL", scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
-								PlayMP:AddTextBox( scrpanel, 30, TOP, "https://www.youtube.com/watch?v=" .. v["Uri"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-								
+								PlayMP:AddTextBox( scrpanel, 30, TOP, "Title", scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 60, TOP, v["Title"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(200,200,200), Color(0,0,0,0), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, "Channel", 30, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, v["Channel"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(200,200,200), Color(255,255,255,10), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, "Real Playback Time", 30, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, v["Length"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(200,200,200), Color(0,0,0,0), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, "URL", 30, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, "https://www.youtube.com/watch?v=" .. v["Uri"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(200,200,200), Color(255,255,255,10), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, "Remove when finished playing", 30, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, tostring(v["removeOldMedia"]), scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(200,200,200), Color(0,0,0,0), TEXT_ALIGN_CENTER )
 								
 								PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "Close" ), Color(231, 76, 47), ButtonPanel:GetWide() - 90, 10, 80, 30, function() 
 									hook.Remove("HUDPaint", "OpenRequestQueueWindow")

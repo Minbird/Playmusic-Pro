@@ -130,6 +130,7 @@ lang.CSet_Show_InfoPanel_Always = "화면 상단에 미디어 정보 항상 표�
 lang.CSet_No_Show_InfoPanel = "화면 상단에 미디어 정보 표시 사용 안함"
 lang.CSet_Queue = "대기열"
 lang.CSet_Quick_Request = "대기열 설정 없이 바로 등록"
+lang.CSet_removeOldMedia = "내가 등록하는 미디어가 재생이 완료되면 대기열에서 자동 삭제"
 lang.CSet_PlayX01 = "PlayX에서 미디어를 재생 중이면 PlayMusic Pro 음소거"
 lang.CSet_There_Is_No_PlayX = "서버에 PlayX가 없습니다. 이 옵션을 사용할 수 없습니다."
 lang.CSet_Graphics = "그래픽"
@@ -169,6 +170,7 @@ lang.AdminSet_UserDefaultSet4 = "대기열에 있는 노래를 반복해서 재�
 lang.AdminSet_UserDefaultSet5 = "캐시를 저장합니다."
 lang.AdminSet_UserDefaultSet6 = "서버에 저장된 캐시를 삭제합니다."
 lang.AdminSet_UserDefaultSet7 = "관리자만 Playmusic Pro 사용 가능"
+lang.AdminSet_UserDefaultSet_RemoveOldMedia = "재생이 완료된 미디어는 항상 삭제"
 lang.RemoveCache = "캐시 삭제"
 lang.Cache = "캐시"
 lang.Cache_Ex = "Playmusic Pro는 재생했던 미디어 정보를 저장, 다음에 다시 재생할 때 이용하여 서버의 네트워크와 API 요청을 절약할 수 있습니다.\nPlaymusic Pro가 지금 %s개의 미디어 정보를 저장했습니다." -- 서버의 저장 공간 중 약 %sKB 사용 중입니다.
@@ -208,6 +210,8 @@ lang.SysNowInBeta = "Playmusic Pro가 지금 베타 테스트 버전입니다!"
 lang.AdminSet_DONOTshowInfoPanel = "이 서버에서는 화면 상단에 미디어 정보를 표시하지 않는 대신 채팅 사용"
 lang.AdminSet_SavedUser = "모든 플레이어"
 lang.AdminSet_OnlineUser = "온라인 플레이어"
+lang.AdminSet_UseSkipToVote = "투표로 재생 중인 미디어를 건너 뛰기 허용"
+lang.AdminSet_UseSkipToVotePer = "미디어 건너뛰기에 필요한 최소 투표 인원 비율"
 
 lang.Channel = "태그"
 lang.ThereIsNoPlaylistText = "안은 생각보다 깨끗한데?"
@@ -233,3 +237,22 @@ lang.PS_unstarted = "시작되지 않음"
 lang.PS_paused = "일시중지"
 lang.PS_buffering = "버퍼링"
 lang.PS_videoCued = "동영상 신호"
+
+lang.queueadd_removeOldQueue = "재생이 종료되면 대기열에서 자동 삭제"
+
+lang.mediaHistory = "최근에 들은 음악"
+lang.mediaHistoryIsLocal = "내가 아까 전에 어떤 노래를 들었더라?"
+lang.noMediaHistory = "제가 메모해둔 바로는, 아무 것도 없어요..."
+
+lang.Someone_want_skip_music = "%s님이 지금 재생중인 미디어 건너 뛰기를 원합니다. (%s/%s)"
+lang.skip_vote_count = "스킵 투표 "
+lang.cant_vote_when_notplaying = "재생 중이 아닐 때는 스킵 투표할 수 없습니다."
+
+lang.userDataBySteam = "%s의 현재 정보 (steam에서 가져옴.)"
+lang.lastconn = "최근 접속: %s"
+lang.NickName_2 = "현재 닉네임: %s"
+
+lang.PSec = "%s초 전에"
+lang.PMin = "%s분 전에"
+lang.PHur = "%s시간 전에"
+lang.PDay = "%s일 전에"

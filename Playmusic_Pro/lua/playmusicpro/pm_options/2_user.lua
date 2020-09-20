@@ -66,6 +66,110 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 				PlayMP:AddTextBox( DScrollPanel, 30, TOP, PlayMP:Str( "MyState_CanCtrlPlaymusic" ), 30, 0, "Default_PlaymusicPro_Font", Color(255,255,255), Color(42, 205, 114), TEXT_ALIGN_CENTER )
 			end
 			
+			PlayMP:AddTextBox( DScrollPanel, 60, TOP, PlayMP:Str( "mediaHistory" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+			PlayMP:AddTextBox( DScrollPanel, 30, TOP, PlayMP:Str( "mediaHistoryIsLocal" ), 30, -18, "Default_PlaymusicPro_Font", Color(200,200,200), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+			
+			if #PlayMP.Client_History.MediaHistory == 0 then
+				PlayMP:AddTextBox( DScrollPanel, 300, TOP, PlayMP:Str( "noMediaHistory" ), DScrollPanel:GetWide() * 0.5, 5, "BigTitle_PlaymusicPro_Font", Color(150,150,150), Color(255,255,255,0), TEXT_ALIGN_CENTER )
+			end
+			
+			for k ,v in pairs(PlayMP.Client_History.MediaHistory) do
+			
+								local VideoInfo = DScrollPanel:Add( "DPanel" )
+								VideoInfo:SetSize( DScrollPanel:GetWide(), 120 )
+								VideoInfo:Dock( TOP )
+								--[[VideoInfo.Paint = function( self, w, h )
+									surface.SetDrawColor( 60, 60, 60, 255 )
+									surface.DrawLine( 10, h - 1, w - 10, h - 1 )
+								end]]
+								VideoInfo:SetBackgroundColor( Color(40,40,40,255))
+							
+								if v.thumbnails then
+								
+									local VideoImage = vgui.Create( "HTML", VideoInfo )
+									VideoImage:SetPos( 10, 5 )
+									VideoImage:SetSize( 200, 130)
+									VideoImage:SetMouseInputEnabled(false)
+									VideoImage:SetHTML( "<img src=\"" .. v.thumbnails .. "\" width=\"160\" height=\"90\">" )
+									
+								else
+								
+									local VideoImage = DScrollPanel:Add( "DPanel" )
+									VideoImage:SetSize( 200, 130)
+									VideoImage:SetPos( 10, 5 )
+									VideoImage:SetBackgroundColor( Color(80,80,80) )
+									
+								end
+						
+								local label = vgui.Create( "DLabel", VideoInfo )
+								label:SetSize( VideoInfo:GetWide() - 300, 40 )
+								label:SetPos( 195, 3 )
+								label:SetFont( "Default_PlaymusicPro_Font" )
+								label:SetColor( Color( 230, 230, 230, 255 ) )
+								label:SetText( v.title )
+								
+								local label3 = vgui.Create( "DLabel", VideoInfo )
+								label3:SetSize( VideoInfo:GetWide() - 400, 20 )
+								label3:SetPos( 195, 40 )
+								label3:SetFont( "DermaDefault" )
+								label3:SetColor( Color( 150, 150, 150, 255 ) )
+								label3:SetText( v.channelTitle )
+								
+								local label4 = vgui.Create( "DLabel", VideoInfo )
+								label4:SetSize( VideoInfo:GetWide() - 400, 20 )
+								label4:SetPos( 195, 55 )
+								label4:SetFont( "DermaDefault" )
+								label4:SetColor( Color( 150, 150, 150, 255 ) )
+								
+								--local dateStart, dateEnd = string.find( v.snippet.publishedAt, "T" )
+								
+								local dateString = v.DateString
+								local datecur = os.time()/86400 - v.Time/86400
+								local timecur = os.time() - v.Time
+								if datecur <= 1 then
+									if timecur < 60 then
+										dateString = PlayMP:Str( "PSec", math.Round(timecur) )
+									elseif timecur > 60 and timecur < 3600 then
+										dateString = PlayMP:Str( "PMin", math.Round(timecur/60) )
+									else
+										dateString = PlayMP:Str( "PHur", math.Round(timecur/3600) )
+									end
+								elseif datecur > 1 and datecur < 31 then
+									dateString = math.Round(datecur) .. PlayMP:Str( "PDay", math.Round(datecur) )
+								end
+								
+								label4:SetText( dateString )
+								
+								VideoInfo.OnCursorEntered = function( self, w, h )
+									VideoInfo:SetBackgroundColor( Color(50,50,50,255), 0.5 )
+									label:SetColor( Color( 255, 255, 255, 255 ) )
+									--label2:SetColor( Color( 170, 170, 170, 255 ) )
+								end
+								VideoInfo.OnCursorExited = function( self, w, h )
+									VideoInfo:SetBackgroundColor( Color(40,40,40,255), 1 ) 
+									label:SetColor( Color( 230, 230, 230, 255 ) )
+									--label2:SetColor( Color( 150, 150, 150, 255 ) )
+								end
+								
+								PlayMP:AddActionButton( VideoInfo, "  " .. PlayMP:Str( "Play" ), Color( 60, 60, 60, 255 ), 190, 75, 90, 30, function() PlayMP:OpenWriteQueueInfoPanel( "https://www.youtube.com/watch?v="..v.Uri ) end, "materials/vgui/playmusic_pro/55.png")
+								
+								PlayMP:AddActionButton( VideoInfo, "  " ..PlayMP:Str( "Save_On_MyPlaylist" ), Color( 42, 205, 114, 255 ), 285, 75, 210, 30, function() 
+									local stat = PlayMP:AddLocalPlayList( {
+										Title = v.title, 
+										Channel = v.channelTitle,
+										Uri = v.Uri,
+										IsPlayList = false}
+									)
+													
+									if stat == "alreadySaved" then
+										PlayMP:Notice( PlayMP:Str( "Already_Saved_OnMyPlylist" ), Color(231, 76, 47), "warning" )
+									elseif stat == "writed" then
+										PlayMP:Notice( PlayMP:Str( "Saved_OnMyPlylist", v["Title"] ), Color(42, 205, 114), "notice" )
+									end
+									
+								end, "materials/vgui/playmusic_pro/11.png" )
+			end
+			
 			
 			
 		end)
@@ -151,6 +255,7 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 			
 			PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "CSet_Queue" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 			PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_Quick_Request" ), "Quick_Request" )
+			PlayMP:AddCheckBox( DScrollPanel, nil, PlayMP:Str( "CSet_removeOldMedia" ), "removeOldQueue" )
 			--PlayMP:AddCheckBox( DScrollPanel, "", "대기열 50개만 표시해 사용 환경 최적화", "대기열에50개만표시" )
 			
 			PlayMP:AddTextBox( DScrollPanel, 48, TOP, "PlayX", 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )

@@ -72,7 +72,7 @@ util.AddNetworkString("PlayMP:GetCacheSize")
 function PlayMP:GetCacheSize(  )
 	local files = file.Find( "playmusic_pro_cache/*.txt", "DATA" )
 	local size = 0
-	if #files > 0 then
+	--[[if #files > 0 then
 		for k, f in ipairs( files ) do
 			if f == nil then return end
 			--print(file.Size( "Playmusic_Pro_UserData/0.txt", "DATA" ))
@@ -81,7 +81,7 @@ function PlayMP:GetCacheSize(  )
 			
 		end
 		
-	end
+	end]]
 	
 	return #files, size
 	
@@ -201,6 +201,18 @@ function PlayMP:NewPlayer( ply )
 		end
 	net.Send( ply ) 
 	
+	PlayMP:PlayerDataUpdate(ply)
+	PlayMP:updateVoteCount( nil, nil )
+	
+end
+
+
+function PlayMP:PlayerDataUpdate(ply)
+	local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())
+	
+	plydata[1].lastConnectTime = os.date( "%m/%d/%y %H:%M:%S" , Timestamp )
+	PlayMP:SetUserInfoBySID(ply:SteamID(), plydata)
+	
 end
 
 
@@ -267,7 +279,8 @@ if data == nil or data == "" then
 	PlayMP:AddSetting( "SaveCache", true )
 	PlayMP:AddSetting( "AOAPMP", false )
 	PlayMP:AddSetting( "WriteLogs", true )
-	
+	PlayMP:AddSetting( "RemoveOldMedia", true )
+	PlayMP:AddSetting( "UseSkipToVote", false )
 	
 	PlayMP:AddSetting( "AdminSet_DONOTshowInfoPanel", false )
 	
@@ -296,8 +309,8 @@ end
 		local ply = net.ReadEntity()
 		local v = net.ReadTable()
 		
-		local plydata = PlayMP:GetUserInfoBySID(pl:SteamID())[1]
-		if pl:IsAdmin() or plydata.power == true then
+		local plydata = PlayMP:GetUserInfoBySID(pl:SteamID())
+		if pl:IsAdmin() or plydata[1].power == true then
 			PlayMP:ChangeSetting( v.UniName, v.Data )
 		else
 			PlayMP:NoticeForPlayer( "Unknown_Error", "red", "warning" , pl )
@@ -327,6 +340,8 @@ function PlayMP:NoticeForPlayer( str, msgtype, type, target, ... )
 		
 		if ... then
 			net.WriteTable( ... )
+		else
+			net.WriteTable( {} )
 		end
 		
 	if target then
@@ -351,7 +366,7 @@ end
 		net.Start("PlayMP:GetQueueData")
 		net.WriteTable( PlayMP.CurrentQueueInfo )
 		net.WriteString( tostring(PlayMP.CurPlayNum) )
-		local getself = net.ReadBool() 
+		--local getself = net.ReadBool() 
 		if getself then
 			net.Send(ply)
 		else
@@ -366,7 +381,7 @@ end
 	PlayMP.QueueLimitPerUser = GetConVar( "playmp_queue_user" ):GetFloat() 
 	PlayMP.TimeLimit = GetConVar( "playmp_media_time" ):GetFloat() 
 
-function PlayMP:AddQueue( url, startTime, endTime, ply )
+function PlayMP:AddQueue( url, startTime, endTime, ply, removeOldMedia )
 	
 	local uri = PlayMP:UrlProcessing( url )
 
@@ -403,8 +418,9 @@ function PlayMP:AddQueue( url, startTime, endTime, ply )
 	queue.startTime = startTime
 	queue.endTime = endTime
 	queue.Ply = ply
+	queue.removeOldMedia = removeOldMedia
 	
-	local er = PlayMP:ReadVideoInfo( uri, startTime, endTime, ply )
+	local er = PlayMP:ReadVideoInfo( uri, startTime, endTime, ply, removeOldMedia )
 		
 	--table.insert( PlayMP.CurrentQueue, queue )
 	
@@ -471,11 +487,12 @@ end
 		local endTime = net.ReadString()
 		local ply = net.ReadEntity()
 		local isPlaylist = net.ReadBool()
+		local removeOldMedia = net.ReadBool()
 		
-		local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())[1]
+		local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())
 		
-		if PlayMP:GetSetting( "AOAPMP", false, true ) and ply:IsAdmin() != true and plydata.power == false then PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) return end
-		if plydata.ban then PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) return end
+		if PlayMP:GetSetting( "AOAPMP", false, true ) and ply:IsAdmin() != true and plydata[1].power == false then PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) return end
+		if plydata[1].ban then PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) return end
 
 		--[[if PlayMP:GetSetting( "AOAQueue", false, true ) == true and ply:IsAdmin() != false and plydata.power == false then
 			PlayMP:NoticeForPlayer( "AllowOnlyAdmin_Queue", "red", "warning" )
@@ -487,10 +504,10 @@ end
 			return
 		end]]
 		
-		if PlayMP:GetSetting( "AOAQueue", false, true ) and ply:IsAdmin() != true and plydata.power == false  then
+		if PlayMP:GetSetting( "AOAQueue", false, true ) and ply:IsAdmin() != true and plydata[1].power == false  then
 			PlayMP:NoticeForPlayer( "AllowOnlyAdmin_Queue", "red", "warning" )
 			return
-		elseif plydata.qeeue == false and ply:IsAdmin() == false and plydata.power == false then
+		elseif plydata[1].qeeue == false and ply:IsAdmin() == false and plydata[1].power == false then
 			PlayMP:NoticeForPlayer( "AllowOnlyAdmin_Queue", "red", "warning" )
 			return
 		end
@@ -508,7 +525,7 @@ end
 			endTime = 0
 		end
 		
-		PlayMP:AddQueue( url, tonumber(startTime), tonumber(endTime), ply, isPlaylist )
+		PlayMP:AddQueue( url, tonumber(startTime), tonumber(endTime), ply, removeOldMedia )
 	end)
 	
 	
@@ -525,21 +542,38 @@ function PlayMP:SkipMusic( ply )
 			
 			--if PlayUser:SteamID() == ply:SteamID() then
 			
-				local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())[1]
+				local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())
+
+				if plydata[1].ban then PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) return end
 				
-				if PlayMP:GetSetting( "AOAPMP", false, true ) and ply:IsAdmin() != true and plydata.power == false then PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) return end
-				if plydata.ban then PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) return end
+				if PlayMP:GetSetting( "UseSkipToVote", false, true ) then
+					PlayMP:VoteSkipMusic(ply)
+					return
+				end
+				
+				if PlayMP:GetSetting( "AOAPMP", false, true ) and ply:IsAdmin() != true and plydata[1].power == false then 
+					PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) 
+					return 
+				end
 			
 				if ply:IsAdmin() then
 					timer.Simple(1, function()
-						PlayMP:EndMusic()
+						if PlayMP:GetSetting( "RemoveOldMedia", false, true ) or tobool(PlayMP.CurrentQueueInfo[PlayMP.CurPlayNum].removeOldMedia) then
+							PlayMP:RemoveQueue( PlayMP.CurPlayNum )
+						else
+							PlayMP:EndMusic()
+						end
 					end)
-				elseif PlayMP:GetSetting( "AOASkip", false, true ) and ply:IsAdmin() != true and plydata.power == false  then
+				elseif PlayMP:GetSetting( "AOASkip", false, true ) and ply:IsAdmin() != true and plydata[1].power == false  then
 					PlayMP:NoticeForPlayer( "AllowOnlyAdmin_Skip", "red", "warning" )
-				elseif plydata.skip == false and ply:IsAdmin() == false and plydata.power == false then
+				elseif plydata[1].skip == false and ply:IsAdmin() == false and plydata[1].power == false then
 					PlayMP:NoticeForPlayer( "AllowOnlyAdmin_Skip", "red", "warning" )
 				else
-					PlayMP:EndMusic()
+					if PlayMP:GetSetting( "RemoveOldMedia", false, true ) or tobool(PlayMP.CurrentQueueInfo[PlayMP.CurPlayNum].removeOldMedia) then
+						PlayMP:RemoveQueue( PlayMP.CurPlayNum )
+					else
+						PlayMP:EndMusic()
+					end
 				end
 			
 			--end
@@ -554,6 +588,11 @@ end
 		
 		PlayMP:SkipMusic( ply )
 	end)
+	
+	
+function PlayMP:VoteSkipMusic( ply )
+	PlayMP:RecieveVoteRequest( ply )
+end
 	
 	
 	
@@ -685,8 +724,8 @@ end)
 		local target = net.ReadString()
 		local data = net.ReadTable()
 		
-		local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())[1]
-		if ply:IsAdmin() or plydata.power == true then
+		local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())
+		if ply:IsAdmin() or plydata[1].power == true then
 			local stat = PlayMP:SetUserInfoBySID(target, data)
 			
 			net.Start("PlayMP:SetUserInfoBySID")
@@ -706,17 +745,17 @@ PlayMP.SeekToTimeThink = 0
 
 local function DoSeekToVideo( time, ply )
 
-	local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())[1]
+	local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())
 	
-	if PlayMP:GetSetting( "AOAPMP", false, true ) and ply:IsAdmin() != true and plydata.power == false then PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) return end
-	if plydata.ban then PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) return end
+	if PlayMP:GetSetting( "AOAPMP", false, true ) and ply:IsAdmin() != true and plydata[1].power == false then PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) return end
+	if plydata[1].ban then PlayMP:NoticeForPlayer( "MyState_CanTUsePlaymusic", "red", "warning" ) return end
 
-	if PlayMP:GetSetting( "AOACPL", false, true ) and ply:IsAdmin() != true and plydata.power == false  then
+	if PlayMP:GetSetting( "AOACPL", false, true ) and ply:IsAdmin() != true and plydata[1].power == false  then
 		PlayMP:NoticeForPlayer( "AllowOnlyAdmin_Loca", "red", "warning" )
 		return
 	end
 	
-	if plydata.seekto == false and ply:IsAdmin() == false and plydata.power == false then
+	if plydata[1].seekto == false and ply:IsAdmin() == false and plydata[1].power == false then
 		PlayMP:NoticeForPlayer( "AllowOnlyAdmin_Loca", "red", "warning" )
 		return
 	end
@@ -741,7 +780,7 @@ end
 	end)
 
 
-function PlayMP:ReadVideoInfo( uri, startTime, endTime, ply )
+function PlayMP:ReadVideoInfo( uri, startTime, endTime, ply, removeOldMedia )
 
 	PlayMP.videoReadError = false
 	PlayMP.IsliveBroadcast = false
@@ -775,7 +814,8 @@ function PlayMP:ReadVideoInfo( uri, startTime, endTime, ply )
 				QueueNum = table.Count( PlayMP.CurrentQueueInfo ) + 1,
 				PlayUser = ply,
 				startTime = startTime,
-				endTime = endTime}
+				endTime = endTime,
+				removeOldMedia = removeOldMedia}
 			
 			net.Start("PlayMP:AddQueue")
 				net.WriteTable( video )
@@ -921,7 +961,8 @@ function PlayMP:ReadVideoInfo( uri, startTime, endTime, ply )
 				QueueNum = table.Count( PlayMP.CurrentQueueInfo ) + 1,
 				PlayUser = ply,
 				startTime = startTime,
-				endTime = endTime}
+				endTime = endTime,
+				removeOldMedia = removeOldMedia}
 			
 			net.Start("PlayMP:AddQueue")
 				net.WriteTable( video )
@@ -977,6 +1018,8 @@ function PlayMP:Playmusic()
 		return 
 	end
 	
+	PlayMP:voteActivate(PlayMP:GetSetting( "UseSkipToVote", false, true ))
+	
 	PlayMP.VideoStartTime = CurTime() + 2
 
 	PlayMP.CurPlayNum = PlayMP.CurPlayNum + 1
@@ -992,6 +1035,8 @@ function PlayMP:Playmusic()
 		net.WriteString( PlayMP.CurPlayNum )
 	net.Broadcast()
 	
+	PlayMP:clearVoteCount()
+	
 	print("[PlayM Pro] Playback Pending...")
 	
 	local pendingTimeCount = 0
@@ -1000,7 +1045,7 @@ function PlayMP:Playmusic()
 			pendingTimeCount = pendingTimeCount + 1
 		end
 		
-		if pendingTimeCount == 10 then
+		if pendingTimeCount == 5 then
 			timer.Remove( "PendingTimePlayMP" )
 			pendingTimeCount = 0
 			PlayMP:StartMedia()
@@ -1020,6 +1065,9 @@ function PlayMP:EndMusic()
 	PlayMP.isPlaying = false
 	
 	PlayMP:StopMusic()
+	PlayMP:clearVoteCount()
+	
+	--PlayMP:GetSetting( "RemoveOldMedia", false, true )
 	
 	if table.Count( PlayMP.CurrentQueueInfo ) == PlayMP.CurPlayNum then
 		if PlayMP:GetSetting( "RepeatQueue", false, true ) then
@@ -1061,7 +1109,11 @@ function PlayMP:VideoTimeThink()
 			
 				--if PlayMP.CurPlayLength < CurTime() - PlayMP.VideoStartTime + PlayMP.SeekToTimeThink then
 				if PlayMP.SeekToTimeThink + (CurTime() - PlayMP.VideoStartTime) > PlayMP.CurPlayLength then
-					PlayMP:EndMusic()
+					if PlayMP:GetSetting( "RemoveOldMedia", false, true ) or tobool(PlayMP.CurrentQueueInfo[PlayMP.CurPlayNum].removeOldMedia) then
+						PlayMP:RemoveQueue( PlayMP.CurPlayNum )
+					else
+						PlayMP:EndMusic()
+					end
 				end
 				
 				PlayMP.CurPlayTime = (CurTime() - PlayMP.VideoStartTime) + PlayMP.SeekToTimeThink
@@ -1128,9 +1180,9 @@ end)
 function PlayMP:UrlProcessing( str )
 
 		if string.find(str,"youtube")!=nil then
-			str = string.match(str,"[?&]v=([^&]*)")
+			str = string.match(str,"[?&]v=([^?]*)")
 		elseif string.find(str,"youtu.be")!=nil then
-			str = string.match(str,"https://youtu.be/([^&]*)")
+			str = string.match(str,"https://youtu.be/([^?]*)")
 		end
 
 	
@@ -1181,8 +1233,8 @@ net.Receive( "PlayMP:ChangConVar", function( len, ply )
 	local name = net.ReadString()
 	local value = net.ReadFloat()
 	
-	local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())[1]
-	if ply:IsAdmin() or plydata.power == true then
+	local plydata = PlayMP:GetUserInfoBySID(ply:SteamID())
+	if ply:IsAdmin() or plydata[1].power == true then
 		GetConVar(name):SetFloat(value)
 	end
 
@@ -1216,7 +1268,7 @@ net.Receive( "PlayMP:PlayerIsReady", function( len, ply )
 					if alreadyReady == false then
 						table.insert( PlayMPpendingUsers, {ID = steamID} )
 						PlayMPpendingUsersCount = PlayMPpendingUsersCount + 1
-						PrintMessage(HUD_PRINTTALK, "[PlayM Pro] 2: User " .. ply:Nick() .. " is ready to play media! (ID: " .. steamID .. ", Count: ".. PlayMPpendingUsersCount .."/" .. #player.GetHumans() ..", CurTime: " .. CurTime() - FirstTime .."s )")
+						print(HUD_PRINTTALK, "[PlayM Pro] 2: User " .. ply:Nick() .. " is ready to play media! (ID: " .. steamID .. ", Count: ".. PlayMPpendingUsersCount .."/" .. #player.GetHumans() ..", CurTime: " .. CurTime() - FirstTime .."s )")
 					end
 				end
 				

@@ -66,11 +66,13 @@ function PlayMP:Str( tag, ... )
 	local s = PlayMP.Lang[tag]
 	if s != nil then
 		if f != nil then
+
 			return string.format( tostring(s), ... )
+
 		end
 		return s
 	end
-	return "Something Error!!"
+	return tag
 
 end
 
@@ -318,6 +320,8 @@ if data == nil or data == "" then
 	PlayMP:AddSetting( "FMem", false )
 	
 	PlayMP:AddSetting( "SyncMediaAndPlayer", true )
+	
+	PlayMP:AddSetting( "removeOldQueue", true )
 	
 	PlayMP:AddSetting( "MainPlayerData",{
 			X=10,
@@ -1057,7 +1061,7 @@ function PlayMP:isMuted()
 end
 
 
-function PlayMP:AddQueue( url, startTime, endTime, isPlaylist )
+function PlayMP:AddQueue( url, startTime, endTime, isPlaylist, removeOldMedia )
 
 	if url == nil then return end
 	
@@ -1078,6 +1082,7 @@ function PlayMP:AddQueue( url, startTime, endTime, isPlaylist )
 		net.WriteString( endTime )
 		net.WriteEntity( LocalPlayer() )
 		net.WriteBool( isPlaylist )
+		net.WriteBool( removeOldMedia )
 	net.SendToServer() 
 	
 end
@@ -1606,9 +1611,9 @@ end
 				end
 				
 				if string.find(entName,"youtube")!=nil then
-					PlayMP:AddQueue( entName )
+					PlayMP:AddQueue( entName, 0, 0, false, PlayMP:GetSetting( "removeOldQueue", false, true ) )
 				elseif string.find(entName,"youtu.be")!=nil then
-					PlayMP:AddQueue( entName )
+					PlayMP:AddQueue( entName, 0, 0, false, PlayMP:GetSetting( "removeOldQueue", false, true )  )
 				else
 					PlayMP:Notice( PlayMP:Str( "wrongUrl" ), Color(231, 76, 47), "warning" )
 				end
@@ -1680,9 +1685,17 @@ net.Receive( "PlayMP:NoticeForPlayer", function()
 	local color = net.ReadTable()
 	local type = net.ReadString()
 	local data = net.ReadTable()
-	
+
 	if data then
-		PlayMP:Notice( PlayMP:Str( tag, data[1] ), color, type )
+		if istable(data) and #data >= 1 then
+		
+			PlayMP:Notice( PlayMP:Str( tag, unpack(data) ), color, type )
+			
+		else
+		
+			PlayMP:Notice( PlayMP:Str( tag, data ), color, type )
+			
+		end
 	else
 		PlayMP:Notice( PlayMP:Str( tag ), color, type )
 	end
@@ -1710,9 +1723,8 @@ net.Receive( "PlayMP:AddQueue", function( )
 		QueueNum = table.Count( PlayMP.CurVideoInfo ) + 1,
 		PlayUser = video.PlayUser,
 		startTime = video.startTime,
-		endTime = video.endTime
-		
-		
+		endTime = video.endTime,
+		removeOldMedia = video.removeOldMedia
 	} )
 
 end)
@@ -1789,6 +1801,14 @@ function PlayMP:ReceiveMusicDataAndPlay( num, curvinfo, time )
 			PlayMP.UpdateNotchInfoPanel( v["Title"], image )
 			
 		end
+		
+		PlayMP:AddMediaHistory( {
+		thumbnails = v["Image"],
+		title = v["Title"],
+		channelTitle = v["Channel"],
+		Uri = v["Uri"]
+		} )
+		
 	end
 	
 end

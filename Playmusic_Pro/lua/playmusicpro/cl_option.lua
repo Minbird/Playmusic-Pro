@@ -55,8 +55,6 @@ function PlayMP:DoAnimaOption( aim, posX, posY, endPoxX, endPoxY, remove, panel,
 end
 
 function PlayMP:ChangeMenuWindow( panelName, funcd )
-
-			hook.Run( "MenuChanged_PMP", panelName )
 			
 			local MenuWindowPanelNew = vgui.Create( "DPanel", PlayMP.basePanel )
 			MenuWindowPanelNew:SetPos( PlayMP.sideMenuPanel:GetWide(), 56 )
@@ -115,6 +113,8 @@ function PlayMP:ChangeMenuWindow( panelName, funcd )
 			end
 			
 			PlayMP.CurMenuPage = panelName
+			
+			hook.Run( "MenuChanged_PMP", panelName )
 			
 			return MenuChan
 			

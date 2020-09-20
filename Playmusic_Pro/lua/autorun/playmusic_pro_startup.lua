@@ -48,8 +48,8 @@ PlayMP = {}
 PlayMP.CurSystemVersion = {}
 PlayMP.CurSystemVersion.isBeta = true
 PlayMP.CurSystemVersion.ResetOptionAnytime = false
-PlayMP.CurSystemVersion.Ver = "2.0.0 - 15 (beta)"
-PlayMP.CurSystemVersion.VerE = "0.24"
+PlayMP.CurSystemVersion.Ver = "2.0.0 - 16 (beta)"
+PlayMP.CurSystemVersion.VerE = "0.25"
 PlayMP.NewerVer = "unknown"
 PlayMP.NewerVerE = 0
 PlayMP.SysStartTime = CurTime()
@@ -70,8 +70,12 @@ print("[PlayM Pro] Try add Client side File: playmusicpro/cl_mainmenu.lua")
 AddCSLuaFile("playmusicpro/cl_mainmenu.lua")
 print("[PlayM Pro] Try add Client side File: playmusicpro/cl_option.lua")
 AddCSLuaFile("playmusicpro/cl_option.lua")
+print("[PlayM Pro] Try add Client side File: playmusicpro/cl_record.lua")
+AddCSLuaFile("playmusicpro/cl_record.lua")
 print("[PlayM Pro] Try add Client side File: playmusicpro/shared.lua")
 AddCSLuaFile("playmusicpro/shared.lua")
+print("[PlayM Pro] Try add Client side File: playmusicpro/cl_vote.lua")
+AddCSLuaFile("playmusicpro/cl_vote.lua")
 include( "playmusicpro/shared.lua" )
 
 print("[PlayM Pro] Loading Entities...")
@@ -114,8 +118,11 @@ timer.Simple( 1, function()
 
 
 		print("[PlayM Pro] Server side system is loading...")
-		print("[PlayM Pro] Loading Init...")
+		print("[PlayM Pro] Init...")
 		include("playmusicpro/init.lua")
+		print("[PlayM Pro] loading vote module...")
+		include("playmusicpro/sv_vote.lua")
+		print("[PlayM Pro] Adding resource...")
 		resource.AddFile( "materials/vgui/Playmusic_Pro/Search.vmt" )
 		resource.AddFile( "materials/vgui/Playmusic_Pro/vol1.vmt" )
 		resource.AddFile( "materials/vgui/Playmusic_Pro/vol2.vmt" )
@@ -136,6 +143,7 @@ timer.Simple( 1, function()
 		resource.AddFile( "materials/vgui/entities/fence002d_pm.png" )
 		resource.AddFile( "materials/vgui/entities/tv_pm.png" )
 		
+		print("[PlayM Pro] Adding workshop resource...")
 		resource.AddWorkshop( "1909043673" ) -- missing texture...
 		
 	end
@@ -144,10 +152,14 @@ timer.Simple( 1, function()
 
 	if CLIENT then
 	
-		print("[PlayM Pro] Loading cl_Init...")
+		print("[PlayM Pro] Init...")
 		include("playmusicpro/cl_init.lua")
 		print("[PlayM Pro] Loading cl_polys.lua...")
 		include("playmusicpro/cl_polys.lua")
+		print("[PlayM Pro] Loading cl_record.lua...")
+		include("playmusicpro/cl_record.lua")
+		print("[PlayM Pro] Loading cl_vote.lua...")
+		include("playmusicpro/cl_vote.lua")
 		
 		local files = file.Find( "playmusicpro/pm_lang/*.lua", "LUA" )
 		if #files > 0 then

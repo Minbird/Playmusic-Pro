@@ -12,6 +12,7 @@ local blur = Material( "pp/blurscreen" )
 		surface.SetDrawColor( 255, 255, 255, alpha )
 		surface.SetMaterial( blur )
 
+
 		for i = 1, 3 do
 			blur:SetFloat( "$blur", ( i / lay ) * density )
 			blur:Recompute()
@@ -346,6 +347,7 @@ end
 		end
 		
 		local function MenuChanged(d)
+			if label == nil or sel == nil or not label:IsValid() or not sel:IsValid() then return end
 			if d == uniqueName then 
 				label:ColorTo(Color(255,150,100), 0.1) 
 				sel:AlphaTo(255, 0.1)
@@ -632,6 +634,12 @@ end
 				label:SetPos( 25,TextBox:GetTall()/2 - line/2 )
 				label:SetSize( TextBox:GetWide() - 50, line)
 			end
+		elseif align == TEXT_ALIGN_RIGHT then
+			if w <= TextBox:GetWide() then
+				label:SetPos( TextBox:GetWide()-w+x,y )
+			else
+				label:SetPos( TextBox:GetWide()-w+x,y )
+			end
 		end
 
 		label:SetFont( font )
@@ -714,7 +722,7 @@ end
 		local numscrollFir = vgui.Create( "DPanel", numscrollMain )
 		numscrollFir:SetPos(2,6)
 		numscrollFir:SetSize(wide-4,4)
-		numscrollFir.Paint = function( self, w, h ) draw.RoundedBox( 2, 0, 0, w, h, Color( 255, 255, 255, 255 ) ) end
+		numscrollFir.Paint = function( self, w, h ) draw.RoundedBox( 2, 0, 0, w, h, Color( 200, 200, 200, 255 ) ) end
 		
 		local numscrollBut = vgui.Create( "DPanel", numscrollMain )
 		numscrollBut:SetPos(2,7)
@@ -803,6 +811,7 @@ end
 		local curx, cury = 0,0
 		local alphato = false
 		local curData
+		local noAnimation = false
 		
 		numscrollMain.Think = function()
 			if trackMouse then
@@ -811,17 +820,18 @@ end
 				if cury < -20 or cury > 36 then trackMouse = false end
 				
 				if input.IsMouseDown(MOUSE_LEFT) then
+					noAnimation = true
 					if curx >= 2 and curx <= wide - 2 then
 						numscrollFir:SetSize(curx-2,4)
 						numscrollBut:SetPos(curx-4,4)
 						if doFloor then
-							nscroll.ValueChanging(math.Round((curx/wide)*mx))
-							curData = math.Round((curx/wide)*mx)
-							numscrollEntry:SetText(math.Round((curx/wide)*mx))
+							nscroll.ValueChanging(math.Round((curx/wide)*(mx-mn)+mn))
+							curData = math.Round((curx/wide)*(mx-mn)+mn)
+							numscrollEntry:SetText(math.Round((curx/wide)*(mx-mn)+mn))
 						else
-							nscroll.ValueChanging((curx/wide)*mx)
-							curData = (curx/wide)*mx
-							numscrollEntry:SetText((curx/wide)*mx)
+							nscroll.ValueChanging((curx/wide)*(mx-mn)+mn)
+							curData = (curx/wide)*(mx-mn)+mn
+							numscrollEntry:SetText((curx/wide)*(mx-mn)+mn)
 						end
 					elseif curx < 2 then
 						numscrollFir:SetSize(0,4)
@@ -838,6 +848,7 @@ end
 					end
 					datachange = true
 				else
+					noAnimation = false
 					if datachange then
 						trackMouse = false
 					end
@@ -855,9 +866,16 @@ end
 			end
 		end
 		
+		local curtime2 = CurTime()
 		nscroll.SetNum = function( a, num ) 
-			numscrollFir:SetSize((wide-4)*(num/mx),4)
-			numscrollBut:SetPos((wide-4)*(num/mx)-4,4)
+			if curtime2 + 0.2 < CurTime() and not noAnimation then
+				numscrollFir:SizeTo((wide-4)*((num-mn)/(mx-mn)),4,0.2)
+				numscrollBut:MoveTo((wide-4)*((num-mn)/(mx-mn))-4,4, 0.2)
+				curtime2 = CurTime()
+			else
+				numscrollFir:SetSize((wide-4)*((num-mn)/(mx-mn)),4)
+				numscrollBut:SetPos((wide-4)*((num-mn)/(mx-mn))-4,4)
+			end
 			if num == 0 then
 				numscrollFir:SetSize(0,4)
 				numscrollBut:SetPos(0,4)
@@ -871,9 +889,9 @@ end
 		
 		nscroll.GetValue = function(  ) 
 			if doFloor then
-				return math.Round((numscrollFir:GetWide()/(wide-4))*mx)
+				return math.Round((numscrollFir:GetWide()/(wide-4))*(mx-mn)+mn)
 			else
-				return (numscrollFir:GetWide()/(wide-4))*mx
+				return (numscrollFir:GetWide()/(wide-4))*(mx-mn)+mn
 			end
 		end
 		
@@ -930,12 +948,18 @@ end
 				draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 220 ) )
 			end
 		end
-		
+	
 		PlayMP.MainMenuCtrlPanel_Button = vgui.Create( "DPanel", PlayMP.MainMenuCtrlPanel )
 		PlayMP.MainMenuCtrlPanel_Button:SetPos( 0, 0 )
 		PlayMP.MainMenuCtrlPanel_Button:SetSize( 150,PlayMP.MainMenuCtrlPanel:GetTall() )
-		PlayMP.MainMenuCtrlPanel_Button.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, 5, h, Color( 205, 114, 42 ) ) end
-	
+		local vote_count_text = PlayMP:Str( "skip_vote_count" )
+		PlayMP.MainMenuCtrlPanel_Button.Paint = function( self, w, h ) 
+			draw.RoundedBox( 0, 0, 0, 5, h, Color( 205, 114, 42 ) ) 
+			if PlayMP.voteActivated then
+				draw.SimpleText(vote_count_text.."("..PlayMP.voteCount.."/"..PlayMP.voteCountMax..")", "DebugFixed", PlayMP.MainMenuCtrlPanel_Button:GetWide() / 2, PlayMP.MainMenuCtrlPanel_Button:GetTall() * 0.5 - 30, 0 == PlayMP.voteCount and Color(255, 255, 255, math.abs(math.sin(CurTime() * 2)) * 180 + 40) or Color(255, 255, 255, math.abs(math.sin(CurTime() * 4)) * 180 + 40), TEXT_ALIGN_CENTER)
+			end
+		end
+		
 		PlayMP.PlayerVideoTitle = vgui.Create( "DLabel", PlayMP.MainMenuCtrlPanel )
 		PlayMP.PlayerVideoTitle:SetPos( 160, 0 )
 		PlayMP.PlayerVideoTitle:SetFont( "Default_PlaymusicPro_Font" )
@@ -1287,7 +1311,7 @@ end
 		function PlayMP:OpenWriteQueueInfoPanelPlayList( id, force )
 		
 			if PlayMP:GetSetting( "Quick_Request", false, true ) and force != true then 
-				PlayMP:AddQueue( id, 0, 0, true )
+				PlayMP:AddQueue( id, 0, 0, true, PlayMP:GetSetting( "removeOldQueue", false, true ) )
 				return
 			end
 			
@@ -1321,7 +1345,7 @@ end
 						hook.Remove("HUDPaint", "OpenRequestQueueWindow")
 						mainPanel:Close()
 						
-						PlayMP:AddQueue( id, 0, 0, true )
+						PlayMP:AddQueue( id, 0, 0, true, PlayMP:GetSetting( "removeOldQueue", false, true ) )
 						
 					end)
 						
@@ -1336,7 +1360,6 @@ end
 		
 		
 		PlayMP:LoadOptions()
-	
 		
 		PlayMP:ChangeMenuWindow( "queueList" )
 		
@@ -1355,13 +1378,13 @@ function PlayMP:OpenWriteQueueInfoPanel( url, force, sT, eT )
 				if eT == nil then
 					eT = 0
 				end
-				PlayMP:AddQueue( url, sT, eT )
+				PlayMP:AddQueue( url, sT, eT, false, PlayMP:GetSetting( "removeOldQueue", false, true ) )
 				return
 			end
 		
-			PlayMP:OpenSubFrame( PlayMP:Str( "QeeueMedia" ), "큐에등록하기", 600, 550, function( mainPanel, scrpanel, ButtonPanel )
+			PlayMP:OpenSubFrame( PlayMP:Str( "QeeueMedia" ), "큐에등록하기", 600, 600, function( mainPanel, scrpanel, ButtonPanel )
 					
-					if url then
+				--	if url then
 					
 						local PriviewUri = url
 					
@@ -1393,10 +1416,12 @@ function PlayMP:OpenWriteQueueInfoPanel( url, force, sT, eT )
 						Video:SetMouseInputEnabled( true )
 						Video:OpenURL( "https://www.youtube.com/embed/" .. PriviewUri .. "?autoplay=0&showinfo=0&rel=0&disablekb=0" )
 						
-					end
+				--	end
 					
 					local URLEntry = PlayMP:AddTextEntryBox( scrpanel, TOP, nil, PlayMP:Str("EnterYoutubeUrl"), scrpanel:GetWide(), 40 )
 					URLEntry:SetText( url )
+					
+					URLEntry:RequestFocus() 
 					
 					local rhrmqOption = scrpanel:Add( "DPanel" )
 					rhrmqOption:SetSize( scrpanel:GetWide(), 50 )
@@ -1409,6 +1434,24 @@ function PlayMP:OpenWriteQueueInfoPanel( url, force, sT, eT )
 					StartEntry:SetText( string.ToMinutesSeconds(sT) )
 					local EndLengthTextEntry = PlayMP:AddTextEntryBox( scrpanel, TOP, PlayMP:Str("EndTime"), PlayMP:Str("EndTime"), scrpanel:GetWide(), 40 )
 					EndLengthTextEntry:SetText( string.ToMinutesSeconds(eT) )
+									
+					PlayMP:AddCheckBox( scrpanel, nil, PlayMP:Str( "queueadd_removeOldQueue" ), "removeOldQueue" )
+					
+					URLEntry.OnChange = function( ) 
+						--if URLEntry:GetValue() == value then return end
+						if string.find( URLEntry:GetValue(),"https://youtu.be/") then
+							Video:OpenURL( "https://www.youtube.com/embed/" .. string.match(URLEntry:GetValue(),"https://youtu.be/([^&]*)") .. "?autoplay=0&showinfo=0&rel=0&disablekb=0" )
+						elseif string.find( URLEntry:GetValue(),"v=") then
+							Video:OpenURL( "https://www.youtube.com/embed/" .. string.match(URLEntry:GetValue(),"[?&]v=([^&]*)") .. "?autoplay=0&showinfo=0&rel=0&disablekb=0" )
+						end
+						
+						if string.match(URLEntry:GetValue(),"[?&]t=([^s&]*)") then
+							StartEntry:SetText( string.ToMinutesSeconds(tonumber(string.match(URLEntry:GetValue(),"[?&]t=([^s&]*)"))) )
+						else
+							StartEntry:SetText( string.ToMinutesSeconds(sT) )
+						end
+						
+					end
 				
 					PlayMP:AddActionButton( ButtonPanel, PlayMP:Str("QueueRequest"), Color( 42, 205, 114 ), ButtonPanel:GetWide() - 200, 10, 100, 30, function() 
 						hook.Remove("HUDPaint", "OpenRequestQueueWindow")
@@ -1483,7 +1526,7 @@ function PlayMP:OpenWriteQueueInfoPanel( url, force, sT, eT )
 								
 							end
 				
-							PlayMP:AddQueue( URLEntry:GetValue(), queueRequest.startTime, queueRequest.endTime )
+							PlayMP:AddQueue( URLEntry:GetValue(), queueRequest.startTime, queueRequest.endTime, false, PlayMP:GetSetting( "removeOldQueue", false, true ) )
 							
 							timer.Simple( 1, function()
 								if PlayMP.CurMenuPage == "queueList" then
@@ -1515,7 +1558,7 @@ function PlayMP:DoNoticeToPlayer( text, color, type )
 		local ivbasGener = PlayMP:GetSetting( "DONOTshowInfoPanel", false, true )
 		if ivbas != true then
 			PlayMP.NotchInfoPanel_PlayerVideoImage:SetAlpha(255)
-			PlayMP.NotchInfoPanel:AlphaTo( 255, 1 )
+			PlayMP.NotchInfoPanel:AlphaTo( 255, 0.3 )
 			--PlayMP.NotchInfoPanel:MoveTo( ScrW() * 0.5 - ScrW() * 0.2, 20, 1, 0)
 			if type == "warning" then
 				PlayMP.NotchInfoPanel:MoveTo( ScrW() * 0.5 - ScrW() * 0.2 -10, 20, 0.05, 0, -1, function()

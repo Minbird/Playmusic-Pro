@@ -38,15 +38,6 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 		UserImage:SetPos( 18, 18 )
 		UserImage:SetPlayer( LocalPlayer(), 64 )
 		
-			
-		local function resetCtrlPanel( sid, nick )
-		
-			if sid == "" or sid == nil then return end
-		
-			PlayMP:GetUserInfoBySID(sid)
-			
-		end
-		
 		
 		local PlayerPanel = vgui.Create( "DScrollPanel", DScrollPanel )
 		PlayerPanel:SetSize( DScrollPanel:GetWide() / 2, DScrollPanel:GetTall() - 100 )
@@ -102,6 +93,24 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 			draw.RoundedBox( 5, 3, 0, w - 6, h, Color( 100, 100, 100 ) )
 		end
 		
+		local function resetCtrlPanel( sid, nick )
+		
+			if sid == "" or sid == nil then return end
+		
+			PlayMP:GetUserInfoBySID(sid)
+			
+			
+			local loadAnima = PlayMP.GetLoadingAni()
+											
+			local loadAnimaHTML = vgui.Create( "HTML", CtrlPanel )
+			loadAnimaHTML:Dock(TOP)
+			loadAnimaHTML:SetPos( CtrlPanel:GetWide() * 0.5 -27.5, 10 )
+			loadAnimaHTML:SetSize( 100, 100)
+			loadAnimaHTML:SetMouseInputEnabled(false)
+			loadAnimaHTML:SetHTML( loadAnima )
+			
+		end
+		
 		net.Receive( "PlayMP:GetUserInfoBySID", function( len, ply )
 				local data = net.ReadTable()
 				
@@ -129,20 +138,43 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 					end
 				end
 				
-				PlayMP:AddTextBox( CtrlPanel, 48, TOP, PlayMP:Str( "Music" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
-				local check1 = PlayMP:AddCheckBox( CtrlPanel, nil, PlayMP:Str( "AdminSet_Qeeue" ), nil, true, data[1], "qeeue" )
-				local check2 = PlayMP:AddCheckBox( CtrlPanel, nil, PlayMP:Str( "AdminSet_Skip" ), nil, true, data[1], "skip" )
-				local check3 = PlayMP:AddCheckBox( CtrlPanel, nil, PlayMP:Str( "AdminSet_seekTo" ), nil, true, data[1], "seekto" )
-				local check4 = PlayMP:AddCheckBox( CtrlPanel, nil, PlayMP:Str( "AdminSet_Ban" ), nil, true, data[1], "ban" )
+				CtrlPanel:Clear()
 				
-				PlayMP:AddTextBox( CtrlPanel, 48, TOP, PlayMP:Str( "Admin" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
-				local check5 = PlayMP:AddCheckBox( CtrlPanel, nil, PlayMP:Str( "AdminSet_AdminLicense" ), nil, true, data[1], "power" )
+				local loadAnima = PlayMP.GetLoadingAni()
+											
+				local loadAnimaHTML = vgui.Create( "HTML", CtrlPanel )
+				loadAnimaHTML:Dock(TOP)
+				loadAnimaHTML:SetPos( CtrlPanel:GetWide() * 0.5 -27.5, 10 )
+				loadAnimaHTML:SetSize( 100, 100)
+				loadAnimaHTML:SetMouseInputEnabled(false)
+				loadAnimaHTML:SetHTML( loadAnima )
 				
-				local setOptions = vgui.Create( "DPanel", CtrlPanel )
-				setOptions:SetSize( CtrlPanel:GetWide(), 180 )
-				setOptions:Dock(TOP)
-				setOptions:SetBackgroundColor(Color(0,0,0,0))
-				PlayMP:AddActionButton( setOptions, PlayMP:Str( "AdminSet_SyncData" ), Color(42, 205, 114), setOptions:GetWide() - 300, 20, 280, 30, function() PlayMP:SetUserInfoBySID(targetedplayer, data) end)
+				steamworks.RequestPlayerInfo( util.SteamIDTo64( targetedplayer ), function(steamName)
+				
+						CtrlPanel:Clear()
+				
+						PlayMP:AddTextBox( CtrlPanel, 18, TOP, PlayMP:Str( "userDataBySteam", targetedplayer ), 10, 5, "DebugFixed", Color(230,230,230), Color(0,0,0,0), TEXT_ALIGN_LEFT )
+						PlayMP:AddTextBox( CtrlPanel, 30, TOP, PlayMP:Str( "NickName_2", steamName ), 10, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_LEFT )
+						local conn = data[1].lastConnectTime
+						if conn == nil then conn = "----" end
+						PlayMP:AddTextBox( CtrlPanel, 30, TOP, PlayMP:Str( "lastconn", conn ), 10, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_LEFT )
+						PrintTable(data[1])
+						
+						PlayMP:AddTextBox( CtrlPanel, 48, TOP, PlayMP:Str( "Music" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+						local check1 = PlayMP:AddCheckBox( CtrlPanel, nil, PlayMP:Str( "AdminSet_Qeeue" ), nil, true, data[1], "qeeue" )
+						local check2 = PlayMP:AddCheckBox( CtrlPanel, nil, PlayMP:Str( "AdminSet_Skip" ), nil, true, data[1], "skip" )
+						local check3 = PlayMP:AddCheckBox( CtrlPanel, nil, PlayMP:Str( "AdminSet_seekTo" ), nil, true, data[1], "seekto" )
+						local check4 = PlayMP:AddCheckBox( CtrlPanel, nil, PlayMP:Str( "AdminSet_Ban" ), nil, true, data[1], "ban" )
+						
+						PlayMP:AddTextBox( CtrlPanel, 48, TOP, PlayMP:Str( "Admin" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+						local check5 = PlayMP:AddCheckBox( CtrlPanel, nil, PlayMP:Str( "AdminSet_AdminLicense" ), nil, true, data[1], "power" )
+						
+						local setOptions = vgui.Create( "DPanel", CtrlPanel )
+						setOptions:SetSize( CtrlPanel:GetWide(), 180 )
+						setOptions:Dock(TOP)
+						setOptions:SetBackgroundColor(Color(0,0,0,0))
+						PlayMP:AddActionButton( setOptions, PlayMP:Str( "AdminSet_SyncData" ), Color(42, 205, 114), setOptions:GetWide() - 300, 20, 280, 30, function() PlayMP:SetUserInfoBySID(targetedplayer, data) end)
+				end )
 			end)
 		
 		resetCtrlPanel( "", "" )
@@ -231,10 +263,11 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 			
 		end
 		
-		PlayMP:AddTextBox( PlayerPanel, 48, TOP, PlayMP:Str( "AdminSet_SavedUser" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 		
-		PlayMP:GetUserInfoAll()
-		net.Receive( "PlayMP:SendUserInfoAll", function( len, ply )
+		--PlayMP:AddTextBox( PlayerPanel, 48, TOP, PlayMP:Str( "AdminSet_SavedUser" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+		
+		--PlayMP:GetUserInfoAll()
+		--[[ net.Receive( "PlayMP:SendUserInfoAll", function( len, ply )
 			local tab = net.ReadTable()
 			for k, v in pairs(tab) do
 			
@@ -283,7 +316,7 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 				
 				
 			end
-		end)
+		end) ]]
 		
 	end)
 			
@@ -322,11 +355,29 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 				PlayMP:AddCheckBox( DScrollPanel, function() 
 					PlayMP:ChangeServerSettings( "DONOTshowInfoPanel" )
 				end, PlayMP:Str( "AdminSet_DONOTshowInfoPanel" ), "DONOTshowInfoPanel" )
+				PlayMP:AddCheckBox( DScrollPanel, function() 
+					PlayMP:ChangeServerSettings( "UseSkipToVote" )
+				end, PlayMP:Str( "AdminSet_UseSkipToVote" ), "UseSkipToVote" )
+				PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "AdminSet_UseSkipToVotePer" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT)
+				PlayMP:AddTextBox( DScrollPanel, 44, TOP, "", 40, 0, "Trebuchet24", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
+					local numslider = PlayMP:CreatNumScroll( self, 100, 0, 30, 100, self:GetWide()-200, true)
+					numslider:SetNum( GetConVar("playmp_MinPerForSkip"):GetFloat() )
+					numslider.ValueChanged = function( d )
+						PlayMP:ChangConVar( "playmp_MinPerForSkip", math.floor(d) )
+					end
+					self.Paint = function( self, w, h )
+					surface.SetDrawColor( 70, 70, 70, 255 )
+					surface.DrawLine( 30, h - 1, w - 30, h - 1 )
+				end
+				end)
 				
 				PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "Options_queueList" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 				PlayMP:AddCheckBox( DScrollPanel, function() 
 					PlayMP:ChangeServerSettings( "RepeatQueue" )
 				end, PlayMP:Str( "AdminSet_UserDefaultSet4" ), "RepeatQueue" )
+				PlayMP:AddCheckBox( DScrollPanel, function() 
+					PlayMP:ChangeServerSettings( "RemoveOldMedia" )
+				end, PlayMP:Str( "AdminSet_UserDefaultSet_RemoveOldMedia" ), "RemoveOldMedia" )
 				PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "Media_Limit" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT)
 				PlayMP:AddTextBox( DScrollPanel, 44, TOP, "", 40, 0, "Trebuchet24", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
 					local numslider = PlayMP:CreatNumScroll( self, 100, 0, 0, 200, self:GetWide()-200, true)
