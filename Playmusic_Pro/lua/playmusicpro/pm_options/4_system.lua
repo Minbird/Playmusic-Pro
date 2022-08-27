@@ -10,7 +10,7 @@ end)
 
 surface.CreateFont( "VeryBigTitle_PlaymusicPro_Font", {
 	font = "Arial",
-	extended = false,
+	extended = true,
 	size = 60,
 	weight = 300,
 	blursize = 0,
@@ -151,7 +151,7 @@ PlayMP:AddOption( PlayMP:Str( "PMPNotice" ), "notice", "", function( DScrollPane
 	PlayMP:ChangeSetting("NoticeReadCount", PlayMP.noticecountOnInternet)
 end)
 
-PlayMP:AddOption( "QnA", "qna", "", function( DScrollPanel ) 
+PlayMP:AddOption( PlayMP:Str( "QnA" ), "qna", "", function( DScrollPanel ) 
 	local HTML = vgui.Create("DHTML", DScrollPanel )
 	HTML:SetPos( 0, 0 )
 	HTML:SetSize( DScrollPanel:GetWide(), DScrollPanel:GetTall() )
