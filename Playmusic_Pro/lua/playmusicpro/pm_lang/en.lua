@@ -256,3 +256,6 @@ lang.PSec = "%s seconds ago"
 lang.PMin = "%s minutes ago"
 lang.PHur = "%s hours ago"
 lang.PDay = "%s days ago"
+
+lang.CSet_PlayerType = "Player mode"
+lang.Embed_IframePlayer_ex = "The Embed player doesn't show ads, but can't play some videos. The Iframe player can play most videos, but may show ads. The YTDL player can play most videos without ads, but it has a long warm-up time and you can't see the video screen (instead, you see a weird screen)."

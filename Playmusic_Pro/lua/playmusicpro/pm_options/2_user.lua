@@ -181,6 +181,87 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 			end
 			
 			PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "Player" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+			
+			PlayMP:AddTextBox( DScrollPanel, 80, TOP, PlayMP:Str( "Embed_IframePlayer_ex" ), 30, 0, "Default_PlaymusicPro_Font", Color(255,255,255), Color(40, 40, 40, 0), TEXT_ALIGN_LEFT )
+			PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "CSet_PlayerType" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
+			
+				local DComboBox = vgui.Create( "DComboBox", self )
+				DComboBox:SetPos( self:GetWide() - 220, 12.5 )
+				DComboBox:SetSize( 200, 30 )
+				
+				local type = {}
+				---type[0] = "Embed Player"
+				---type[1] = "Iframe Player"
+				---type[2] = "YTDL Player"
+				
+				type[0] = "YTDL Player"
+				type[1] = "Iframe Player"
+				type[2] = "Embed Player"
+				
+				local typeList = {}
+				typeList[0] = PlayMP.PlayerURLList[0]
+				typeList[1] = PlayMP.PlayerURLList[1]
+				typeList[2] = PlayMP.PlayerURLList[2]
+				local selectorList = {}
+				selectorList[0] = PlayMP.SelectorList[0]
+				selectorList[1] = PlayMP.SelectorList[1]
+				selectorList[2] = PlayMP.SelectorList[2]
+				
+				DComboBox.OnSelect = function( panel, index, value )
+				
+					if value == type[0] then
+						PlayMP:ChangeSetting( "PlayerType", 0 )
+						PlayMP.PlayerURL = typeList[0]
+						PlayMP.PlayerQuerySelector = selectorList[0]
+					end
+					
+					if value == type[1] then
+						PlayMP:ChangeSetting( "PlayerType", 1 )
+						PlayMP.PlayerURL = typeList[1]
+						PlayMP.PlayerQuerySelector = selectorList[1]
+					end
+					
+					if value == type[2] then
+						PlayMP:ChangeSetting( "PlayerType", 2 )
+						PlayMP.PlayerURL = typeList[2]
+						PlayMP.PlayerQuerySelector = selectorList[2]
+					end
+					
+					-- 재생기 새로고침
+					if PlayMP.isPlaying != true then return end
+					if PlayMP.PlayerMode == "worldScr" then return end
+					PlayMP.PlayerHTML:Remove()
+					PlayMP.PlayerMainPanel:Close()
+					PlayMP:LoadPlayer()
+					for k, v in pairs( PlayMP.CurVideoInfo ) do
+						if v["QueueNum"] == PlayMP.CurPlayNum then
+							PlayMP.PlayerHTML:OpenURL(PlayMP.PlayerURL .. v.Uri )
+							function PlayMP.PlayerHTML:OnDocumentReady( url )
+								PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]].. PlayMP.GetPlayerVolume() .. [[);]])
+								PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. PlayMP.CurPlayTime + v.startTime .. [[);]])
+								PlayMP.PlayerHTML:QueueJavascript(PlayMP.SOMETHING)
+							end
+						end
+					end
+
+				end
+				
+				local curSet = PlayMP:GetSetting( "PlayerType", false, true )
+				if curSet == nil then curSet = 0 end
+				
+				DComboBox:AddChoice( type[0] )
+				DComboBox:AddChoice( type[1] )
+				DComboBox:AddChoice( type[2] )
+				DComboBox:SetValue( type[curSet] )
+				
+				self.Paint = function( self, w, h )
+					surface.SetDrawColor( 70, 70, 70, 255 )
+					surface.DrawLine( 30, h - 1, w - 30, h - 1 )
+				end
+			end)
+				
+				
+				
 			PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_SyncPlay_WhenConnectAtHalfway" ), "SyncPlay_WCAH" )
 			PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_No_Play_Always" ), "No_Play_Always" )
 			PlayMP:AddCheckBox( DScrollPanel, function()
@@ -191,7 +272,12 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 					PlayMP:LoadPlayer()
 					for k, v in pairs( PlayMP.CurVideoInfo ) do
 						if v["QueueNum"] == PlayMP.CurPlayNum then
-							PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. v.Uri .. "?Vol=" .. PlayMP:GetPlayerVolume() .. "?Seek=" .. PlayMP.CurPlayTime )
+							PlayMP.PlayerHTML:OpenURL(PlayMP.PlayerURL .. v.Uri )
+							function PlayMP.PlayerHTML:OnDocumentReady( url )
+								PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]].. PlayMP.GetPlayerVolume() .. [[);]])
+								PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. PlayMP.CurPlayTime + v.startTime .. [[);]])
+								PlayMP.PlayerHTML:QueueJavascript(PlayMP.SOMETHING)
+							end
 						end
 					end
 				end, PlayMP:Str( "CSet_Show_MediaPlayer" ), "Show_MediaPlayer" )
@@ -452,9 +538,9 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 			PlayMP:AddCheckBox( DScrollPanel, function()
 				if PlayMP.isPlaying and PlayMP.PlayerHTML != nil and PlayMP.PlayerHTML:Valid() then
 					if PlayMP:GetSetting( "FMem", false, true) then
-						PlayMP.PlayerHTML:QueueJavascript([[player.setPlaybackQuality( "small" );]])
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setPlaybackQuality( "small" );]])
 					else
-						PlayMP.PlayerHTML:QueueJavascript([[player.setPlaybackQuality( "defaunt" );]])
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setPlaybackQuality( "defaunt" );]])
 					end
 				end
 			end, PlayMP:Str( "CSet_FMem" ), "FMem" )
@@ -471,7 +557,8 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 						if RealPlayTime == nil then RealPlayTime = 0 end
 						local VideoStartTime = PlayMP.VideoStartTime
 						if VideoStartTime == nil then VideoStartTime = "null" end
-						local text = "CurFPS:" .. PlayMP.CurFrameTime .. "\nFunctionLoad:" .. tostring(tobool(PlayMP.MenuWindows)) .. "\nLanguages:" .. table.Count(PlayMP.Lang) .. "\nCurLanguage:" .. PlayMP.CurLang .. "\nMediaStartTime:" .. VideoStartTime .. "\nPlayMP.isPlaying:" .. tostring(PlayMP.isPlaying) .. "\nRealPlayTime:" .. RealPlayTime .. "\nCurPlayTime:" .. tostring(PlayMP.CurPlayTime) .. "\nCurTimeError:" .. PlayMP.CurPlayTime - RealPlayTime .. "\nCurPlayNum:" .. CurPlayNum .. "\nCurMenuPage:" .. tostring(CurMenuPage) .. "\nPending:" .. tostring(PlayMP.isPending) .. "\nPlayerStatusNumber:" .. tostring(PlayMP.PlayerStatus)
+						local SettingsCount = table.Count(PlayMP.CurSettings or {})
+						local text = "CurFPS:" .. PlayMP.CurFrameTime .. "\nFunctionLoad:" .. tostring(tobool(PlayMP.MenuWindows)) .. "\nLanguages:" .. table.Count(PlayMP.Lang) .. "\nCurLanguage:" .. PlayMP.CurLang .. "\nMediaStartTime:" .. VideoStartTime .. "\nPlayMP.isPlaying:" .. tostring(PlayMP.isPlaying) .. "\nRealPlayTime:" .. RealPlayTime .. "\nCurPlayTime:" .. tostring(PlayMP.CurPlayTime) .. "\nCurTimeError:" .. PlayMP.CurPlayTime - RealPlayTime .. "\nCurPlayNum:" .. CurPlayNum .. "\nCurMenuPage:" .. tostring(CurMenuPage) .. "\nPending:" .. tostring(PlayMP.isPending) .. "\nPlayerStatusNumber:" .. tostring(PlayMP.PlayerStatus) .. "\ncurSettings Count(Including ServerSettings): " .. tostring(SettingsCount)
 						draw.DrawText( text, "ChatFont", 50, 50, Color( 255, 255, 255, 255 ), TEXT_ALIGN_LEFT )
 					end)
 				else

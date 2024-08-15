@@ -4,6 +4,22 @@ PlayMP.CurPlayTime = 0
 PlayMP.CurVideoInfo = {}
 PlayMP.RealPlayTime = 0
 PlayMP.LocalPlayerData = {}
+PlayMP.PlayerURL = "https://www.youtube-nocookie.com/embed/"
+PlayMP.PlayerQuerySelector = [[document.querySelector(".html5-video-player")]]
+
+PlayMP.PlayerURLList = {}
+PlayMP.PlayerURLList[2] = "https://www.youtube-nocookie.com/embed/"
+PlayMP.PlayerURLList[1] = "https://minbird.github.io/html/app/Pro_youtube.html?uri="
+PlayMP.PlayerURLList[0] = "https://minbird.kr/utils/ytdl/play?v="
+
+PlayMP.SelectorList = {}
+PlayMP.SelectorList[2] = [[document.querySelector(".html5-video-player")]]
+PlayMP.SelectorList[1] = [[player]]
+PlayMP.SelectorList[0] = [[Video]]
+
+
+
+PlayMP.SOMETHING = ""
 
 CreateClientConVar("playmp_volume", 15, true, false)
 
@@ -335,6 +351,8 @@ if data == nil or data == "" then
 	
 	PlayMP:AddSetting( "시스템언어", "SystemLang" )
 	PlayMP:AddSetting( "mainMenuBind", 100 )
+	
+	PlayMP:AddSetting( "PlayerType", 0 )
 
 end
 
@@ -346,7 +364,7 @@ function PlayMP.SetPlayerVolume( vol )
     RunConsoleCommand("playmp_volume", vol)
 	
 	if PlayMP.PlayerHTML != nil and PlayMP.PlayerHTML:Valid() then
-		PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. PlayMP.GetPlayerVolume() .. [[)]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]] .. PlayMP.GetPlayerVolume() .. [[)]])
 	end
 end
 
@@ -580,6 +598,19 @@ end
 PlayMP.isPending = false
 function PlayMP:PlayMusic( uri, startTime, endTime, newPlayer )
 
+	local curSet = PlayMP:GetSetting( "PlayerType", false, true )
+	if curSet == nil then curSet = 0 end
+	local typeList = {}
+	typeList[0] = PlayMP.PlayerURLList[0]
+	typeList[1] = PlayMP.PlayerURLList[1]
+	typeList[2] = PlayMP.PlayerURLList[2]
+	local selectorList = {}
+	selectorList[0] = PlayMP.SelectorList[0]
+	selectorList[1] = PlayMP.SelectorList[1]
+	selectorList[2] = PlayMP.SelectorList[2]
+	PlayMP.PlayerURL = typeList[curSet]
+	PlayMP.PlayerQuerySelector = selectorList[curSet]
+
 	if PlayMP:GetSetting( "No_Play_Always", false, true ) then 
 		
 		return 
@@ -594,9 +625,16 @@ function PlayMP:PlayMusic( uri, startTime, endTime, newPlayer )
 	PlayMP:LoadPlayer()
 	local vol = 0
 	if PlayMP.PlayerIsMuted then vol = 0 else vol = PlayMP.GetPlayerVolume() end
-	PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. uri .. "?Vol=" .. 0 .. "?Seek=" .. startTime )
+	PlayMP.PlayerHTML:OpenURL(PlayMP.PlayerURL .. uri)
+	
+	function PlayMP.PlayerHTML:OnDocumentReady( url )
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]] .. vol .. [[);]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. startTime .. [[);]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.SOMETHING)
+	end
+	
 	if PlayMP:GetSetting( "FMem", false, true) then
-		PlayMP.PlayerHTML:QueueJavascript([[player.setPlaybackQuality( "small" );]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setPlaybackQuality( "small" );]])
 	end
 	
 	PlayMP.SeekToTimeThink = 0
@@ -609,7 +647,8 @@ function PlayMP:PlayMusic( uri, startTime, endTime, newPlayer )
 		local Tick_TimeThink = CurTime()
 		hook.Add( "Think", "PendingPlayMP", function()
 			if 0.2 > CurTime() - Tick_TimeThink then return end
-			PlayMP.PlayerHTML:RunJavascript([[PlayMP.PlayState(player.getPlayerState());]])
+			if not PlayMP.PlayerHTML:IsValid() then return end
+			PlayMP.PlayerHTML:RunJavascript([[PlayMP.PlayState(]] .. PlayMP.PlayerQuerySelector .. [[.getPlayerState());]])
 			Tick_TimeThink = CurTime()
 		end )
 	end
@@ -623,7 +662,7 @@ function PlayMP:PlayerIsReady()
 		net.Start("PlayMP:PlayerIsReady")
 		net.SendToServer()
 		
-		PlayMP.PlayerHTML:QueueJavascript([[player.pauseVideo();]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.pauseVideo();]])
 		
 	end
 	
@@ -639,12 +678,14 @@ function PlayMP:StartMedia()
 
 	end
 	hook.Remove( "Think", "PendingPlayMP")
+	
+	if PlayMP.PlayerHTML == nil or not ispanel(PlayMP.PlayerHTML) or not PlayMP.PlayerHTML:IsValid() then return end
 
-	PlayMP.PlayerHTML:QueueJavascript([[player.playVideo();]])
+	PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.playVideo();]])
 	if PlayMP.PlayerIsMuted then
-		PlayMP.PlayerHTML:QueueJavascript([[player.mute();]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.mute();]])
 	else
-		PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. PlayMP.GetPlayerVolume() .. [[)]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]] .. PlayMP.GetPlayerVolume() .. [[)]])
 	end
 	
 end
@@ -680,19 +721,20 @@ function PlayMP:LoadPlayer( vMe )
 if PlayMP.PlayerMode != nil and PlayMP.PlayerMode == "worldScr" then
 
 	PlayMP.PlayerHTML:AddFunction("PlayMP", "PlayState", function( st )
+				print(st)
 				if st == nil then 
 					return 
 				end
 				if state != st then
 					
 					local stns = {}
-					stns[1] = PlayMP:Str( "PS_unstarted" )
-					stns[2] = PlayMP:Str( "Prepare_Play" )
-					stns[3] = PlayMP:Str( "Now_Playing" )
-					stns[4] = PlayMP:Str( "PS_paused" )
-					stns[5] = PlayMP:Str( "PS_buffering" )
+					stns[1] = PlayMP:Str( "PS_unstarted" ) -- -1
+					stns[2] = PlayMP:Str( "Prepare_Play" ) -- 0
+					stns[3] = PlayMP:Str( "Now_Playing" ) -- 1
+					stns[4] = PlayMP:Str( "PS_paused" ) -- 2
+					stns[5] = PlayMP:Str( "PS_buffering" ) -- 3
 					stns[6] = "???"
-					stns[7] = PlayMP:Str( "PS_videoCued" )
+					stns[7] = PlayMP:Str( "PS_videoCued" ) -- 5
 					
 					state = st
 					PlayMP:ChangeNowPlayingText(stns[tonumber(st)+2])
@@ -709,6 +751,12 @@ if PlayMP.PlayerMode != nil and PlayMP.PlayerMode == "worldScr" then
 					
 				end
 			end)
+			
+	function PlayMP.PlayerHTML:OnDocumentReady( url )
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]].. PlayMP.GetPlayerVolume() .. [[);]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. PlayMP.CurPlayTime + v.startTime .. [[);]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.SOMETHING)
+	end
 			
 	return
 else
@@ -786,7 +834,7 @@ PlayMP.PlayerHTML:AddFunction("PlayMP", "CurTime", function( time )
 	if not setError then return end
 	
 	if ( PlayMP.RealPlayTime - PlayMP.StartTime > PlayMP.CurPlayTime + 1.5 ) or ( PlayMP.RealPlayTime + 1.5 < PlayMP.CurPlayTime - PlayMP.StartTime ) then
-		PlayMP.PlayerHTML:QueueJavascript([[player.seekTo(]] .. PlayMP.CurPlayTime + PlayMP.StartTime .. [[, true)]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. PlayMP.CurPlayTime + PlayMP.StartTime .. [[, true)]])
 		--PlayMP.timeError = PlayMP.timeError + (curTime - PlayMP.CurPlayTime)
 		print("[PlayM Pro] Time error: " .. PlayMP.CurPlayTime - PlayMP.RealPlayTime .. "s! Try set to " .. PlayMP.CurPlayTime + PlayMP.StartTime .. "s...")
 		
@@ -953,9 +1001,14 @@ function PlayMP:EditMainPlayer()
 				if v["QueueNum"] == PlayMP.CurPlayNum then
 					local vol = 0
 					if PlayMP.PlayerIsMuted then vol = 0 else vol = PlayMP.GetPlayerVolume() end
-					PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. v.Uri .. "?Vol=" .. vol .. "?Seek=" .. PlayMP.CurPlayTime + v.startTime )
+					PlayMP.PlayerHTML:OpenURL(PlayMP.PlayerURL .. v.Uri)
+					function PlayMP.PlayerHTML:OnDocumentReady( url )
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]].. vol .. [[);]])
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. PlayMP.CurPlayTime + v.startTime .. [[);]])
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.SOMETHING)
+					end
 					if PlayMP:GetSetting( "FMem", false, true) then
-						PlayMP.PlayerHTML:QueueJavascript([[player.setPlaybackQuality( "small" );]])
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setPlaybackQuality( "small" );]])
 					end
 				end
 			end
@@ -1115,15 +1168,20 @@ function PlayMP:VideoTimeThink()
 			local Muted = false
 			hook.Add( "Think", "PMP Video Time Think", function()
 			
-				if PlayMP.PlayerHTML == nil then 
+				if PlayMP.PlayerHTML == nil or not ispanel(PlayMP.PlayerHTML) or not PlayMP.PlayerHTML:IsValid() then 
 					hook.Remove( "Think", "PMP Video Time Think")
 					PlayMP:LoadPlayer()
+					function PlayMP.PlayerHTML:OnDocumentReady( url )
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(0);]])
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. PlayMP.CurPlayTime + PlayMP.StartTime .. [[);]])
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.SOMETHING)
+					end
 					return
 				end
 				
 				if 0.2 > CurTime() - Tick_TimeThink then return end
 				
-				PlayMP.PlayerHTML:RunJavascript([[PlayMP.PlayState(player.getPlayerState());]])
+				PlayMP.PlayerHTML:RunJavascript([[PlayMP.PlayState(]] .. PlayMP.PlayerQuerySelector .. [[.getPlayerState());]])
 				
 				PlayMP.CurPlayTime = (CurTime() - PlayMP.VideoStartTime) + PlayMP.timeError + PlayMP.SeekToTimeThink
 				
@@ -1145,11 +1203,11 @@ function PlayMP:VideoTimeThink()
 				
 				if PlayMP:GetSetting( "PlayX01", false, true) then
 					if PlayX != nil and PlayX.Playing and PlayX.VideoRangeStatus == 1 then
-						PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(0)]])
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(0)]])
 						Muted = true
 					else
 						if Muted == true then
-							PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. vol .. [[)]])
+							PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]] .. vol .. [[)]])
 						end
 						Muted = false
 					end
@@ -1158,7 +1216,7 @@ function PlayMP:VideoTimeThink()
 				end
 			
 				if PlayMP.SeekTo != true then
-					PlayMP.PlayerHTML:RunJavascript([[PlayMP.CurTime(player.getCurrentTime());]])
+					PlayMP.PlayerHTML:RunJavascript([[PlayMP.CurTime(]] .. PlayMP.PlayerQuerySelector .. [[.getCurrentTime());]])
 				end
 			
 				if PlayMP.CurVideoLength < PlayMP.CurPlayTime then
@@ -1197,7 +1255,7 @@ function PlayMP:Seekto( time )
 			
 		PlayMP.SeekToTimeThink = PlayMP.SeekToTimeThink - (PlayMP.CurPlayTime - tonumber(time))
 			
-		PlayMP.PlayerHTML:QueueJavascript([[player.seekTo(]] .. time + PlayMP.StartTime .. [[, true)]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. time + PlayMP.StartTime .. [[, true)]])
 		PlayMP.SeekTo = false
 			
 	end
@@ -1840,16 +1898,16 @@ function PlayMP:VolumeToWithNoChangeSetting( vol, ti, startVol )
 				return
 			end
 			chTime = (CurTime() - curTime)/ti
-			PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. curVol + (volTonNum * chTime) .. [[)]])
+			PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]] .. curVol + (volTonNum * chTime) .. [[)]])
 			
 			if chTime >= 1 then
 				PlayMP_VolumeTo_isWorking = false
-				PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. vol .. [[)]])
+				PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]] .. vol .. [[)]])
 				hook.Remove( "Think", "VolumeToWithNoChangeSetting" )
 			end
 		end )
 	else
-		PlayMP.PlayerHTML:QueueJavascript([[player.setVolume(]] .. vol .. [[)]])
+		PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]] .. vol .. [[)]])
 		PlayMP_VolumeTo_isWorking = false
 	end
 	
@@ -1917,7 +1975,7 @@ local function changePlayMode( mode )
 				if not setError then return end
 				
 				if ( PlayMP.RealPlayTime - PlayMP.StartTime > PlayMP.CurPlayTime + 1.5 ) or ( PlayMP.RealPlayTime + 1.5 < PlayMP.CurPlayTime - PlayMP.StartTime ) then
-					PlayMP.PlayerHTML:QueueJavascript([[player.seekTo(]] .. PlayMP.CurPlayTime + PlayMP.StartTime .. [[, true)]])
+					PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. PlayMP.CurPlayTime + PlayMP.StartTime .. [[, true)]])
 					--PlayMP.timeError = PlayMP.timeError + (curTime - PlayMP.CurPlayTime)
 					print("[PlayM Pro] Time error: " .. PlayMP.CurPlayTime - PlayMP.RealPlayTime .. "s! Try set to " .. PlayMP.CurPlayTime + PlayMP.StartTime .. "s...")
 
@@ -1932,15 +1990,22 @@ local function changePlayMode( mode )
 		end
 	end
 	
+	
 	if PlayMP.isPlaying then
 		PlayMP:LoadPlayer()
 		for k, v in pairs( PlayMP.CurVideoInfo ) do
 			if v["QueueNum"] == PlayMP.CurPlayNum then
 				local vol = 0
 				if PlayMP.PlayerIsMuted then vol = 0 else vol = PlayMP.GetPlayerVolume() end
-				PlayMP.PlayerHTML:OpenURL("https://minbird.github.io/html/app/Pro_youtube.html?uri=" .. v.Uri .. "?Vol=" .. vol .. "?Seek=" .. PlayMP.CurPlayTime + v.startTime )
+				PlayMP.PlayerHTML:OpenURL(PlayMP.PlayerURL .. v.Uri)
+				function PlayMP.PlayerHTML:OnDocumentReady( url )
+					PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]] .. vol .. [[);]])
+					PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. PlayMP.CurPlayTime + v.startTime .. [[);]])
+					PlayMP.PlayerHTML:QueueJavascript(PlayMP.SOMETHING)
+				end
 				if PlayMP:GetSetting( "FMem", false, true) then
-					PlayMP.PlayerHTML:QueueJavascript([[player.setPlaybackQuality( "small" );]])
+					PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setPlaybackQuality( "small" );]])
+					
 				end
 			end
 		end
@@ -2061,8 +2126,9 @@ net.Receive( "player_connect_PlayMP:Playmusic", function()
 	local pn = tonumber( net.ReadString() )
 	local playing = net.ReadString()
 	local pt = tonumber( net.ReadString() )
+	
 	if pt and playing == "playing" then
-		PlayMP:ReceiveMusicDataAndPlay( pn, nil, pt )
+		PlayMP:ReceiveMusicDataAndPlay( pn, PlayMP.CurVideoInfo, pt )
 	else
 		PlayMP.CurPlayNum = pn
 	end

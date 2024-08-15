@@ -256,3 +256,6 @@ lang.PSec = "%s초 전에"
 lang.PMin = "%s분 전에"
 lang.PHur = "%s시간 전에"
 lang.PDay = "%s일 전에"
+
+lang.CSet_PlayerType = "재생기 방식 선택"
+lang.Embed_IframePlayer_ex = "Embed 재생기는 광고가 표시되지 않지만 일부 영상은 재생할 수 없습니다. Iframe 재생기는 대부분의 영상을 재생할 수 있지만, 광고가 표시될 수 있습니다. YTDL 재생기는 대부분의 영상을 광고 없이 재생할 수 있지만, 준비 시간이 길고 영상 화면을 볼 수 없습니다(대신 이상한 화면이 보입니다.)."

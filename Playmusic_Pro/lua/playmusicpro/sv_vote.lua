@@ -44,10 +44,10 @@ end
 function PlayMP:updateVoteCount( num, ply )
 
 	PlayMP.MinPerForSkip = GetConVar( "playmp_MinPerForSkip" ):GetFloat() 
-	voteCount = voteCount + 1
 	PlayMP.voteCount = voteCount
 	
 	if ply != nil then
+		voteCount = voteCount + 1
 		PlayMP:NoticeForPlayer( "Someone_want_skip_music", "gray", "notice", nil, {ply:Nick(), voteCount, math.max(math.Round(PlayMP.MinPerForSkip/100 * (#player.GetHumans())),1)} )
 	end
 	

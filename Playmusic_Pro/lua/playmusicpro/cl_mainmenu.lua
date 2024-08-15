@@ -475,6 +475,12 @@ end
 
 	function PlayMP:AddCheckBox( panel, func, text, def, instant, vaild, unique )
 	
+		local func = func
+		local dummyFunc = function() end 
+		if not isfunction(func) then 
+			func = dummyFunc
+		end
+	
 		local table = {}
 		if instant != nil and instant == true then
 			table.Vaild = vaild[unique]
@@ -606,6 +612,12 @@ end
 	function PlayMP:AddTextBox( panel, tall, dock, text, x, y, font, color, boxColor, align, func, returnAllPanel )
 		
 		local align = align
+		
+		local func = func
+		local dummyFunc = function() end 
+		if not isfunction(func) then 
+			func = dummyFunc
+		end
 		
 		local TextBox = panel:Add( "DPanel" )
 		TextBox:SetSize( panel:GetWide(), tall )
@@ -1075,7 +1087,7 @@ end
 				if not PlayMP:isMuted() then
 					
 					if PlayMP.PlayerHTML != nil and PlayMP.PlayerHTML:Valid() then
-						PlayMP.PlayerHTML:QueueJavascript([[player.unMute();]])
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.unMute();]])
 					end
 					if VolumeSlider:GetValue() > 85 then
 						Button_Vol:SetImage( "vgui/playmusic_pro/vol1" )
@@ -1089,7 +1101,7 @@ end
 					
 				else
 					if PlayMP.PlayerHTML != nil and PlayMP.PlayerHTML:Valid() then
-						PlayMP.PlayerHTML:QueueJavascript([[player.mute();]])
+						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.mute();]])
 					end
 					Button_Vol:SetImage( "vgui/playmusic_pro/mute.png" )
 					

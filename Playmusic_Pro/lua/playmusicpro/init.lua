@@ -434,6 +434,7 @@ function PlayMP:AddQueue( url, startTime, endTime, ply, removeOldMedia )
 			return 
 		elseif er == "ok" then
 			--PlayMP:NoticeForPlayer( "QueueAdded", "green", "notice", ply,   )
+			http.Fetch( "https://minbird.kr/utils/ytdl?v=" .. uri, function() end, function( message ) PlayMP:WriteLog( message ) end )
 			PlayMP:Playmusic()
 			PlayMP:WriteLog("User '" .. ply:Nick() .. "'(" .. ply:SteamID() .. ") add music to queue! (" .. url .. ")")
 		end
@@ -826,6 +827,7 @@ function PlayMP:ReadVideoInfo( uri, startTime, endTime, ply, removeOldMedia )
 			PlayMP:Playmusic()
 			PlayMP:WriteLog("User '" .. ply:Nick() .. "'(" .. ply:SteamID() .. ") add music to queue! (" .. uri .. ")")
 			PlayMP:NoticeForPlayer( "QueueAdded", "green", "notice", ply, {cache.Name} )
+			http.Fetch( "https://minbird.kr/utils/ytdl?v=" .. uri, function() end, function( message ) PlayMP:WriteLog( message ) end )
 			return
 	end
 
@@ -977,6 +979,7 @@ function PlayMP:ReadVideoInfo( uri, startTime, endTime, ply, removeOldMedia )
 				PlayMP:NoticeForPlayer( "CantPlayLiveCont", "red", "warning", ply )
 			else
 				PlayMP:NoticeForPlayer( "QueueAdded", "green", "notice", ply, {video.Title} )
+				http.Fetch( "https://minbird.kr/utils/ytdl?v=" .. uri, function() end, function( message ) PlayMP:WriteLog( message ) end )
 				PlayMP:Playmusic()
 				PlayMP:WriteLog("User '" .. ply:Nick() .. "'(" .. ply:SteamID() .. ") add music to queue! (" .. uri .. ")")
 			end
