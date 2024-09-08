@@ -248,7 +248,7 @@ lang.Someone_want_skip_music = "%s님이 지금 재생중인 미디어 건너 �
 lang.skip_vote_count = "스킵 투표 "
 lang.cant_vote_when_notplaying = "재생 중이 아닐 때는 스킵 투표할 수 없습니다."
 
-lang.userDataBySteam = "%s의 현재 정보 (steam에서 가져옴.)"
+lang.userDataBySteam = "%s의 현재 정보 (Steam에서 가져옴.)"
 lang.lastconn = "최근 접속: %s"
 lang.NickName_2 = "현재 닉네임: %s"
 

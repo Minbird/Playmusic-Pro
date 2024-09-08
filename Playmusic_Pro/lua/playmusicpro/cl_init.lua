@@ -202,7 +202,7 @@ end
 	
 surface.CreateFont( "NotchInfoPanel_PlaymusicPro_Font", {
 	font = "Arial",
-	extended = false,
+	extended = true,
 	size = 18,
 	weight = 500,
 	blursize = 0,
@@ -220,7 +220,7 @@ surface.CreateFont( "NotchInfoPanel_PlaymusicPro_Font", {
 
 surface.CreateFont( "Default_PlaymusicPro_Font", {
 	font = "Arial",
-	extended = false,
+	extended = true,
 	size = 18,
 	weight = 550,
 	blursize = 0,
