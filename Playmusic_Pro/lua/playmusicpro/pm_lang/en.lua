@@ -16,7 +16,7 @@ lang.CanUseSeektoOnlyAdmin = "This Server not allow you change playback location
 lang.wrongUrl = "Incorrect Url. Please submit correct Url."
 lang.Error_VideoDataReadError = "Can't read Info about Video Url that you submitted."
 lang.CantPlayLiveCont = "Can't playing this Video because this is Live Content."
-lang.AreYouSureRemoveThisMusic = "Are You Sure remove this Video from My Play List?\nYou can't recover it after Remove."
+lang.AreYouSureRemoveThisMusic = "Are You Sure want to remove this Video from My Play List?\nYou can't recover it after Removal."
 lang.RemoveMusicFromPlayList = "Remove Video from My Play List"
 lang.AddToQueue = "Add To Queue"
 lang.EnterYoutubeUrl = "Enter Youtube Video URL"
@@ -258,9 +258,4 @@ lang.PHur = "%s hours ago"
 lang.PDay = "%s days ago"
 
 lang.CSet_PlayerType = "Player mode"
-lang.Embed_IframePlayer_ex = "Only for Chromium Sound engine.\nThe Embed player doesn't show ads, but can't play some videos. The Iframe player can play most videos, but may show ads.\nThe YTDL player can play most videos without ads, but it has a long warm-up time and you can't see the video screen (instead, you see a weird screen)."
 
-lang.Player_Engine_ex = "Select the sound engine that you want to use for music playback. Gmod Audio Player is highly compatible, but can cause errors in music localisation (roughly 0-10 seconds off), so we recommend using Chromium."
-lang.CSet_Player_Engine_Gmod = "Gmod Audio Player"
-lang.CSet_Player_Engine_Chromium = "Chromium (recommend)"
-lang.CSet_Player_Engine = "Sound engine"
