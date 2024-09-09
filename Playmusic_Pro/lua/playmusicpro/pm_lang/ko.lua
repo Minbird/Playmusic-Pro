@@ -258,4 +258,9 @@ lang.PHur = "%s시간 전에"
 lang.PDay = "%s일 전에"
 
 lang.CSet_PlayerType = "재생기 방식 선택"
-lang.Embed_IframePlayer_ex = "Embed 재생기는 광고가 표시되지 않지만 일부 영상은 재생할 수 없습니다. Iframe 재생기는 대부분의 영상을 재생할 수 있지만, 광고가 표시될 수 있습니다. YTDL 재생기는 대부분의 영상을 광고 없이 재생할 수 있지만, 준비 시간이 길고 영상 화면을 볼 수 없습니다(대신 이상한 화면이 보입니다.)."
+lang.Embed_IframePlayer_ex = "Chromium 사운드 엔진을 사용할 때만 적용되는 설정입니다.\nEmbed 재생기는 광고가 표시되지 않지만 일부 영상은 재생할 수 없습니다. Iframe 재생기는 대부분의 영상을 재생할 수 있지만, 광고가 표시될 수 있습니다.\nYTDL 재생기는 대부분의 영상을 광고 없이 재생할 수 있지만, 준비 시간이 길고 영상 화면을 볼 수 없습니다(대신 이상한 화면이 보입니다.)."
+
+lang.Player_Engine_ex = "음악 재생에 사용할 사운드 엔진을 선택합니다. Gmod Audio Player은 호환성이 높지만, 음악 위치 탐색에 오류가 발생할 수 있으므로(대략 0~10초 오차) Chromium 사용을 권장합니다. Gmod Audio Player는 항상 YTDL 재생기를 사용합니다."
+lang.CSet_Player_Engine_Gmod = "Gmod Audio Player"
+lang.CSet_Player_Engine_Chromium = "Chromium (권장)"
+lang.CSet_Player_Engine = "사용할 사운드 엔진"

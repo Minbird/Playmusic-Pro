@@ -1,4 +1,3 @@
-
 -- Do NOT EDIT Unique Code. EDIT ONLY TEXT.
 -- 고유 코드를 절대로 수정하지 마십시오. 텍스트만 수정하십시오.
 -- НЕ РЕДАКТИРУЙТЕ уникальный код. РЕДАКТИРОВАТЬ ТОЛЬКО ТЕКСТ.
@@ -258,3 +257,11 @@ lang.PSec = "%s сек. назад"
 lang.PMin = "%s мин. назад"
 lang.PHur = "%s ч. назад"
 lang.PDay = "%s дн. назад"
+
+lang.CSet_PlayerType = "Player mode"
+lang.Embed_IframePlayer_ex = "Only for Chromium Sound engine.\nThe Embed player doesn't show ads, but can't play some videos. The Iframe player can play most videos, but may show ads.\nThe YTDL player can play most videos without ads, but it has a long warm-up time and you can't see the video screen (instead, you see a weird screen)."
+
+lang.Player_Engine_ex = "Select the sound engine that you want to use for music playback. Gmod Audio Player is highly compatible, but can cause errors in music localisation (roughly 0-10 seconds off), so we recommend using Chromium."
+lang.CSet_Player_Engine_Gmod = "Gmod Audio Player"
+lang.CSet_Player_Engine_Chromium = "Chromium (recommend)"
+lang.CSet_Player_Engine = "Sound engine"

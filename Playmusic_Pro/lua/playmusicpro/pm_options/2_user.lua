@@ -12,24 +12,6 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 			UserImage:SetPos( (MySteamInfo:GetWide() / 2) - 64, 30 )
 			UserImage:SetPlayer( LocalPlayer(), 128 )
 			
-			--[[if LocalPlayer():IsAdmin() then
-				local isAdmin = DScrollPanel:Add( "DPanel" )
-				isAdmin:SetSize( DScrollPanel:GetWide(), 20 )
-				isAdmin:Dock( TOP )
-				isAdmin.Paint = function( self, w, h )
-					draw.RoundedBox( 0, 0, 0, w, h, Color(0,0,0,100) )
-					draw.DrawText(PlayMP:Str( "MyState_Admin" ), "Trebuchet18", (isAdmin:GetWide() / 2), 0, Color(180,120,120), TEXT_ALIGN_CENTER)
-				end
-			end
-			
-			local WelcomeMsg = DScrollPanel:Add( "DPanel" )
-			WelcomeMsg:SetSize( DScrollPanel:GetWide(), 60 )
-			WelcomeMsg:Dock( TOP )
-			WelcomeMsg.Paint = function( self, w, h )
-				draw.RoundedBox( 0, 0, 0, w, h, Color(0,0,0,100) )
-				draw.DrawText(PlayMP:Str( "MyState_HelloPlayer", LocalPlayer():Nick() ), "DermaLarge", (WelcomeMsg:GetWide() / 2), 0, Color(255,255,255), TEXT_ALIGN_CENTER)
-			end]]
-			
 			if PlayMP.LocalPlayerData[1]["power"] then
 				PlayMP:AddTextBox( DScrollPanel, 20, TOP, PlayMP:Str( "MyState_Admin" ), 30, 0, "Trebuchet18", Color(180,120,120), Color(0,0,0,100), TEXT_ALIGN_CENTER )
 			end
@@ -78,10 +60,6 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 								local VideoInfo = DScrollPanel:Add( "DPanel" )
 								VideoInfo:SetSize( DScrollPanel:GetWide(), 120 )
 								VideoInfo:Dock( TOP )
-								--[[VideoInfo.Paint = function( self, w, h )
-									surface.SetDrawColor( 60, 60, 60, 255 )
-									surface.DrawLine( 10, h - 1, w - 10, h - 1 )
-								end]]
 								VideoInfo:SetBackgroundColor( Color(40,40,40,255))
 							
 								if v.thumbnails then
@@ -121,8 +99,6 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 								label4:SetFont( "DermaDefault" )
 								label4:SetColor( Color( 150, 150, 150, 255 ) )
 								
-								--local dateStart, dateEnd = string.find( v.snippet.publishedAt, "T" )
-								
 								local dateString = v.DateString
 								local datecur = os.time()/86400 - v.Time/86400
 								local timecur = os.time() - v.Time
@@ -143,12 +119,10 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 								VideoInfo.OnCursorEntered = function( self, w, h )
 									VideoInfo:SetBackgroundColor( Color(50,50,50,255), 0.5 )
 									label:SetColor( Color( 255, 255, 255, 255 ) )
-									--label2:SetColor( Color( 170, 170, 170, 255 ) )
 								end
 								VideoInfo.OnCursorExited = function( self, w, h )
 									VideoInfo:SetBackgroundColor( Color(40,40,40,255), 1 ) 
 									label:SetColor( Color( 230, 230, 230, 255 ) )
-									--label2:SetColor( Color( 150, 150, 150, 255 ) )
 								end
 								
 								PlayMP:AddActionButton( VideoInfo, "  " .. PlayMP:Str( "Play" ), Color( 60, 60, 60, 255 ), 190, 75, 90, 30, function() PlayMP:OpenWriteQueueInfoPanel( "https://www.youtube.com/watch?v="..v.Uri ) end, "materials/vgui/playmusic_pro/55.png")
@@ -175,13 +149,51 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 		end)
 		
 		PlayMP:AddOption( PlayMP:Str( "Options_ClientOptions" ), "ClientOptions", "", function(DScrollPanel)
-		
-			if PlayMP.CurSystemVersion.isBeta and PlayMP.CurSystemVersion.ResetOptionAnytime then
-				PlayMP:AddTextBox( DScrollPanel, 100, TOP, "현재 Playmusic Pro 버전은 " .. PlayMP.CurSystemVersion.Ver .. "이며\n테스트 베타 환경으로 실행되고 있습니다...\nPlaymusic Pro가 시작될 때마다 설정을 초기화합니다.", 30, 12, "Trebuchet24", Color(255, 255, 255), Color(231, 76, 47), TEXT_ALIGN_LEFT )
-			end
 			
 			PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "Player" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 			
+			PlayMP:AddTextBox( DScrollPanel, 80, TOP, PlayMP:Str( "Player_Engine_ex" ), 30, 0, "Default_PlaymusicPro_Font", Color(255,255,255), Color(40, 40, 40, 0), TEXT_ALIGN_LEFT )
+			PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "CSet_Player_Engine" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
+			
+				local DComboBox = vgui.Create( "DComboBox", self )
+				DComboBox:SetPos( self:GetWide() - 220, 12.5 )
+				DComboBox:SetSize( 200, 30 )
+				
+				local type = {}
+				type[0] = PlayMP:Str( "CSet_Player_Engine_Gmod" )
+				type[1] = PlayMP:Str( "CSet_Player_Engine_Chromium" )
+				
+				DComboBox.OnSelect = function( panel, index, value )
+				
+					if value == type[0] then
+						PlayMP:ChangeSetting( "PlayerEngine", 0 )
+						PlayMP.Player.Engine_type = "gmod"
+					end
+					
+					if value == type[1] then
+						PlayMP:ChangeSetting( "PlayerEngine", 1 )
+						PlayMP.Player.Engine_type = "chromium"
+					end
+					
+					-- 재생기 새로고침
+					PlayMP.Player:Reload_Player()
+
+				end
+				
+				local curSet = PlayMP:GetSetting( "PlayerEngine", false, true )
+				if curSet == nil then curSet = 0 end
+				
+				DComboBox:AddChoice( type[0] )
+				DComboBox:AddChoice( type[1] )
+				DComboBox:SetValue( type[curSet] )
+				
+				self.Paint = function( self, w, h )
+					surface.SetDrawColor( 70, 70, 70, 255 )
+					surface.DrawLine( 30, h - 1, w - 30, h - 1 )
+				end
+			end)
+
+
 			PlayMP:AddTextBox( DScrollPanel, 80, TOP, PlayMP:Str( "Embed_IframePlayer_ex" ), 30, 0, "Default_PlaymusicPro_Font", Color(255,255,255), Color(40, 40, 40, 0), TEXT_ALIGN_LEFT )
 			PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "CSet_PlayerType" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
 			
@@ -190,10 +202,7 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 				DComboBox:SetSize( 200, 30 )
 				
 				local type = {}
-				---type[0] = "Embed Player"
-				---type[1] = "Iframe Player"
-				---type[2] = "YTDL Player"
-				
+
 				type[0] = "YTDL Player"
 				type[1] = "Iframe Player"
 				type[2] = "Embed Player"
@@ -211,38 +220,27 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 				
 					if value == type[0] then
 						PlayMP:ChangeSetting( "PlayerType", 0 )
-						PlayMP.PlayerURL = typeList[0]
-						PlayMP.PlayerQuerySelector = selectorList[0]
+						PlayMP.Player.Url = typeList[0]
+						PlayMP.Player.QuerySelector = selectorList[0]
 					end
 					
 					if value == type[1] then
 						PlayMP:ChangeSetting( "PlayerType", 1 )
-						PlayMP.PlayerURL = typeList[1]
-						PlayMP.PlayerQuerySelector = selectorList[1]
+						PlayMP.Player.Url = typeList[1]
+						PlayMP.Player.QuerySelector = selectorList[1]
 					end
 					
 					if value == type[2] then
 						PlayMP:ChangeSetting( "PlayerType", 2 )
-						PlayMP.PlayerURL = typeList[2]
-						PlayMP.PlayerQuerySelector = selectorList[2]
+						PlayMP.Player.Url = typeList[2]
+						PlayMP.Player.QuerySelector = selectorList[2]
 					end
 					
 					-- 재생기 새로고침
-					if PlayMP.isPlaying != true then return end
+					if PlayMP.Player.isPlaying != true then return end
 					if PlayMP.PlayerMode == "worldScr" then return end
-					PlayMP.PlayerHTML:Remove()
-					PlayMP.PlayerMainPanel:Close()
-					PlayMP:LoadPlayer()
-					for k, v in pairs( PlayMP.CurVideoInfo ) do
-						if v["QueueNum"] == PlayMP.CurPlayNum then
-							PlayMP.PlayerHTML:OpenURL(PlayMP.PlayerURL .. v.Uri )
-							function PlayMP.PlayerHTML:OnDocumentReady( url )
-								PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]].. PlayMP.GetPlayerVolume() .. [[);]])
-								PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. PlayMP.CurPlayTime + v.startTime .. [[);]])
-								PlayMP.PlayerHTML:QueueJavascript(PlayMP.SOMETHING)
-							end
-						end
-					end
+					
+					PlayMP.Player:Reload_Player()
 
 				end
 				
@@ -265,21 +263,11 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 			PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_SyncPlay_WhenConnectAtHalfway" ), "SyncPlay_WCAH" )
 			PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_No_Play_Always" ), "No_Play_Always" )
 			PlayMP:AddCheckBox( DScrollPanel, function()
-				if PlayMP.isPlaying != true then return end
+				if PlayMP.Player.isPlaying != true then return end
 				if PlayMP.PlayerMode == "worldScr" then return end
-					PlayMP.PlayerHTML:Remove()
-					PlayMP.PlayerMainPanel:Close()
-					PlayMP:LoadPlayer()
-					for k, v in pairs( PlayMP.CurVideoInfo ) do
-						if v["QueueNum"] == PlayMP.CurPlayNum then
-							PlayMP.PlayerHTML:OpenURL(PlayMP.PlayerURL .. v.Uri )
-							function PlayMP.PlayerHTML:OnDocumentReady( url )
-								PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setVolume(]].. PlayMP.GetPlayerVolume() .. [[);]])
-								PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.seekTo(]] .. PlayMP.CurPlayTime + v.startTime .. [[);]])
-								PlayMP.PlayerHTML:QueueJavascript(PlayMP.SOMETHING)
-							end
-						end
-					end
+				
+				PlayMP.Player:Reload_Player()
+
 				end, PlayMP:Str( "CSet_Show_MediaPlayer" ), "Show_MediaPlayer" )
 			PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "CSet_ChangeViewerSet" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
 				PlayMP:AddActionButton( self, PlayMP:Str( "CSet_ChangeViewerSet_OpenViewer" ), Color( 60, 60, 60, 255 ), w - 120, 12.5, 100, 30, function() if PlayMP.PlayerMode == "worldScr" then return end PlayMP:EditMainPlayer() end)
@@ -292,11 +280,11 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 				if PlayMP:GetSetting( "Show_InfPan_Always", false, true ) then
 					PlayMP.NotchInfoPanel_PlayerVideoImage:SetAlpha(255)
 					PlayMP.NotchInfoPanel:AlphaTo( 255, 1 )
-					PlayMP.NotchInfoPanel:MoveTo( ScrW() * 0.5 - ScrW() * 0.2, 20, 1)
+					PlayMP.NotchInfoPanel:MoveTo( ScrW() * 0.55 - ScrW() * 0.2, 20, 1)
 				else
 					PlayMP.NotchInfoPanel_PlayerVideoImage:SetAlpha(0)
 					PlayMP.NotchInfoPanel:AlphaTo( 0, 1 )
-					PlayMP.NotchInfoPanel:MoveTo( ScrW() * 0.5 - ScrW() * 0.2, 0, 1)
+					PlayMP.NotchInfoPanel:MoveTo( ScrW() * 0.55 - ScrW() * 0.2, 0, 1)
 				end
 			end, PlayMP:Str( "CSet_Show_InfoPanel_Always" ), "Show_InfPan_Always" )
 			--PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_No_Show_InfoPanel" ), "No_Show_InfoPanel" )
@@ -320,7 +308,7 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 					
 					numslider.ValueChanged = function( d )
 						
-						--PlayMP:ChangConVar( "playmp_queue_user", math.floor(d) )
+						--PlayMP.net.ChangConVar( "playmp_queue_user", math.floor(d) )
 						if math.floor(d) == 0 then
 							CSet_VolChangeWhenPlayerStartVChatOriLabel:SetText(PlayMP:Str( "CSet_MuteWhenPlayerStartVChat" ))
 						elseif math.floor(d) == 100 then
@@ -344,97 +332,16 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 			PlayMP:AddCheckBox( DScrollPanel, nil, PlayMP:Str( "CSet_removeOldMedia" ), "removeOldQueue" )
 			--PlayMP:AddCheckBox( DScrollPanel, "", "대기열 50개만 표시해 사용 환경 최적화", "대기열에50개만표시" )
 			
-			PlayMP:AddTextBox( DScrollPanel, 48, TOP, "PlayX", 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+			--[[PlayMP:AddTextBox( DScrollPanel, 48, TOP, "PlayX", 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 			if PlayX != nil then
 				PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_PlayX01" ), "PlayX01" )
 			else
 				PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "CSet_There_Is_No_PlayX" ), DScrollPanel:GetWide() * 0.5, 15, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0, 0, 0, 0), TEXT_ALIGN_CENTER )
-			end
+			end]] -- PlayX 옵션이 있을 필요가 있나?
 			
 			PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "CSet_Graphics" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 			PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_Use_Blur" ), "Use_Blur" )
 			PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_Use_Animation" ), "Use_Animation" )
-			--[[PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "CSet_MainMenu_Alpha" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
-				PlayMP:AddActionButton( self, PlayMP:Str( "Edit" ), Color( 60, 60, 60, 255 ), w - 120, 12.5, 100, 30, function() 
-				
-					PlayMP:OpenSubFrame( PlayMP:Str( "CSet_Set_MainMenu_Alpha" ), PlayMP:Str( "CSet_MainMenu_Alpha" ), 600, 200, function( mainPanel, scrpanel, ButtonPanel )
-						PlayMP:AddTextBox( scrpanel, 50, TOP, PlayMP:Str( "CSet_Set_MainMenu_Alpha_Ex" ), scrpanel:GetWide() * 0.5, 12, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-						
-						--local TextEntry = PlayMP:AddTextEntryBox( scrpanel, TOP, nil, "50 ~ 255", scrpanel:GetWide(), 40 )
-						--TextEntry:SetText( PlayMP:GetSetting( "MainMenu_Alpha", false, true) )
-						
-						local TextEntry = vgui.Create( "DNumSlider", scrpanel )
-						TextEntry:SetSize(scrpanel:GetWide(), 40)
-						TextEntry:Dock(TOP)
-						TextEntry:SetText( " " )	
-						TextEntry:SetMin( 50 )
-						TextEntry:SetMax( 255 )				
-						TextEntry:SetValue( tonumber(PlayMP:GetSetting( "MainMenu_Alpha", false, true)) )
-						
-						PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "Apply" ), Color( 70, 70, 70 ), ButtonPanel:GetWide() - 260, 10, 130, 30, function()
-						
-							if TextEntry:GetValue() != nil then
-								if tonumber(TextEntry:GetValue()) != nil and tonumber(TextEntry:GetValue()) > 49 and tonumber(TextEntry:GetValue()) < 256 then
-									hook.Remove("HUDPaint", "OpenRequestQueueWindow")
-									mainPanel:Close()
-									
-									PlayMP:ChangeSetting( "MainMenu_Alpha", TextEntry:GetValue() )
-									
-									PlayMP:OpenSubFrame( PlayMP:Str( "CSet_Set_MainMenu_Alpha" ), "메인 메뉴 불투명도 설정", 600, 200, function( mainPanel, scrpanel, ButtonPanel )
-										PlayMP:AddTextBox( scrpanel, scrpanel:GetTall(), FILL, PlayMP:Str( "CSet_Set_MainMenu_Alpha_Ex2", TextEntry:GetValue() ), scrpanel:GetWide() * 0.5, 12, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-										PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "OK" ), Color( 70, 70, 70 ), ButtonPanel:GetWide() - 120, 10, 100, 30, function()
-											hook.Remove("HUDPaint", "OpenRequestQueueWindow")
-											mainPanel:Close()
-										end )
-									end)
-									
-								else
-								
-									hook.Remove("HUDPaint", "OpenRequestQueueWindow")
-									mainPanel:Close()
-								
-									PlayMP:OpenSubFrame( PlayMP:Str( "CSet_Set_MainMenu_Alpha" ), "메인 메뉴 불투명도 설정", 600, 200, function( mainPanel, scrpanel, ButtonPanel )
-										PlayMP:AddTextBox( scrpanel, scrpanel:GetTall(), FILL, PlayMP:Str( "CSet_Set_MainMenu_Alpha_Err", TextEntry:GetValue() ), scrpanel:GetWide() * 0.5, 12, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-										
-										PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "OK" ), Color( 70, 70, 70 ), ButtonPanel:GetWide() - 120, 10, 100, 30, function()
-											hook.Remove("HUDPaint", "OpenRequestQueueWindow")
-											mainPanel:Close()
-										end )
-									end)
-								
-								end
-							else
-							
-							hook.Remove("HUDPaint", "OpenRequestQueueWindow")
-							mainPanel:Close()
-								
-							PlayMP:OpenSubFrame( PlayMP:Str( "CSet_Set_MainMenu_Alpha" ), "메인 메뉴 불투명도 설정", 600, 200, function( mainPanel, scrpanel, ButtonPanel )
-								PlayMP:AddTextBox( scrpanel, scrpanel:GetTall(), FILL, PlayMP:Str( "Unknown_Error" ), scrpanel:GetWide() * 0.5, 12, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-								PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "OK" ), Color( 70, 70, 70 ), ButtonPanel:GetWide() - 120, 10, 100, 30, function()
-									hook.Remove("HUDPaint", "OpenRequestQueueWindow")
-									mainPanel:Close()
-								end )
-							end)
-							
-							end
-							
-						end)
-						
-						PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "Cancel" ), Color( 70, 70, 70 ), ButtonPanel:GetWide() - 120, 10, 100, 30, function()
-							hook.Remove("HUDPaint", "OpenRequestQueueWindow")
-							mainPanel:Close()
-						end )
-						
-					end)
-				end)
-				
-				self.Paint = function( self, w, h )
-					surface.SetDrawColor( 70, 70, 70, 255 )
-					surface.DrawLine( 30, h - 1, w - 30, h - 1 )
-				end
-				
-			end)]]
-			
 			PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "System" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 			
 			PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "CSet_openMenuBind" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
@@ -485,10 +392,6 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 					
 					PlayMP:OpenSubFrame( PlayMP:Str( "Notice" ), "재시작후언어적용알림", 600, 200, function( mainPanel, scrpanel, ButtonPanel )
 						PlayMP:AddTextBox( scrpanel, scrpanel:GetTall(), FILL, PlayMP:Str( "CSet_Language_PlzReStartPMP", CurLangName ), scrpanel:GetWide() * 0.5, 40, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-						--[[PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "NoShowAgain" ), Color( 70, 70, 70 ), ButtonPanel:GetWide() - 260, 10, 130, 30, function()
-							hook.Remove("HUDPaint", "OpenRequestQueueWindow")
-							mainPanel:Close()
-						end )]]
 						PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "OK" ), Color( 70, 70, 70 ), ButtonPanel:GetWide() - 120, 10, 100, 30, function()
 							hook.Remove("HUDPaint", "OpenRequestQueueWindow")
 							mainPanel:Close()
@@ -514,57 +417,28 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 				
 			end)
 			
-			--[[
-			PlayMP:AddCheckBox( DScrollPanel, function()
-				if PlayMP:GetSetting( "저사양모드", false, true) then
-					PlayMP:Notice( "저사양 모드를 적용합니다. 대부분의 애니메이션이 제거되며 PlayMusic Pro 시스템의 작동이 느려질 수 있으나 정상입니다.", Color(42, 205, 114), "notice" )
-					PlayMP:OpenSubFrame( "알림", "알림 - 클립보드에 복사함", 600, 200, function( mainPanel, scrpanel, ButtonPanel )
-						PlayMP:AddTextBox( scrpanel, scrpanel:GetTall(), FILL, "저사양 모드를 적용합니다.\n대부분의 애니메이션이 사라지며 조금 적은 프레임의 이득을 얻을 수 있습니다.\n단, 게리모드 특성상 화면에 많은 콘텐츠가 표시되는 경우\n이 모드가 소용없을 수 있습니다.\n이 문제를 해결할 수 있도록 노력하겠습니다.", scrpanel:GetWide() * 0.5, 12, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-						PlayMP:AddActionButton( ButtonPanel, "다시 보지 않기", Color( 70, 70, 70 ), ButtonPanel:GetWide() - 260, 10, 130, 30, function()
-							hook.Remove("HUDPaint", "OpenRequestQueueWindow")
-							mainPanel:Close()
-						end )
-						PlayMP:AddActionButton( ButtonPanel, "확인", Color( 70, 70, 70 ), ButtonPanel:GetWide() - 120, 10, 100, 30, function()
-							hook.Remove("HUDPaint", "OpenRequestQueueWindow")
-							mainPanel:Close()
-						end )
-					end)
-				else
-					PlayMP:Notice( "저사양 모드를 해제합니다.", Color(42, 205, 114), "notice" )
-				end
-			end, "저사양 모드 사용", "저사양모드" )
-			]]
+
 			PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_NoNoticeUpdate" ), "NoUpdateNotice" )
-			PlayMP:AddCheckBox( DScrollPanel, function()
-				if PlayMP.isPlaying and PlayMP.PlayerHTML != nil and PlayMP.PlayerHTML:Valid() then
-					if PlayMP:GetSetting( "FMem", false, true) then
-						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setPlaybackQuality( "small" );]])
-					else
-						PlayMP.PlayerHTML:QueueJavascript(PlayMP.PlayerQuerySelector .. [[.setPlaybackQuality( "defaunt" );]])
-					end
-				end
-			end, PlayMP:Str( "CSet_FMem" ), "FMem" )
 			
 			PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "Advanced" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 			PlayMP:AddCheckBox( DScrollPanel, function() 
 				if PlayMP:GetSetting( "디버그모드", false, true) then
 					hook.Add("HUDPaint", "PlayMProDebug", function()
-						local CurPlayNum = PlayMP.CurPlayNum
+						local CurPlayNum = PlayMP.Player.Cur_Play_Num
 						if CurPlayNum == nil then CurPlayNum = 0 end
 						local CurMenuPage = PlayMP.CurMenuPage
 						if CurMenuPage == nil then CurMenuPage = "null" end
-						local RealPlayTime = PlayMP.RealPlayTime
+						local RealPlayTime = PlayMP.Player.Real_play_time
 						if RealPlayTime == nil then RealPlayTime = 0 end
-						local VideoStartTime = PlayMP.VideoStartTime
+						local VideoStartTime = PlayMP.Player.Cur_media_start_time
 						if VideoStartTime == nil then VideoStartTime = "null" end
 						local SettingsCount = table.Count(PlayMP.CurSettings or {})
-						local text = "CurFPS:" .. PlayMP.CurFrameTime .. "\nFunctionLoad:" .. tostring(tobool(PlayMP.MenuWindows)) .. "\nLanguages:" .. table.Count(PlayMP.Lang) .. "\nCurLanguage:" .. PlayMP.CurLang .. "\nMediaStartTime:" .. VideoStartTime .. "\nPlayMP.isPlaying:" .. tostring(PlayMP.isPlaying) .. "\nRealPlayTime:" .. RealPlayTime .. "\nCurPlayTime:" .. tostring(PlayMP.CurPlayTime) .. "\nCurTimeError:" .. PlayMP.CurPlayTime - RealPlayTime .. "\nCurPlayNum:" .. CurPlayNum .. "\nCurMenuPage:" .. tostring(CurMenuPage) .. "\nPending:" .. tostring(PlayMP.isPending) .. "\nPlayerStatusNumber:" .. tostring(PlayMP.PlayerStatus) .. "\ncurSettings Count(Including ServerSettings): " .. tostring(SettingsCount)
+						local text = "CurFPS:" .. PlayMP.CurFrameTime .. "\nFunctionLoad:" .. tostring(tobool(PlayMP.MenuWindows)) .. "\nLanguages:" .. table.Count(PlayMP.Lang) .. "\nCurLanguage:" .. PlayMP.CurLang .. "\nMediaStartTime:" .. VideoStartTime .. "\nPlayMP.Player.isPlaying:" .. tostring(PlayMP.Player.isPlaying) .. "\nRealPlayTime:" .. RealPlayTime .. "\nCurPlayTime:" .. tostring(PlayMP.Player.Cur_play_time) .. "\nCurTimeError:" .. PlayMP.Player.Cur_play_time - RealPlayTime .. "\nCurPlayNum:" .. CurPlayNum .. "\nCurMenuPage:" .. tostring(CurMenuPage) .. "\nPending:" .. tostring(PlayMP.Player.isPending) .. "\nPlayerStatusNumber:" .. tostring(PlayMP.Player.State) .. "\ncurSettings Count(Including ServerSettings): " .. tostring(SettingsCount)
 						draw.DrawText( text, "ChatFont", 50, 50, Color( 255, 255, 255, 255 ), TEXT_ALIGN_LEFT )
 					end)
 				else
 					hook.Remove("HUDPaint", "PlayMProDebug")
 				end
 			end, "Debug Mode", "디버그모드")
-			--PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_SyncMediaAndPlayer" ), "SyncMediaAndPlayer" )
 			
 		end)

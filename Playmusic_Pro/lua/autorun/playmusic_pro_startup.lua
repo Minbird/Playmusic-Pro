@@ -22,7 +22,7 @@ PlayMP.system.lang.cur_lang = "en"
 
 
 print("[PlayM Pro] Loading Language Files...")
-local folder = "playmusic_pro/pm_lang/"
+local folder = "playmusicpro/pm_lang/"
 local files = file.Find( folder .. "/" .. "*.lua", "LUA" )
 for _, file in ipairs( files ) do
 	print("[PlayM Pro] Try add Client side Language File: " .. file)
@@ -30,43 +30,43 @@ for _, file in ipairs( files ) do
 end
 
 print("[PlayM Pro] Loading Options Files...")
-local folder = "playmusic_pro/pm_options/"
+local folder = "playmusicpro/pm_options/"
 local files = file.Find( folder .. "/" .. "*.lua", "LUA" )
 for _, file in ipairs( files ) do
 	print("[PlayM Pro] Try add Client side Options File: " .. file)
 	AddCSLuaFile( folder .. "/" .. file )
 end
 
-include("playmusic_pro/share.lua")
-include("playmusic_pro/shared.lua")
+include("playmusicpro/share.lua")
+include("playmusicpro/shared.lua")
 
 -- server
 if SERVER then
-	AddCSLuaFile("playmusic_pro/client/cl_init.lua")
-	AddCSLuaFile("playmusic_pro/client/cl_network.lua")
-	AddCSLuaFile("playmusic_pro/client/player.lua")
-	AddCSLuaFile("playmusic_pro/logger.lua")
-	AddCSLuaFile("playmusic_pro/setting.lua")
-	AddCSLuaFile("playmusic_pro/share.lua")
-	AddCSLuaFile("playmusic_pro/shared.lua")
-	AddCSLuaFile("playmusic_pro/vars.lua")
-	AddCSLuaFile("playmusic_pro/client/convars.lua")
-	AddCSLuaFile("playmusic_pro/client/font.lua")
-	AddCSLuaFile("playmusic_pro/client/cl_polys.lua")
-	AddCSLuaFile("playmusic_pro/client/cl_record.lua")
-	AddCSLuaFile("playmusic_pro/client/cl_vote.lua")
-	AddCSLuaFile("playmusic_pro/client/cl_mainmenu.lua")
-	AddCSLuaFile("playmusic_pro/client/cl_option.lua")
-	AddCSLuaFile("playmusic_pro/client/user.lua")
-	AddCSLuaFile("playmusic_pro/client/old_cl_init.lua")
-	AddCSLuaFile("playmusic_pro/client/ui.lua")
+	AddCSLuaFile("playmusicpro/client/cl_init.lua")
+	AddCSLuaFile("playmusicpro/client/cl_network.lua")
+	AddCSLuaFile("playmusicpro/client/player.lua")
+	AddCSLuaFile("playmusicpro/logger.lua")
+	AddCSLuaFile("playmusicpro/setting.lua")
+	AddCSLuaFile("playmusicpro/share.lua")
+	AddCSLuaFile("playmusicpro/shared.lua")
+	AddCSLuaFile("playmusicpro/vars.lua")
+	AddCSLuaFile("playmusicpro/client/convars.lua")
+	AddCSLuaFile("playmusicpro/client/font.lua")
+	AddCSLuaFile("playmusicpro/client/cl_polys.lua")
+	AddCSLuaFile("playmusicpro/client/cl_record.lua")
+	AddCSLuaFile("playmusicpro/client/cl_vote.lua")
+	AddCSLuaFile("playmusicpro/client/cl_mainmenu.lua")
+	AddCSLuaFile("playmusicpro/client/cl_option.lua")
+	AddCSLuaFile("playmusicpro/client/user.lua")
+	AddCSLuaFile("playmusicpro/client/old_cl_init.lua")
+	AddCSLuaFile("playmusicpro/client/ui.lua")
 
 	print("[PlayM Pro] Server side system is loading...")
 	print("[PlayM Pro] Init...")
-	include("playmusic_pro/server/init.lua")
+	include("playmusicpro/server/init.lua")
 	print("[PlayM Pro] loading vote module...")
-	include("playmusic_pro/server/sv_vote.lua")
-	include("playmusic_pro/server/youtube.lua")
+	include("playmusicpro/server/sv_vote.lua")
+	include("playmusicpro/server/youtube.lua")
 	print("[PlayM Pro] Adding resource...")
 	resource.AddFile( "materials/vgui/Playmusic_Pro/Search.vmt" )
 	resource.AddFile( "materials/vgui/Playmusic_Pro/vol1.vmt" )
@@ -96,7 +96,7 @@ end
 
 -- client
 if CLIENT then
-    include("playmusic_pro/client/cl_init.lua")
+    include("playmusicpro/client/cl_init.lua")
 end
 
 

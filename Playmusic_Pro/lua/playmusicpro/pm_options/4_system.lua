@@ -10,7 +10,7 @@ end)
 
 surface.CreateFont( "VeryBigTitle_PlaymusicPro_Font", {
 	font = "Arial",
-	extended = true,
+	extended = false,
 	size = 60,
 	weight = 300,
 	blursize = 0,
@@ -106,7 +106,7 @@ local matGradientLeft = CreateMaterial("gradient-l", "UnlitGeneric", {["$basetex
 		TextLabel:SetSize( systemInfoPane:GetWide() - 80, 30 )
 		TextLabel:SetPos( 50, 70 )
 		TextLabel:SetFont( "Default_PlaymusicPro_Font" )
-		TextLabel:SetText( PlayMP:Str( "InstalledVer", PlayMP.CurSystemVersion.Ver) )
+		TextLabel:SetText( PlayMP:Str( "InstalledVer", PlayMP.info.version_str) )
 		TextLabel:SetMouseInputEnabled( true )
 		
 		local TextLabel = vgui.Create( "DLabel", systemInfoPane  )
@@ -116,13 +116,13 @@ local matGradientLeft = CreateMaterial("gradient-l", "UnlitGeneric", {["$basetex
 		TextLabel:SetText( "Copyright © by Minbird(민버드)\nDO NOT RE-UPLOAD to steam workshop or any other site. 재배포 금지." )
 		TextLabel:SetMouseInputEnabled( true )
 		
-		if tonumber(PlayMP.NewerVerE) > tonumber(PlayMP.CurSystemVersion.VerE) then
+		if tonumber(PlayMP.info.newer_version) > tonumber(PlayMP.info.version) then
 			PlayMP:AddTextBox( Main, 30, TOP, PlayMP:Str( "ThereIsNewPlayMusicUsable" ), DScrollPanel:GetWide() * 0.5, 12, "Default_PlaymusicPro_Font", Color(255,255,255), Color(42, 205, 114), TEXT_ALIGN_CENTER )
-		elseif tonumber(PlayMP.NewerVerE) == tonumber(PlayMP.CurSystemVersion.VerE) then
+		elseif tonumber(PlayMP.info.newer_version) == tonumber(PlayMP.info.version) then
 			PlayMP:AddTextBox( Main, 30, TOP, PlayMP:Str( "NewerVerNow" ), DScrollPanel:GetWide() * 0.5, 12, "Default_PlaymusicPro_Font", Color(255,255,255), Color(50, 50, 50), TEXT_ALIGN_CENTER )
 		end
 		
-		if PlayMP.CurSystemVersion.isBeta then
+		if PlayMP.info.is_beta then
 			PlayMP:AddTextBox( DScrollPanel, 30, TOP, PlayMP:Str( "SysNowInBeta" ), DScrollPanel:GetWide() * 0.5, 12, "Default_PlaymusicPro_Font", Color(255,255,255), Color(150, 0, 0), TEXT_ALIGN_CENTER )
 		end
 
@@ -151,7 +151,7 @@ PlayMP:AddOption( PlayMP:Str( "PMPNotice" ), "notice", "", function( DScrollPane
 	PlayMP:ChangeSetting("NoticeReadCount", PlayMP.noticecountOnInternet)
 end)
 
-PlayMP:AddOption( PlayMP:Str( "QnA" ), "qna", "", function( DScrollPanel ) 
+PlayMP:AddOption( "QnA", "qna", "", function( DScrollPanel ) 
 	local HTML = vgui.Create("DHTML", DScrollPanel )
 	HTML:SetPos( 0, 0 )
 	HTML:SetSize( DScrollPanel:GetWide(), DScrollPanel:GetTall() )
