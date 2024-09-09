@@ -64,8 +64,8 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 											net.Receive( "PlayMP:GetQueueData", function()
 												hook.Remove("HUDPaint", "OpenRequestQueueWindow")
 												mainPanel:Close()
-												PlayMP.CurVideoInfo = net.ReadTable()
-												PlayMP.CurPlayNum = tonumber(net.ReadString())
+												PlayMP.Player.Queue = net.ReadTable()
+												PlayMP.Player.Cur_Play_Num = tonumber(net.ReadString())
 												PlayMP:ChangeMenuWindow( "queueList" )
 											end)
 											
@@ -114,7 +114,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 			DScrollPanel:SetSize( DScrollPanel:GetWide()-20, DScrollPanel:GetTall() - 100 )
 	
 			
-			if table.Count(PlayMP.CurVideoInfo) == 0 then
+			if table.Count(PlayMP.Player.Queue) == 0 then
 				PlayMP:Notice( PlayMP:Str( "There_Is_No_Music_On_Queue" ), Color(231, 76, 47), "warning" )
 				PlayMP:AddTextBox( DScrollPanel, 300, TOP, PlayMP:Str( "ThereIsNoQueueText" ), DScrollPanel:GetWide() * 0.5, 5, "BigTitle_PlaymusicPro_Font", Color(150,150,150), Color(255,255,255,0), TEXT_ALIGN_CENTER )
 			else
@@ -130,9 +130,9 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 					end)
 				end
 			
-				for k, v in pairs(PlayMP.CurVideoInfo) do
+				for k, v in pairs(PlayMP.Player.Queue) do
 				
-					if v == nil or v["QueueNum"] == nil or PlayMP.CurPlayNum == nil then 
+					if v == nil or v["QueueNum"] == nil or PlayMP.Player.Cur_Play_Num == nil then 
 						PlayMP:Notice( PlayMP:Str( "Error_Queue_SomethingWrong" ), Color(231, 76, 47), "warning" )
 						PlayMP:AddTextBox( DScrollPanel, 450, TOP, PlayMP:Str( "Error_Queue_SomethingWrong_Explain" ), DScrollPanel:GetWide()/2, 15, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_CENTER, function( self, w, h )
 							PlayMP:AddActionButton( self, PlayMP:Str( "ReTry" ), Color( 60, 60, 60, 255 ), w/2 - 100, 300, 200, 30, function()
@@ -140,8 +140,8 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 							end)
 							
 							PlayMP:AddActionButton( self, PlayMP:Str( "ReSet_Data_On_Client" ), Color( 60, 60, 60, 255 ), w/2 - 100, 340, 200, 30, function()
-								PlayMP.CurVideoInfo = {}
-								PlayMP.CurPlayNum = 0
+								PlayMP.Player.Queue = {}
+								PlayMP.Player.Cur_Play_Num = 0
 								PlayMP:GetQueueData(true)
 							end)
 							
@@ -164,14 +164,14 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 							
 						end)
 					return end
-					--if tonumber(v["QueueNum"]) + 2 < PlayMP.CurPlayNum then
+					--if tonumber(v["QueueNum"]) + 2 < PlayMP.Player.Cur_Play_Num then
 					
 					--else
 					
 						--[[if only50 and k == 50 then
 						
 							PlayMP:AddTextBox( DScrollPanel, 40, TOP, "더 이상은 무리..!", DScrollPanel:GetWide()/2, 15, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-							PlayMP:AddTextBox( DScrollPanel, 80, TOP, "사용자의 깔끔한 사용 환경을 위해, " .. table.Count(PlayMP.CurVideoInfo) - PlayMP.CurPlayNum - k .. "개가 더 있지만\n여기에 표시하지 않았습니다.", DScrollPanel:GetWide()/2, 15, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_CENTER, function( self, w, h )
+							PlayMP:AddTextBox( DScrollPanel, 80, TOP, "사용자의 깔끔한 사용 환경을 위해, " .. table.Count(PlayMP.Player.Queue) - PlayMP.Player.Cur_Play_Num - k .. "개가 더 있지만\n여기에 표시하지 않았습니다.", DScrollPanel:GetWide()/2, 15, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_CENTER, function( self, w, h )
 								PlayMP:AddActionButton( self, "설정에서 변경", Color( 60, 60, 60, 255 ), w - 210, 40, 200, 30, function()
 									PlayMP:ChangeMenuWindow( "ClientOptions" )
 								end)
@@ -186,7 +186,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 						queueListInfoPanelBase:Dock( TOP )
 						queueListInfoPanelBase:SetBackgroundColor( Color(0,0,0,0) )
 						
-						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+						if tonumber(v["QueueNum"]) == PlayMP.Player.Cur_Play_Num then
 							playingMPanel = queueListInfoPanelBase
 							queueListInfoPanelBase:SetSize( DScrollPanel:GetWide(), 120 )
 						else
@@ -195,7 +195,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 						
 						local queueListInfoPanel = vgui.Create( "DPanel", queueListInfoPanelBase )
 						--queueListInfoPanel:SetSize( DScrollPanel:GetWide() - 4, 56 )
-						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+						if tonumber(v["QueueNum"]) == PlayMP.Player.Cur_Play_Num then
 							queueListInfoPanel:SetSize( DScrollPanel:GetWide() - 4, 116 )
 						else
 							queueListInfoPanel:SetSize( DScrollPanel:GetWide() - 4, 56 )
@@ -214,7 +214,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 						local QueueNum = vgui.Create( "DLabel", queueListInfoPanel )
 						QueueNum:SetFont( "DermaDefault" )
 
-						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+						if tonumber(v["QueueNum"]) == PlayMP.Player.Cur_Play_Num then
 							queueListInfoPanelBase:SetBackgroundColor( Color( 42, 205, 114, 255) )
 							QueueNum:SetColor( Color( 42, 205, 114, 255) )
 							QueueNum:SetText( PlayMP:Str( "Now_Playing_MainPanelMusic" ) )
@@ -234,7 +234,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 
 						local Title = vgui.Create( "DLabel", queueListInfoPanel )
 						Title:SetFont( "Default_PlaymusicPro_Font" )
-						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+						if tonumber(v["QueueNum"]) == PlayMP.Player.Cur_Play_Num then
 							Title:SetColor( Color( 42, 205, 114, 255) )
 							Title:SetSize( queueListInfoPanel:GetWide() / 2, 20 )
 							Title:SetPos( 10, 30 )
@@ -248,7 +248,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 						
 						local Length = vgui.Create( "DLabel", queueListInfoPanel )
 						Length:SetFont( "Default_PlaymusicPro_Font" )
-						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+						if tonumber(v["QueueNum"]) == PlayMP.Player.Cur_Play_Num then
 							Length:SetSize( 100, 20 )
 							Length:SetPos( Title:GetWide() , 30 )
 						else
@@ -272,7 +272,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 						local button = {}
 						
 						local PlayUserButtonBack = vgui.Create( "DPanel", queueListInfoPanel )
-						if k == PlayMP.CurPlayNum then
+						if k == PlayMP.Player.Cur_Play_Num then
 							PlayUserButtonBack:SetSize( 32 + w + 20, 42 )
 							PlayUserButtonBack:SetPos( Title:GetWide() + Length:GetWide() + 25, 25 )
 						else
@@ -290,7 +290,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 						end
 						
 						local PlayUser
-						if k == PlayMP.CurPlayNum then
+						if k == PlayMP.Player.Cur_Play_Num then
 							PlayUser = vgui.Create( "DLabel", PlayUserButtonBack )
 							PlayUser:SetFont( "Default_PlaymusicPro_Font" )
 							PlayUser:SetSize( w, 18 )
@@ -367,7 +367,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 											
 											PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "AdminSet_SyncData" ), Color(42, 205, 114), ButtonPanel:GetWide() - 280, 10, 180, 30, function() PlayMP:SetUserInfoBySID(v["PlayUser"]:SteamID(), data) end)
 										end)
-										PlayMP:GetUserInfoBySID(v["PlayUser"]:SteamID())
+										PlayMP.net.GetUserInfoBySID(v["PlayUser"]:SteamID())
 									end
 								end
 								
@@ -376,7 +376,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 						
 						local ActionButConta = queueListInfoPanel
 						
-						if tonumber(v["QueueNum"]) != PlayMP.CurPlayNum then
+						if tonumber(v["QueueNum"]) != PlayMP.Player.Cur_Play_Num then
 							ActionButConta = vgui.Create( "DPanel", queueListInfoPanel )
 							ActionButConta:SetSize( 140, 42 )
 							ActionButConta:SetPos( queueListInfoPanel:GetWide() - 140, 7 )
@@ -388,7 +388,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 						local abY
 						local abW
 						local abT
-						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+						if tonumber(v["QueueNum"]) == PlayMP.Player.Cur_Play_Num then
 							--abXYWT = 20, 65, 250, 30
 							abX = 20
 							abY = 65
@@ -419,12 +419,12 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 							end
 							
 						end, "materials/vgui/playmusic_pro/11.png" )
-						if tonumber(v["QueueNum"]) != PlayMP.CurPlayNum then
+						if tonumber(v["QueueNum"]) != PlayMP.Player.Cur_Play_Num then
 							abD:SetText( "" )
 						end
 						
 						
-						if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+						if tonumber(v["QueueNum"]) == PlayMP.Player.Cur_Play_Num then
 							--abXYWT = 280, 65, 150, 30
 							abX = 280
 							abY = 65
@@ -445,7 +445,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 								PlayMP:AddTextBox( scrpanel, 30, TOP, "Channel", 30, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
 								PlayMP:AddTextBox( scrpanel, 30, TOP, v["Channel"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(200,200,200), Color(255,255,255,10), TEXT_ALIGN_CENTER )
 								PlayMP:AddTextBox( scrpanel, 30, TOP, "Real Playback Time", 30, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
-								PlayMP:AddTextBox( scrpanel, 30, TOP, v["Length"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(200,200,200), Color(0,0,0,0), TEXT_ALIGN_CENTER )
+								PlayMP:AddTextBox( scrpanel, 30, TOP, tostring(v["Length"]), scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(200,200,200), Color(0,0,0,0), TEXT_ALIGN_CENTER )
 								PlayMP:AddTextBox( scrpanel, 30, TOP, "URL", 30, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,10), TEXT_ALIGN_CENTER )
 								PlayMP:AddTextBox( scrpanel, 30, TOP, "https://www.youtube.com/watch?v=" .. v["Uri"], scrpanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(200,200,200), Color(255,255,255,10), TEXT_ALIGN_CENTER )
 								PlayMP:AddTextBox( scrpanel, 30, TOP, "Remove when finished playing", 30, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
@@ -478,12 +478,12 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 								
 							end)
 						end, "materials/vgui/playmusic_pro/22.png" )
-						if tonumber(v["QueueNum"]) != PlayMP.CurPlayNum then
+						if tonumber(v["QueueNum"]) != PlayMP.Player.Cur_Play_Num then
 							abD2:SetText( "" )
 						end
 						
 						if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] or v["PlayUser"] == LocalPlayer() then
-							if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+							if tonumber(v["QueueNum"]) == PlayMP.Player.Cur_Play_Num then
 								--abXYWT = 280, 65, 150, 30
 								abX = queueListInfoPanel:GetWide() - 140
 								abY = 70
@@ -512,8 +512,8 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 										net.Receive( "PlayMP:GetQueueData", function()
 											hook.Remove("HUDPaint", "OpenRequestQueueWindow")
 											mainPanel:Close()
-											PlayMP.CurVideoInfo = net.ReadTable()
-											PlayMP.CurPlayNum = tonumber(net.ReadString())
+											PlayMP.Player.Queue = net.ReadTable()
+											PlayMP.Player.Cur_Play_Num = tonumber(net.ReadString())
 											PlayMP:ChangeMenuWindow( "queueList" )
 										end)
 										
@@ -538,7 +538,7 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 									end)
 								end
 							
-								if tonumber(v["QueueNum"]) == PlayMP.CurPlayNum then
+								if tonumber(v["QueueNum"]) == PlayMP.Player.Cur_Play_Num then
 									PlayMP:OpenSubFrame( PlayMP:Str( "Notice" ), "알림 - 재생중인 노래 삭제?", 600, 200, function( mainPanel, scrpanel, ButtonPanel )
 										PlayMP:AddTextBox( scrpanel, scrpanel:GetTall(), FILL, PlayMP:Str( "Remove_Media_Now_Playing" ), scrpanel:GetWide() * 0.5, scrpanel:GetTall() * 0.5 - 12, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
 										PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "Remove" ), Color( 231, 76, 47 ), ButtonPanel:GetWide() - 240, 10, 100, 30, function()
@@ -569,11 +569,11 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 								PlayMP:ChangeMenuWindow( "queueList" )
 							end, "materials/vgui/playmusic_pro/33.png" )
 			
-							if tonumber(v["QueueNum"]) != PlayMP.CurPlayNum then
+							if tonumber(v["QueueNum"]) != PlayMP.Player.Cur_Play_Num then
 								abD3:SetText( "" )
 							end
 							
-							if tonumber(v["QueueNum"]) != PlayMP.CurPlayNum then
+							if tonumber(v["QueueNum"]) != PlayMP.Player.Cur_Play_Num then
 								queueListInfoPanel.OnCursorEntered = function()
 									ActionButConta:SetAlpha(255)
 								end
@@ -603,14 +603,14 @@ PlayMP:AddSeparator( PlayMP:Str( "Music" ), "icon16/music.png" )
 							
 						end
 						
-						--print( tonumber(v["QueueNum"]) >= table.Count(PlayMP.CurVideoInfo) ,tonumber(v["QueueNum"]), table.Count(PlayMP.CurVideoInfo) )
-						if tonumber(v["QueueNum"]) >= table.Count(PlayMP.CurVideoInfo) then
+						--print( tonumber(v["QueueNum"]) >= table.Count(PlayMP.Player.Queue) ,tonumber(v["QueueNum"]), table.Count(PlayMP.Player.Queue) )
+						if tonumber(v["QueueNum"]) >= table.Count(PlayMP.Player.Queue) then
 							ScrollToChildPMP(playingMPanel)
 						end
 						
-						if k == #PlayMP.CurVideoInfo then
+						if k == #PlayMP.Player.Queue then
 							PlayMP:AddTextBox( DScrollPanel, 60, TOP, PlayMP:Str( "ThereIsEndOfQueueText" ), queueListInfoPanel:GetWide() * 0.5, 5, "BigTitle_PlaymusicPro_Font", Color(255,255,255), Color(255,255,255,0), TEXT_ALIGN_CENTER )
-							PlayMP:AddTextBox( DScrollPanel, 30, TOP, PlayMP:Str( "ThereIsEndOfQueueText2", #PlayMP.CurVideoInfo ), queueListInfoPanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,5), TEXT_ALIGN_CENTER )
+							PlayMP:AddTextBox( DScrollPanel, 30, TOP, PlayMP:Str( "ThereIsEndOfQueueText2", #PlayMP.Player.Queue ), queueListInfoPanel:GetWide() * 0.5, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,5), TEXT_ALIGN_CENTER )
 						end
 					
 					--end

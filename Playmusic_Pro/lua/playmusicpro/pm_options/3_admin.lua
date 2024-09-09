@@ -97,7 +97,7 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 		
 			if sid == "" or sid == nil then return end
 		
-			PlayMP:GetUserInfoBySID(sid)
+			PlayMP.net.GetUserInfoBySID(sid)
 			
 			
 			local loadAnima = PlayMP.GetLoadingAni()
@@ -339,31 +339,31 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 					
 				PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "AdminSet_UserDefaultSet" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 				PlayMP:AddCheckBox( DScrollPanel, function() 
-					PlayMP:ChangeServerSettings( "AOAPMP" )
+					PlayMP.net.ChangeServerSettings( "AOAPMP" )
 				end, PlayMP:Str( "AdminSet_UserDefaultSet7" ), "AOAPMP" )
 				PlayMP:AddCheckBox( DScrollPanel, function() 
-					PlayMP:ChangeServerSettings( "AOAQueue" )
+					PlayMP.net.ChangeServerSettings( "AOAQueue" )
 				end, PlayMP:Str( "AdminSet_UserDefaultSet1" ), "AOAQueue" )
 				PlayMP:AddCheckBox( DScrollPanel, function() 
-					PlayMP:ChangeServerSettings( "AOASkip" )
+					PlayMP.net.ChangeServerSettings( "AOASkip" )
 				end, PlayMP:Str( "AdminSet_UserDefaultSet2" ), "AOASkip" )
 				PlayMP:AddCheckBox( DScrollPanel, function() 
-					PlayMP:ChangeServerSettings( "AOACPL" )
+					PlayMP.net.ChangeServerSettings( "AOACPL" )
 				end, PlayMP:Str( "AdminSet_UserDefaultSet3" ), "AOACPL" )
 				
 				PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "Player" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 				PlayMP:AddCheckBox( DScrollPanel, function() 
-					PlayMP:ChangeServerSettings( "DONOTshowInfoPanel" )
+					PlayMP.net.ChangeServerSettings( "DONOTshowInfoPanel" )
 				end, PlayMP:Str( "AdminSet_DONOTshowInfoPanel" ), "DONOTshowInfoPanel" )
 				PlayMP:AddCheckBox( DScrollPanel, function() 
-					PlayMP:ChangeServerSettings( "UseSkipToVote" )
+					PlayMP.net.ChangeServerSettings( "UseSkipToVote" )
 				end, PlayMP:Str( "AdminSet_UseSkipToVote" ), "UseSkipToVote" )
 				PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "AdminSet_UseSkipToVotePer" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT)
 				PlayMP:AddTextBox( DScrollPanel, 44, TOP, "", 40, 0, "Trebuchet24", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
 					local numslider = PlayMP:CreatNumScroll( self, 100, 0, 30, 100, self:GetWide()-200, true)
 					numslider:SetNum( GetConVar("playmp_MinPerForSkip"):GetFloat() )
 					numslider.ValueChanged = function( d )
-						PlayMP:ChangConVar( "playmp_MinPerForSkip", math.floor(d) )
+						PlayMP.net.ChangConVar( "playmp_MinPerForSkip", math.floor(d) )
 					end
 					self.Paint = function( self, w, h )
 					surface.SetDrawColor( 70, 70, 70, 255 )
@@ -373,17 +373,17 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 				
 				PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "Options_queueList" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 				PlayMP:AddCheckBox( DScrollPanel, function() 
-					PlayMP:ChangeServerSettings( "RepeatQueue" )
+					PlayMP.net.ChangeServerSettings( "RepeatQueue" )
 				end, PlayMP:Str( "AdminSet_UserDefaultSet4" ), "RepeatQueue" )
 				PlayMP:AddCheckBox( DScrollPanel, function() 
-					PlayMP:ChangeServerSettings( "RemoveOldMedia" )
+					PlayMP.net.ChangeServerSettings( "RemoveOldMedia" )
 				end, PlayMP:Str( "AdminSet_UserDefaultSet_RemoveOldMedia" ), "RemoveOldMedia" )
 				PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "Media_Limit" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT)
 				PlayMP:AddTextBox( DScrollPanel, 44, TOP, "", 40, 0, "Trebuchet24", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
 					local numslider = PlayMP:CreatNumScroll( self, 100, 0, 0, 200, self:GetWide()-200, true)
 					numslider:SetNum( GetConVar("playmp_queue"):GetFloat() )
 					numslider.ValueChanged = function( d )
-						PlayMP:ChangConVar( "playmp_queue", math.floor(d) )
+						PlayMP.net.ChangConVar( "playmp_queue", math.floor(d) )
 					end
 					self.Paint = function( self, w, h )
 					surface.SetDrawColor( 70, 70, 70, 255 )
@@ -395,7 +395,7 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 					local numslider = PlayMP:CreatNumScroll( self, 100, 0, 0, 500, self:GetWide()-200, true)
 					numslider:SetNum( GetConVar("playmp_media_time"):GetFloat() )
 					numslider.ValueChanged = function( d )
-						PlayMP:ChangConVar( "playmp_media_time", math.floor(d) )
+						PlayMP.net.ChangConVar( "playmp_media_time", math.floor(d) )
 					end
 					self.Paint = function( self, w, h )
 					surface.SetDrawColor( 70, 70, 70, 255 )
@@ -407,7 +407,7 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 					local numslider = PlayMP:CreatNumScroll( self, 100, 0, 0, 200, self:GetWide()-200, true)
 					numslider:SetNum( GetConVar("playmp_queue_user"):GetFloat() )
 					numslider.ValueChanged = function( d )
-						PlayMP:ChangConVar( "playmp_queue_user", math.floor(d) )
+						PlayMP.net.ChangConVar( "playmp_queue_user", math.floor(d) )
 					end
 					self.Paint = function( self, w, h )
 					surface.SetDrawColor( 70, 70, 70, 255 )
@@ -416,11 +416,11 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 				end)
 				PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "AdminSet_Logs" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 				PlayMP:AddCheckBox( DScrollPanel, function() 
-					PlayMP:ChangeServerSettings( "WriteLogs" )
+					PlayMP.net.ChangeServerSettings( "WriteLogs" )
 				end, PlayMP:Str( "AdminSet_UserDefaultSet8" ), "WriteLogs" )
 				PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "Cache" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 				PlayMP:AddCheckBox( DScrollPanel, function() 
-					PlayMP:ChangeServerSettings( "SaveCache" )
+					PlayMP.net.ChangeServerSettings( "SaveCache" )
 				end, PlayMP:Str( "AdminSet_UserDefaultSet5" ), "SaveCache" )
 				PlayMP:AddTextBox( DScrollPanel, 55, TOP, PlayMP:Str( "AdminSet_UserDefaultSet6" ), 40, 0, "Default_PlaymusicPro_Font", Color( 255, 255, 255 ), Color(0,0,0,0), TEXT_ALIGN_LEFT, function( self, w, h )
 					PlayMP:AddActionButton( self, PlayMP:Str( "RemoveCache" ), Color( 60, 60, 60, 255 ), w - 120, 12.5, 100, 30, function() PlayMP:RemoveCache() end)
@@ -430,20 +430,7 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 					end
 				end)
 			
-			
-				PlayMP:GetCacheSize()
-				
-			--end)
 
-			net.Receive( "PlayMP:GetCacheSize", function( len, ply )
-				
-				local data = net.ReadTable()
-				PlayMP:AddTextBox( DScrollPanel, 80, TOP, PlayMP:Str( "Cache_Ex", data.f ), 30, 0, "Default_PlaymusicPro_Font", Color(255,255,255), Color(40, 40, 40, 0), TEXT_ALIGN_LEFT ) --  math.Round(data.s / 1024, 2)
-				--label:SetText("Playmusic Pro는 재생했던 미디어 정보를 저장, 다음에 다시 재생할 때 이용하여 서버의 네트워크와 API 요청을 절약할 수 있습니다.\nPlaymusic Pro가 지금 " .. data.f .. "개의 미디어 정보를 저장했고, 서버의 저장 공간 중 약 " .. math.Round(data.s / 1024, 2) .. " KB 사용 중입니다.")
-			end)
-			
-			--PlayMP:AddTextBox( DScrollPanel, 48, TOP, "Point Shop", 30, 12, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
-			--PlayMP:AddCheckBox( DScrollPanel, "", "Point Shop 과 연동", "포인트샵연동" )
 		end)
 				
 			

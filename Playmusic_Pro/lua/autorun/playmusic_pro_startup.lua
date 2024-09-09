@@ -1,90 +1,25 @@
-
-print("[PlayM Pro] Start Up System! \n 시스템을 시작합니다!")
-print("[PlayM Pro] Thanks for using PlayMusic Pro. \n 플레이뮤직 Pro를 이용해주셔서 감사합니다.")
-
-if PlayMP then -- 초기화
-
-	hook.Remove( "Think", "PMP Video Time Think")
-
-	if CLIENT then
-		hook.Remove("Think", "PlayerVideoTitle_TextSliderThink")
-		hook.Remove("Tick", "MainNotchInfoPanelTimebarTick")
-		hook.Remove( "Think", "PlayerVideoTitle_aniImage_Think")
-		hook.Remove( "Tick", "PMP_KeyDown")
-		hook.Remove( "Tick", "Menu Time Seekto bar Think")
-	
-		if PlayMP.PlayerHTML != nil then
-			PlayMP.PlayerHTML:Remove()
-		end
-	
-		if PlayMP.PlayerMainPanel != nil then
-			PlayMP.MainMenuCtrlPanel:Clear()
-			PlayMP.PlayerMainPanel:Remove()
-			PlayMP.PlayerMainPanel:Close()
-		end
-		if MenuWindowPanel != nil then
-			PlayMP.MenuWindowPanel:Clear()
-			PlayMP.MainMenuPanel:Remove()
-			PlayMP.MainMenuPanel:Close()
-			PlayMP.MainMenuPanel = nil
-		end
-		if PlayMP.NotchInfoPanel != nil then
-			PlayMP.NotchInfoPanel:Clear()
-			PlayMP.NotchInfoPanel:Close()
-		end
-	
-	end
-
-
-	if SERVER then
-		PrintMessage( HUD_PRINTTALK, "[Playmusic Pro] 플레이 뮤직 프로가 초기화되었습니다." )
-	end
-	
-
-end
+print("[Playmusic Pro] System startup...")
+print("///////////////////////////")
+print("// Playmusic Pro StartUp //")
+print("// by Minbirdragon       //")
+print("///////////////////////////")
 
 PlayMP = {}
 
-PlayMP.CurSystemVersion = {}
-PlayMP.CurSystemVersion.isBeta = true
-PlayMP.CurSystemVersion.ResetOptionAnytime = false
-PlayMP.CurSystemVersion.Ver = "2.0.0 - 17 (beta)"
-PlayMP.CurSystemVersion.VerE = "0.26"
-PlayMP.NewerVer = "unknown"
-PlayMP.NewerVerE = 0
-PlayMP.SysStartTime = CurTime()
-PlayMP.CurLangData = {}
-PlayMP.Lang = {}
-print("///////////////////////////")
-print("// Playmusic Pro StartUp //")
-print("///////////////////////////")
-print("[PlayM Pro] Loading...")
-print("[PlayM Pro] Loading Main Files...")
-print("[PlayM Pro] Try add Client side File: playmusicpro/cl_init.lua")
-AddCSLuaFile("playmusicpro/cl_init.lua")
-print("[PlayM Pro] Try add Client side File: playmusicpro/cl_polys.lua")
-AddCSLuaFile("playmusicpro/cl_polys.lua")
-print("[PlayM Pro] Try add Client side File: playmusicpro/init.lua")
-AddCSLuaFile("playmusicpro/init.lua")
-print("[PlayM Pro] Try add Client side File: playmusicpro/cl_mainmenu.lua")
-AddCSLuaFile("playmusicpro/cl_mainmenu.lua")
-print("[PlayM Pro] Try add Client side File: playmusicpro/cl_option.lua")
-AddCSLuaFile("playmusicpro/cl_option.lua")
-print("[PlayM Pro] Try add Client side File: playmusicpro/cl_record.lua")
-AddCSLuaFile("playmusicpro/cl_record.lua")
-print("[PlayM Pro] Try add Client side File: playmusicpro/shared.lua")
-AddCSLuaFile("playmusicpro/shared.lua")
-print("[PlayM Pro] Try add Client side File: playmusicpro/cl_vote.lua")
-AddCSLuaFile("playmusicpro/cl_vote.lua")
-include( "playmusicpro/shared.lua" )
 
-print("[PlayM Pro] Loading Entities...")
-print("[PlayM Pro] Try add Client side File: entities/tv_pm.lua")
-AddCSLuaFile("entities/tv_pm.lua")
-print("[PlayM Pro] Try add Client side File: entities/billboard_pm.lua")
-AddCSLuaFile("entities/billboard_pm.lua")
-print("[PlayM Pro] Try add Client side File: entities/fence002d_pm.lua")
-AddCSLuaFile("entities/fence002d_pm.lua")
+print("[Playmusic Pro] Start Init...")
+
+PlayMP.info = {}
+PlayMP.info.version = "1.0"
+PlayMP.info.version_str = "3.0.0"
+PlayMP.info.newer_version = "0.0"
+PlayMP.info.newer_version_str = "Unknown"
+PlayMP.info.is_beta = false
+
+PlayMP.system = {}
+PlayMP.system.lang = {}
+PlayMP.system.lang.cur_lang = "en"
+
 
 print("[PlayM Pro] Loading Language Files...")
 local folder = "playmusicpro/pm_lang/"
@@ -102,150 +37,74 @@ for _, file in ipairs( files ) do
 	AddCSLuaFile( folder .. "/" .. file )
 end
 
-print("[PlayM Pro] Checking Newer Version...")
-http.Fetch( "https://minbird.github.io/pmproNewerVer", function(data)
-	PlayMP.NewerVerE = tonumber(data)
+include("playmusicpro/share.lua")
+include("playmusicpro/shared.lua")
+
+-- server
+if SERVER then
+	AddCSLuaFile("playmusicpro/client/cl_init.lua")
+	AddCSLuaFile("playmusicpro/client/cl_network.lua")
+	AddCSLuaFile("playmusicpro/client/player.lua")
+	AddCSLuaFile("playmusicpro/logger.lua")
+	AddCSLuaFile("playmusicpro/setting.lua")
+	AddCSLuaFile("playmusicpro/share.lua")
+	AddCSLuaFile("playmusicpro/shared.lua")
+	AddCSLuaFile("playmusicpro/vars.lua")
+	AddCSLuaFile("playmusicpro/client/convars.lua")
+	AddCSLuaFile("playmusicpro/client/font.lua")
+	AddCSLuaFile("playmusicpro/client/cl_polys.lua")
+	AddCSLuaFile("playmusicpro/client/cl_record.lua")
+	AddCSLuaFile("playmusicpro/client/cl_vote.lua")
+	AddCSLuaFile("playmusicpro/client/cl_mainmenu.lua")
+	AddCSLuaFile("playmusicpro/client/cl_option.lua")
+	AddCSLuaFile("playmusicpro/client/user.lua")
+	AddCSLuaFile("playmusicpro/client/old_cl_init.lua")
+	AddCSLuaFile("playmusicpro/client/ui.lua")
+
+	print("[PlayM Pro] Server side system is loading...")
+	print("[PlayM Pro] Init...")
+	include("playmusicpro/server/init.lua")
+	print("[PlayM Pro] loading vote module...")
+	include("playmusicpro/server/sv_vote.lua")
+	include("playmusicpro/server/youtube.lua")
+	print("[PlayM Pro] Adding resource...")
+	resource.AddFile( "materials/vgui/Playmusic_Pro/Search.vmt" )
+	resource.AddFile( "materials/vgui/Playmusic_Pro/vol1.vmt" )
+	resource.AddFile( "materials/vgui/Playmusic_Pro/vol2.vmt" )
+	resource.AddFile( "materials/vgui/Playmusic_Pro/vol3.vmt" )
+	resource.AddFile( "materials/vgui/Playmusic_Pro/vol4.vmt" )
+	resource.AddSingleFile( "materials/vgui/Playmusic_Pro/11.png" )
+	resource.AddSingleFile( "materials/vgui/Playmusic_Pro/22.png" )
+	resource.AddSingleFile( "materials/vgui/Playmusic_Pro/33.png" )
+	resource.AddSingleFile( "materials/vgui/Playmusic_Pro/44.png" )
+	resource.AddSingleFile( "materials/vgui/Playmusic_Pro/55.png" )
+	resource.AddSingleFile( "materials/vgui/Playmusic_Pro/mute.png" )
+	resource.AddFile( "materials/vgui/Playmusic_Pro/Search.vmt" )
 	
+	resource.AddFile( "materials/vgui/entities/billboard_pm.vmt" )
+	resource.AddFile( "materials/vgui/entities/fence002d_pm.vmt" )
+	resource.AddFile( "materials/vgui/entities/tv_pm.vmt" )
+	resource.AddFile( "materials/vgui/entities/billboard_pm.png" )
+	resource.AddFile( "materials/vgui/entities/fence002d_pm.png" )
+	resource.AddFile( "materials/vgui/entities/tv_pm.png" )
+	
+	print("[PlayM Pro] Adding workshop resource...")
+	resource.AddWorkshop( "1909043673" ) -- missing texture...
+
+end
+
+
+-- client
+if CLIENT then
+    include("playmusicpro/client/cl_init.lua")
+end
+
+
+print("[Playmusic Pro] Search for newer version of Playmusic Pro...")
+http.Fetch( "https://minbird.github.io/pmproNewerVer", function(data)
+	PlayMP.info.newer_version = tonumber(data)
 end)
 
 http.Fetch( "https://minbird.github.io/pmproNewerVerV", function(data)
-	PlayMP.NewerVer = tostring(data)
-end)
-
-timer.Simple( 1, function()
-
-	if SERVER then
-
-
-		print("[PlayM Pro] Server side system is loading...")
-		print("[PlayM Pro] Init...")
-		include("playmusicpro/init.lua")
-		print("[PlayM Pro] loading vote module...")
-		include("playmusicpro/sv_vote.lua")
-		print("[PlayM Pro] Adding resource...")
-		resource.AddFile( "materials/vgui/Playmusic_Pro/Search.vmt" )
-		resource.AddFile( "materials/vgui/Playmusic_Pro/vol1.vmt" )
-		resource.AddFile( "materials/vgui/Playmusic_Pro/vol2.vmt" )
-		resource.AddFile( "materials/vgui/Playmusic_Pro/vol3.vmt" )
-		resource.AddFile( "materials/vgui/Playmusic_Pro/vol4.vmt" )
-		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/11.png" )
-		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/22.png" )
-		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/33.png" )
-		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/44.png" )
-		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/55.png" )
-		resource.AddSingleFile( "materials/vgui/Playmusic_Pro/mute.png" )
-		resource.AddFile( "materials/vgui/Playmusic_Pro/Search.vmt" )
-		
-		resource.AddFile( "materials/vgui/entities/billboard_pm.vmt" )
-		resource.AddFile( "materials/vgui/entities/fence002d_pm.vmt" )
-		resource.AddFile( "materials/vgui/entities/tv_pm.vmt" )
-		resource.AddFile( "materials/vgui/entities/billboard_pm.png" )
-		resource.AddFile( "materials/vgui/entities/fence002d_pm.png" )
-		resource.AddFile( "materials/vgui/entities/tv_pm.png" )
-		
-		print("[PlayM Pro] Adding workshop resource...")
-		resource.AddWorkshop( "1909043673" ) -- missing texture...
-		
-	end
-	
-
-
-	if CLIENT then
-	
-		print("[PlayM Pro] Init...")
-		include("playmusicpro/cl_init.lua")
-		print("[PlayM Pro] Loading cl_polys.lua...")
-		include("playmusicpro/cl_polys.lua")
-		print("[PlayM Pro] Loading cl_record.lua...")
-		include("playmusicpro/cl_record.lua")
-		print("[PlayM Pro] Loading cl_vote.lua...")
-		include("playmusicpro/cl_vote.lua")
-		
-		local files = file.Find( "playmusicpro/pm_lang/*.lua", "LUA" )
-		if #files > 0 then
-			for k, files in ipairs( files ) do
-				Msg( "[PlayM Pro] Language File Read: " .. files .. "\n" )
-				include( "playmusicpro/pm_lang/" .. files )
-				--[[local data = file.Read( "playmusicpro/pm_lang/" .. files, "LUA" )
-				data = util.JSONToTable(data)
-				table.insert( PlayMP.CurLangData, {
-					Lang = data.Lang,
-					LangUni = files,
-					Data = data
-				}
-				)]]
-			end
-		else
-			error("[PlayM Pro] Language filie read ERROR!")
-		end
-		
-		PlayMP.OptionsData = {} 
-
-
-
-		local option = file.Find( "playmusicpro/pm_options/*.lua", "LUA" )
-		if #option > 0 then
-			for k, file in ipairs( option ) do
-				Msg( "[PlayM Pro] Option File Read: " .. file .. "\n" )
-				local func = CompileFile( "playmusicpro/pm_options/" .. file )
-				
-				table.insert( PlayMP.OptionsData, {
-					Func = func,
-				}
-				)
-	
-			end
-		else
-			error("[PlayM Pro] Options not found!")
-		end
-	
-		local curLangSet = PlayMP:GetSetting( "시스템언어", false, false )
-		
-		if curLangSet != nil and curLangSet.Data == "SystemLang" then
-			PlayMP.CurLang = GetConVarString("gmod_language")
-		elseif curLangSet != nil then
-			PlayMP.CurLang = curLangSet.Data
-		else
-			PlayMP.CurLang = "en"
-		end
-		
-		for k, v in pairs(PlayMP.CurLangData) do
-			if v.LangUni == PlayMP.CurLang then
-				PlayMP.Lang = v.Data
-			end
-			if k == #PlayMP.CurLangData and table.IsEmpty(PlayMP.Lang) then
-				PlayMP:ChangeLang("en")
-			end
-		end
-		
-		--include( "playmusicpro/pm_lang/" .. PlayMP.CurLang .. ".lua" )
-		
-		local PlayMPMenuBind = PlayMP:GetSetting( "mainMenuBind", false, true )
-		if PlayMPMenuBind == nil then 
-			PlayMP:ChangeSetting( "mainMenuBind", 100 )
-			PlayMPMenuBind = 100 
-		end
-		
-		chat.AddText(Color(255,150,100),PlayMP:Str( "Welcome_Messages1" ),Color(255,255,255),PlayMP:Str( "Welcome_Messages2" ),Color(255,150,100),PlayMP:Str( "Welcome_Messages3", input.GetKeyName(PlayMPMenuBind) ),Color(255,255,255),PlayMP:Str( "Welcome_Messages4" ),Color(255,150,100),PlayMP:Str( "Welcome_Messages5" ),Color(255,255,255),PlayMP:Str( "Welcome_Messages6" ))
-		chat.AddText(Color(255,255,255),PlayMP:Str( "Welcome_Messages7" ), Color(255,150,100), PlayMP.CurSystemVersion.Ver, Color(255,255,255), PlayMP:Str( "Welcome_Messages8" ))
-		if not PlayMP:GetSetting( "NoUpdateNotice", false, true) and PlayMP.NewerVer != nil then
-			if tonumber(PlayMP.NewerVerE) > tonumber(PlayMP.CurSystemVersion.VerE) then
-				chat.AddText(Color(255,255,255), PlayMP:Str( "Welcome_Messages9" ), Color(255,150,100), PlayMP:Str( "Welcome_Messages10" ), Color(255,255,255), PlayMP:Str( "Welcome_Messages11" ), Color(255,150,100), PlayMP.NewerVer, Color(255,255,255), PlayMP:Str( "Welcome_Messages12" ))
-			end
-		end
-		
-		if PlayMP.CurSystemVersion.isBeta then
-			chat.AddText(Color(255,0,0),PlayMP:Str( "SysNowInBeta" ))
-		end
-	
-	end
-
-	print("[PlayM Pro] System is Ready! (Loading Time: " .. CurTime() - PlayMP.SysStartTime - 1 .."s)")
-	print("[PlayM Pro] System Version is " .. PlayMP.CurSystemVersion.Ver)
-	if PlayMP.NewerVerE != nil and tonumber(PlayMP.NewerVerE) > tonumber(PlayMP.CurSystemVersion.VerE) then
-		print("[PlayM Pro] There is Newer Versioncan install! (" .. PlayMP.NewerVer .. ")")
-	elseif PlayMP.NewerVerE != nil and tonumber(PlayMP.NewerVerE) <= tonumber(PlayMP.CurSystemVersion.VerE) then
-		print("[PlayM Pro] It's A Latest Version of PlayMusic Pro that is installed.")
-	end
-
+	PlayMP.info.newer_version_str = tostring(data)
 end)
