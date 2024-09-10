@@ -158,7 +158,6 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 						local conn = data[1].lastConnectTime
 						if conn == nil then conn = "----" end
 						PlayMP:AddTextBox( CtrlPanel, 30, TOP, PlayMP:Str( "lastconn", conn ), 10, 5, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_LEFT )
-						PrintTable(data[1])
 						
 						PlayMP:AddTextBox( CtrlPanel, 48, TOP, PlayMP:Str( "Music" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
 						local check1 = PlayMP:AddCheckBox( CtrlPanel, nil, PlayMP:Str( "AdminSet_Qeeue" ), nil, true, data[1], "qeeue" )
@@ -173,7 +172,11 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 						setOptions:SetSize( CtrlPanel:GetWide(), 180 )
 						setOptions:Dock(TOP)
 						setOptions:SetBackgroundColor(Color(0,0,0,0))
-						PlayMP:AddActionButton( setOptions, PlayMP:Str( "AdminSet_SyncData" ), Color(42, 205, 114), setOptions:GetWide() - 300, 20, 280, 30, function() PlayMP:SetUserInfoBySID(targetedplayer, data) end)
+						PrintTable(data[1])
+						PlayMP:AddActionButton( setOptions, PlayMP:Str( "AdminSet_SyncData" ), Color(42, 205, 114), setOptions:GetWide() - 300, 20, 280, 30, function() 
+							PlayMP:SetUserInfoBySID(targetedplayer, data) 
+							PrintTable(data[1])
+						end)
 				end )
 			end)
 		
@@ -253,6 +256,7 @@ if LocalPlayer():IsAdmin() or PlayMP.LocalPlayerData[1]["power"] then
 					PlayUserButtonBack:SetBackgroundColor( Color(255,255,255,10) )
 				end
 				PlayUserButton.DoClick = function()
+					if v == nil or not IsValid(v) then return end
 					--nick:SetText( v:Nick() )
 					sid:SetText( v:SteamID() )
 					resetCtrlPanel( v:SteamID(), v:Nick() )

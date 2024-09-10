@@ -151,7 +151,7 @@ PlayMP:AddOption( PlayMP:Str( "PMPNotice" ), "notice", "", function( DScrollPane
 	PlayMP:ChangeSetting("NoticeReadCount", PlayMP.noticecountOnInternet)
 end)
 
-PlayMP:AddOption( "QnA", "qna", "", function( DScrollPanel ) 
+PlayMP:AddOption( PlayMP:Str( "QnA" ), "qna", "", function( DScrollPanel ) 
 	local HTML = vgui.Create("DHTML", DScrollPanel )
 	HTML:SetPos( 0, 0 )
 	HTML:SetSize( DScrollPanel:GetWide(), DScrollPanel:GetTall() )

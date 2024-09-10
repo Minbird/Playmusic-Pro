@@ -457,10 +457,11 @@ function PlayMP.Player:set_vol( vol )
     RunConsoleCommand("playmp_volume", vol) -- for data save
 
     if PlayMP.Player.Engine_type == "chromium" then
-	    if PlayMP.Player.Player_HTML == nil and not PlayMP.Player.Player_HTML:Valid() then return end
+	    if PlayMP.Player.Player_HTML == nil or not PlayMP.Player.Player_HTML:Valid() then return end
 	    PlayMP.Player.Player_HTML:QueueJavascript(PlayMP.Player.QuerySelector .. [[.setVolume(]] .. PlayMP.Player.get_vol() .. [[)]])
     
     elseif PlayMP.Player.Engine_type == "gmod" then
+        if PlayMP.Player.Player_Station == nil or not IsValid(PlayMP.Player.Player_Station) then return end
         PlayMP.Player.Player_Station:SetVolume(vol/100)
     end
 end

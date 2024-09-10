@@ -3,6 +3,7 @@ local API_KEY = "AIzaSyDVspFpFX5lq9uKg6h1hSknHIG46UDlqa0"
 local playerDataSaved = {}
 PlayMP.CurrentQueueInfo = {}
 PlayMP.CurPlayNum = 0
+PlayMP.CurUsersData = {}
 
 util.AddNetworkString("PlayMP:RESETALLDATA")
 net.Receive( "PlayMP:RESETALLDATA", function()
@@ -145,36 +146,6 @@ function PlayMP:GetSetting( str, getAll, returnOnlyData )
 	
 end
 
-
-
---[[gameevent.Listen( "player_connect_client" )
-hook.Add( "player_connect_client", "player_connect_client", function( data )
-	local name = data.name			// Same as Player:Nick()
-	local steamid = data.networkid	// Same as Player:SteamID()
-	local ip = data.address			// Same as Player:IPAddress()
-	local bot = data.bot			// Same as Player:IsBot()
-	local ent = player.GetBySteamID( steamid ) 
-	
-	if bot == 1 then -- bot!
-		return
-	end
-	
-	if PlayMP.isPlaying == true then
-	
-		print("재생 중이에용")
-	
-		net.Start("player_connect_PlayMP:Playmusic")
-			net.WriteTable( PlayMP.CurrentQueueInfo )
-			net.WriteString( PlayMP.CurPlayNum )
-		net.Send( ent ) 
-		
-		net.Start("PlayMP:DoSeekToVideo")
-			net.WriteString( tostring(PlayMP.CurPlayTime) )
-		net.Send( ent ) 
-		
-	end
-
-end )]]
 
 util.AddNetworkString("player_connect_PlayMP:Playmusic")
 
@@ -583,6 +554,7 @@ function PlayMP:GetUserInfoBySID(target)
 		local data = file.Read( dir .. tostring(target) .. ".txt", "DATA" )
 		if data == nil or data == "" then
 			local Table = {}
+			-- 파일에 실제로 저장되는 값
 			table.insert( Table, {
 				qeeue = true,
 				skip = true,
@@ -590,6 +562,8 @@ function PlayMP:GetUserInfoBySID(target)
 				power = false,
 				ban = false
 			})
+
+			--[[ 서버 내부에서 처리를 위해 저장하는 값
 			table.RemoveByValue( playerDataSaved, target )
 			table.insert( playerDataSaved, {
 				qeeue = true,
@@ -598,7 +572,7 @@ function PlayMP:GetUserInfoBySID(target)
 				power = false,
 				ban = false,
 				ply = target
-			})
+			})]]
 			
 			file.Write( dir .. tostring(target) .. ".txt", util.TableToJSON(Table) )
 			return Table
@@ -610,7 +584,10 @@ function PlayMP:GetUserInfoBySID(target)
 end
 
 	net.Receive( "PlayMP:GetUserInfoBySID", function( len, ply )
-		local data = PlayMP:GetUserInfoBySID(ply:SteamID())
+		local sid = net.ReadString()
+
+		--local data = PlayMP:GetUserInfoBySID(ply:SteamID()) -- 왜 이렇게 했지?
+		local data = PlayMP:GetUserInfoBySID(sid)
 		
 		net.Start("PlayMP:GetUserInfoBySID")
 			net.WriteTable( data )
@@ -639,8 +616,10 @@ function PlayMP:SetUserInfoBySID(target, data)
 
 	file.Write( dir .. tostring(target) .. ".txt", util.TableToJSON(data) )
 	
-	table.RemoveByValue( playerDataSaved, target )
-	table.insert( playerDataSaved, data)
+	--[[table.RemoveByValue( playerDataSaved, target ) -- 서버 테이블에 저장된 유저 데이터를 삭제한다
+	table.insert( playerDataSaved, data) -- 새로 인서트한다.
+
+	PrintTable(playerDataSaved)]]
 	
 	if ply != nil and ply != false and ply:IsPlayer() then
 		net.Start("PlayMP:GetUserInfoBySID2")
@@ -1143,14 +1122,19 @@ function PlayMP:UrlProcessing( str )
 
 		if string.find(str,"youtube")!=nil then
 			str = string.match(str,"[?&]v=([^?]*)")
+			local str_exploded = string.Explode( "&", str ) -- 만약 여러 파라미터가 있으면... 아마 video id가 항상 맨 앞이었던 거 같은데
+			str = str_exploded[1] or str
 		elseif string.find(str,"youtu.be")!=nil then
 			str = string.match(str,"https://youtu.be/([^?]*)")
+			local str_exploded = string.Explode( "?", str ) -- 만약 여러 파라미터가 있으면... 단축 url은 파라미터 모두 무시함
+			str = str_exploded[1] or str
 		end
 
 	
 	if str == nil or str == "" then
 		return "Error"
 	else
+		print(str)
 		return str
 	end
 end
