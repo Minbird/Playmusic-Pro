@@ -613,6 +613,8 @@ function PlayMP.Player:Video_Time_Think()
 
             PlayMP.Player.Real_play_time = PlayMP.Player.Player_Station:GetTime()
 
+            if PlayMP.Player.State != 1 then return end
+
             PlayMP.Player:set_time_error()
             
             if PlayMP.Player.isDownVolumeWithVoiceChat then return end
