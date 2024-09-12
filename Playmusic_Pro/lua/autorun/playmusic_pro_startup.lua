@@ -4,14 +4,39 @@ print("// Playmusic Pro StartUp //")
 print("// by Minbirdragon       //")
 print("///////////////////////////")
 
+if PlayMP and PlayMP.Player and CLIENT then
+	PlayMP.Player:Stop()
+	hook.Remove("Tick", "MainNotchInfoPanelTimebarTick")
+	hook.Remove("Think", "PlayerVideoTitle_TextSliderThink")
+	hook.Remove("Think", "PlayerVideoTitle_aniImage_Think")
+	hook.Remove("PostCleanupMap", "PlayMP:PostCleanupMap")
+	hook.Remove("Tick", "DoNoticeToPlayerOnMenu")
+
+	if IsValid(PlayMP.MenuWindowPanel) then -- 사용자가 메뉴를 열고 있는 경우 창 닫아주기.
+		PlayMP.MenuWindowPanel:Clear()
+		PlayMP.MainMenuPanel:Remove()
+		PlayMP.MainMenuPanel:Close()
+	end
+	-- PlayMP:OpenSubFrame로 열린 창은 local이므로 오류 발생하지 않음.
+
+	PlayMP.NotchInfoPanel:Clear() -- 이건 항상 유효함 (화면 위 이디케이터)
+	PlayMP.NotchInfoPanel:Close()
+end
+
+
+if PlayMP and SERVER then
+	hook.Remove("Think", "PMP Video Time Think") -- 혹시 재생 중에 초기화된다면...
+end
+
+
 PlayMP = {}
 
 
 print("[Playmusic Pro] Start Init...")
 
 PlayMP.info = {}
-PlayMP.info.version = "1.0"
-PlayMP.info.version_str = "3.0.0"
+PlayMP.info.version = "1.01"
+PlayMP.info.version_str = "3.0.1"
 PlayMP.info.newer_version = "0.0"
 PlayMP.info.newer_version_str = "Unknown"
 PlayMP.info.is_beta = false

@@ -34,6 +34,11 @@ function PlayMP.PlayerCommand(ply, text, teamchat, isdead, station, c, args)
 				PlayMP:MainMenu()
 				return
 			end
+
+			if entName == "vol" then
+				PlayMP.Player.set_vol( tonumber(entName) )
+				return
+			end
 			
 			if string.find(entName,"youtube")!=nil then
 				PlayMP:AddQueue( entName, 0, 0, false, PlayMP:GetSetting( "removeOldQueue", false, true ) )

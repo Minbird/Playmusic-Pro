@@ -8,9 +8,8 @@ PlayMP.logger_level = 1
 
 
 -- just adding [Playmusic Pro]
-PlayMP.system.print = function( str, ... )
-    local args = ...
-    print("[Playmusic Pro] " .. args.level_str .. " " .. tostring(str))
+PlayMP.system.print = function( str, level )
+    print("[Playmusic Pro] " .. level .. " - " .. tostring(str))
 end
 
 CreateConVar( "playmp_queue", "0", {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Limit number for media. If set to 0, no limit.", 0 )

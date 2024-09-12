@@ -1,3 +1,5 @@
+print("[Playmusic Pro] Client player...")
+
 PlayMP.Player = {}
 PlayMP.Player.Allow_Error_Time = 1.0 -- 허용하는 오차 범위 (초)
 PlayMP.Player.Retry_Time = 10
@@ -23,8 +25,13 @@ PlayMP.Player.isPending = false
 PlayMP.Player.isPlaying = false
 PlayMP.Player.isMuted = false
 PlayMP.Player.isSeeking = false
+PlayMP.Player.isInReady = false
 PlayMP.Player.isDownVolumeWithVoiceChat = false
 PlayMP.Player.VolumeTo_isWorking = false
+PlayMP.Player.Cur_Volume = math.Clamp(GetConVar("playmp_volume"):GetInt() or 20, 0, 100)
+PlayMP.Player.Cur_VolumeSFX = GetConVar("volume_sfx"):GetFloat()
+-- 현재 플레이어의 볼륨을 캐싱할 변수들 (위 2개)
+-- 이 convar는 convars.lua에서 선언되고, player.lua는 항상 convars.lua보다 늦게 인클루드되어야 함.
 
 PlayMP.PlayerURLList = {}
 PlayMP.PlayerURLList[2] = PlayMP.urls.embed
@@ -199,6 +206,8 @@ function PlayMP.Player:Im_ready()
 
     if PlayMP.Setting:get( "No_Play_Always" ) then return end
 
+    PlayMP.Player.isLoading = false
+
     if not PlayMP.Player.isPending then
         return
     end
@@ -235,6 +244,9 @@ function PlayMP.Player:Play()
 
     if PlayMP.Setting:get( "No_Play_Always" ) then return end
 
+    PlayMP.Player.isInReady = false
+    PlayMP.Player.isLoading = false
+
     if not PlayMP.Player.isPlaying then -- 재생 중에 호출될 수도 있음. 재생 중에는 이 변수가 초기화되면 안 됨!
         PlayMP.Player.isPending = false
         PlayMP.Player.isPlaying = true
@@ -243,7 +255,6 @@ function PlayMP.Player:Play()
 
         local data = PlayMP.Player.Get_now_music()
         PlayMP.Player.Set_Start_Time( tonumber(data.startTime) )
-        local data = PlayMP.Player.Get_now_music()
         PlayMP.UpdateNotchInfoPanel( data.Title, data.Image )
 
         PlayMP:AddMediaHistory( {
@@ -257,7 +268,7 @@ function PlayMP.Player:Play()
     end
 
     if PlayMP.Player.Engine_type == "chromium" then
-        if PlayMP.Player.Player_HTML == nil or not ispanel(PlayMP.Player.Player_HTML) or not PlayMP.Player.Player_HTML:IsValid() then return end
+        if PlayMP.Player.Player_HTML == nil or not PlayMP.Player.Player_HTML:IsValid() then return end
         PlayMP.Player.Player_HTML:QueueJavascript(PlayMP.Player.QuerySelector .. [[.playVideo();]])
 
         if PlayMP.Player.isMuted then
@@ -269,7 +280,7 @@ function PlayMP.Player:Play()
     elseif PlayMP.Player.Engine_type == "gmod" then
         if not IsValid(PlayMP.Player.Player_Station) then return end
         PlayMP.Player.Player_Station:Play()
-        PlayMP.Player.Player_Station:SetVolume(PlayMP.Player.get_vol()/100) -- 1이 100%임
+        PlayMP.Player.Player_Station:SetVolume( PlayMP.Player.calculate_sfx_vol(PlayMP.Player.Cur_VolumeSFX, PlayMP.Player.get_vol() )) -- 1이 100%임
         if PlayMP.Player.isMuted then
             PlayMP.Player.Player_Station:SetVolume(0)
         end
@@ -298,6 +309,7 @@ function PlayMP.Player:Stop()
     PlayMP.Player.isPlaying = false
     PlayMP.Player.isMuted = false
     PlayMP.Player.isSeeking = false
+    PlayMP.Player.isInReady = false
     PlayMP.Player.isDownVolumeWithVoiceChat = false
     PlayMP.Player.VolumeTo_isWorking = false
 
@@ -321,6 +333,7 @@ end
 function PlayMP.Player:Remove_TimeThink()
     if PlayMP.Player.TimeThink_Remover == nil then return end
     PlayMP.Player.TimeThink_Remover()
+    PlayMP.Player.TimeThink_Remover = nil
 end
 
 
@@ -329,6 +342,8 @@ end
 function PlayMP.Player:Do_ready( url )
 
     if PlayMP.Setting:get( "No_Play_Always" ) then return end
+
+    PlayMP.Player.isInReady = true
 
     if not PlayMP.Player.isPlaying then
         PlayMP.Player.isPending = true
@@ -444,13 +459,11 @@ function PlayMP.Player.ChangeStateText( text )
 end
 
 
-
 -- 볼륨 가져오기
 function PlayMP.Player.get_vol()
-    return math.Clamp(GetConVar("playmp_volume"):GetInt(), 0, 100)
+    --return math.Clamp(GetConVar("playmp_volume"):GetInt(), 0, 100) -- getconvar는 느리니까, 캐싱해서 사용하세욧!!! 이라고 gmod wiki에 있었음
+    return math.Clamp(PlayMP.Player.Cur_Volume, 0, 100)
 end
-
-
 
 -- 볼륨 설정하기 1에서 100까지
 function PlayMP.Player:set_vol( vol )
@@ -462,23 +475,46 @@ function PlayMP.Player:set_vol( vol )
     
     elseif PlayMP.Player.Engine_type == "gmod" then
         if PlayMP.Player.Player_Station == nil or not IsValid(PlayMP.Player.Player_Station) then return end
-        PlayMP.Player.Player_Station:SetVolume(vol/100)
+        PlayMP.Player.Player_Station:SetVolume( PlayMP.Player.calculate_sfx_vol(PlayMP.Player.Cur_VolumeSFX, vol) ) -- effect sound 볼륨 가져오기. 크로미움 플레이어와 볼륨 격차 줄이기 위해...
     end
 end
+
+-- volue_sfx에 따라 gmod audio channel 볼륨 조정. 크로미움 플레이어와의 격차 줄이기 위해... 
+-- volume_sfx는 항상 0~1 사이, vol은 항상 0~100 사이여야 함!
+function PlayMP.Player.calculate_sfx_vol(volume_sfx, vol)
+    local vol = vol/100
+    if volume_sfx == 0 then
+        return 0  -- volume_sfx가 0일 경우 예외 처리
+    else
+        return vol / volume_sfx * 0.5 -- 2배 줄여야 데시벨이 맞음.
+    end
+end
+
+-- 위 set_vol이나 사용자가 직접 콘솔에서 볼륨 조절할 때마다 캐싱하는 콜백함수.
+cvars.AddChangeCallback("playmp_volume", function(convar_name, value_old, value_new)
+    PlayMP.Player.Cur_Volume = math.Clamp(value_new, 0, 100)
+end)
+
+-- 사용자가 게리모드 옵션에서 sound effect volume을 조절하면 캐싱하는 콜백함수.
+cvars.AddChangeCallback("volume_sfx", function(convar_name, value_old, value_new)
+    PlayMP.Player.Cur_VolumeSFX = math.Clamp(value_new, 0, 1)
+    if IsValid(PlayMP.Player.Player_Station) then
+        PlayMP.Player.Player_Station:SetVolume( PlayMP.Player.calculate_sfx_vol(PlayMP.Player.Cur_VolumeSFX, PlayMP.Player.get_vol()) )
+    end
+end)
 
 
 -- 플레이어를 새로고침합니다.
 function PlayMP.Player:Reload_Player()
     if not PlayMP.Player.isPlaying then return end
     if PlayMP.Player.isPending then return end
-    PlayMP.Player.isReloading = true
+    PlayMP.Player.isLoading = true
 
     local cur_music = PlayMP.Player.Get_now_music()
 
     PlayMP.Player:Do_ready( cur_music.Uri )
 	PlayMP.Player:Play() -- Play는 항상 시작 위치에서 시작하므로, Seekto를 나중에 호출해야 함
     PlayMP.Player:Seekto( PlayMP.Player.Cur_play_time )
-    PlayMP.Player.isReloading = false
 end
 
 
@@ -494,7 +530,8 @@ function PlayMP.Player:set_time_error()
 
     if ( curPlayTime > playmp_playtime + PlayMP.Player.Allow_Error_Time ) or ( curPlayTime + PlayMP.Player.Allow_Error_Time < playmp_playtime ) then
 
-        if PlayMP.Player.isReloading then return end
+        if PlayMP.Player.isLoading then return end
+        if PlayMP.Player.isInReady then return end
         PlayMP.timeError = PlayMP.timeError - (playmp_playtime - curPlayTime)
         
         print("[PlayM Pro] Time error: " .. playmp_playtime - curPlayTime .. "s! Try set to " .. curPlayTime .. "s...")
@@ -507,10 +544,7 @@ end
 -- 플레이어의 상태를 지속 확인하는 함수.
 function PlayMP.Player:Video_Time_Think()
 
-    if PlayMP.Player.TimeThink_Remover != nil then
-        PlayMP.Player.TimeThink_Remover()
-        PlayMP.Player.TimeThink_Remover = nil
-    end
+    PlayMP.Player:Remove_TimeThink()
     
     local Tick_TimeThink = CurTime()
     local nowWait = false
@@ -524,16 +558,15 @@ function PlayMP.Player:Video_Time_Think()
             
             if PlayMP.Player.Time_think_Time_Sec > CurTime() - Tick_TimeThink then return end
 
+            PlayMP.Player.Cur_play_time = (CurTime() - PlayMP.Player.Cur_media_start_time) + PlayMP.SeekToTimeThink + PlayMP.timeError
+
             if PlayMP.Player.Player_HTML == nil or not PlayMP.Player.Player_HTML:Valid() then
-                hook.Remove( "Think", "PMP Video Time Think")
                 return
             end
             
             PlayMP.Player.Player_HTML:RunJavascript([[PlayMP.PlayState(]] .. PlayMP.Player.QuerySelector .. [[.getPlayerState());]])
             
             Tick_TimeThink = CurTime()
-
-            PlayMP.Player.Cur_play_time = (CurTime() - PlayMP.Player.Cur_media_start_time) + PlayMP.SeekToTimeThink + PlayMP.timeError
 
             if not PlayMP.Player.isSeeking then
                 PlayMP.Player.Player_HTML:RunJavascript([[PlayMP.CurTime(]] .. PlayMP.Player.QuerySelector .. [[.getCurrentTime());]])
@@ -556,10 +589,11 @@ function PlayMP.Player:Video_Time_Think()
             
             if PlayMP.Player.Time_think_Time_Sec > CurTime() - Tick_TimeThink then return end
 
+            PlayMP.Player.Cur_play_time = (CurTime() - PlayMP.Player.Cur_media_start_time) + PlayMP.SeekToTimeThink + PlayMP.timeError
+
             local isValid = IsValid(PlayMP.Player.Player_Station)
 
-            if not isValid then 
-                hook.Remove( "Think", "PMP Video Time Think")
+            if not isValid  then
                 return 
             end
 
@@ -577,8 +611,6 @@ function PlayMP.Player:Video_Time_Think()
             stns[7] = PlayMP:Str( "PS_videoCued" ) -- 5
             PlayMP.Player.ChangeStateText(stns[tonumber(PlayMP.Player.State)+2])
 
-            PlayMP.Player.Cur_play_time = (CurTime() - PlayMP.Player.Cur_media_start_time) + PlayMP.SeekToTimeThink + PlayMP.timeError
-
             PlayMP.Player.Real_play_time = PlayMP.Player.Player_Station:GetTime()
 
             PlayMP.Player:set_time_error()
@@ -588,7 +620,7 @@ function PlayMP.Player:Video_Time_Think()
             local vol = 0
             if PlayMP.Player.isMuted then vol = 0 else vol = PlayMP.Player.get_vol() end
 
-            PlayMP.Player.Player_Station:SetVolume(PlayMP.Player.get_vol()/100) -- 1이 100% 볼륨
+            PlayMP.Player.Player_Station:SetVolume( PlayMP.Player.calculate_sfx_vol(PlayMP.Player.Cur_VolumeSFX, PlayMP.Player.get_vol()) ) -- 1이 100% 볼륨
             
         end )
     end
@@ -662,7 +694,7 @@ function PlayMP:VolumeToWithNoChangeSetting( vol, ti, startVol )
             if PlayMP.Player.Engine_type == "chromium" then
 			    PlayMP.Player.Player_HTML:QueueJavascript(PlayMP.Player.QuerySelector .. [[.setVolume(]] .. curVol + (volTonNum * chTime) .. [[)]])
 			else
-                PlayMP.Player.Player_Station:SetVolume( (curVol + (volTonNum * chTime))/100 )
+                PlayMP.Player.Player_Station:SetVolume( PlayMP.Player.calculate_sfx_vol(PlayMP.Player.Cur_VolumeSFX, (curVol + (volTonNum * chTime)) ) )
             end
 
 			if chTime >= 1 then
@@ -670,7 +702,7 @@ function PlayMP:VolumeToWithNoChangeSetting( vol, ti, startVol )
                 if PlayMP.Player.Engine_type == "chromium" then
 				    PlayMP.Player.Player_HTML:QueueJavascript(PlayMP.Player.QuerySelector .. [[.setVolume(]] .. vol .. [[)]])
                 else
-                    PlayMP.Player.Player_Station:SetVolume( vol/100 )
+                    PlayMP.Player.Player_Station:SetVolume( PlayMP.Player.calculate_sfx_vol(PlayMP.Player.Cur_VolumeSFX, vol ) )
                 end
 				hook.Remove( "Think", "VolumeToWithNoChangeSetting" )
 			end
@@ -679,9 +711,16 @@ function PlayMP:VolumeToWithNoChangeSetting( vol, ti, startVol )
 		if PlayMP.Player.Engine_type == "chromium" then
             PlayMP.Player.Player_HTML:QueueJavascript(PlayMP.Player.QuerySelector .. [[.setVolume(]] .. vol .. [[)]])
         else
-            PlayMP.Player.Player_Station:SetVolume( vol/100 )
+            PlayMP.Player.Player_Station:SetVolume( PlayMP.Player.calculate_sfx_vol(PlayMP.Player.Cur_VolumeSFX, vol ) )
         end
 		PlayMP.Player.VolumeTo_isWorking = false
 	end
 	
 end
+
+hook.Add("PostCleanupMap", "PlayMP:PostCleanupMap", function()
+    if PlayMP.Player.Engine_type == "gmod" then -- 크로미움 플레이어인 경우 이걸 할 필요 없음
+        PlayMP.Player:Reload_Player()
+        PlayMP.Logger.log("Gmod Audio Channel is dead! Trying reload player...", "INFO")
+    end
+end)

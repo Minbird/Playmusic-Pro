@@ -403,12 +403,14 @@ end
 		
 	end
 	
-	local gamemode = GetConVar("gamemode"):GetString()
-	local cornerRadius = 15
+	--local gamemode = GetConVar("gamemode"):GetString()
+	local cornerRadius = 14
+
+	--PlayMP.Logger.log(gamemode, "INFO")
 	
-	if gamemode == "zombiesurvival" then
-		cornerRadius = 14
-	end
+	--if gamemode == "zombiesurvival" then
+	--	cornerRadius = 14
+	--end
 	
 	function PlayMP:AddActionButton( panel, name, colorP, posX, posY, sizeW, sizeT, func, icon )	
 		
