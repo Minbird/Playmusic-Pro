@@ -148,6 +148,7 @@ function PlayMP:CreatFrame( frameTitle, uniqueName )
 	quitbutton.Paint = function( self, w, h ) draw.RoundedBox( 0, 0, 0, w, h, Color( 100, 120, 120 ) ) end
 	
 	local windowAlpha = PlayMP:GetSetting( "메인메뉴의불투명도", false, true)
+	local ondebug = PlayMP:GetSetting( "디버그모드" )
 	
 	if isnumber(windowAlpha) != true then
 		windowAlpha = tonumber(windowAlpha)
@@ -156,6 +157,10 @@ function PlayMP:CreatFrame( frameTitle, uniqueName )
 	if windowAlpha == nil or windowAlpha == {} then
 		windowAlpha = 255
 		PlayMP:AddSetting( "메인메뉴의불투명도", 255 )
+	end
+
+	if ondebug then
+		windowAlpha = 150
 	end
 	
 	--hook.Add( "HUDPaint", uniqueName, function()
@@ -563,20 +568,6 @@ end
 				hook.Run( text, table.Vaild, label )
 			end
 		end
-		
-		--[[local Tiggle = vgui.Create( "DImageButton", CheckBoxPanel )
-		Tiggle:SetPos( CheckBoxPanel:GetWide() - 90, 10 )
-		Tiggle:SetSize( 50, 30 )
-		Tiggle:SetImage( "image/Toggle_true.png" )		
-		Tiggle.DoClick = function()
-			if table.Vaild then
-				Tiggle:SetImage( "image/Toggle_false.png" )
-				table.Vaild = false
-			else
-				Tiggle:SetImage( "image/Toggle_true.png" )	
-				table.Vaild = true
-			end
-		end]]
 		
 		local label = vgui.Create( "DLabel", CheckBoxPanel )
 		label:SetSize( CheckBoxPanel:GetWide() - 100, CheckBoxPanel:GetTall() )

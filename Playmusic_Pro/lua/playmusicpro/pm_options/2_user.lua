@@ -421,24 +421,19 @@ PlayMP:AddSeparator( PlayMP:Str( "User" ), "icon16/user.png" )
 			PlayMP:AddCheckBox( DScrollPanel, "", PlayMP:Str( "CSet_NoNoticeUpdate" ), "NoUpdateNotice" )
 			
 			PlayMP:AddTextBox( DScrollPanel, 48, TOP, PlayMP:Str( "Advanced" ), 30, 0, "Trebuchet24", Color(255,255,255), Color(40, 40, 40), TEXT_ALIGN_LEFT )
+
+			
 			PlayMP:AddCheckBox( DScrollPanel, function() 
-				if PlayMP:GetSetting( "디버그모드", false, true) then
-					hook.Add("HUDPaint", "PlayMProDebug", function()
-						local CurPlayNum = PlayMP.Player.Cur_Play_Num
-						if CurPlayNum == nil then CurPlayNum = 0 end
-						local CurMenuPage = PlayMP.CurMenuPage
-						if CurMenuPage == nil then CurMenuPage = "null" end
-						local RealPlayTime = PlayMP.Player.Real_play_time
-						if RealPlayTime == nil then RealPlayTime = 0 end
-						local VideoStartTime = PlayMP.Player.Cur_media_start_time
-						if VideoStartTime == nil then VideoStartTime = "null" end
-						local SettingsCount = table.Count(PlayMP.CurSettings or {})
-						local text = "CurFPS:" .. PlayMP.CurFrameTime .. "\nFunctionLoad:" .. tostring(tobool(PlayMP.MenuWindows)) .. "\nLanguages:" .. table.Count(PlayMP.Lang) .. "\nCurLanguage:" .. PlayMP.CurLang .. "\nMediaStartTime:" .. VideoStartTime .. "\nPlayMP.Player.isPlaying:" .. tostring(PlayMP.Player.isPlaying) .. "\nRealPlayTime:" .. RealPlayTime .. "\nCurPlayTime:" .. tostring(PlayMP.Player.Cur_play_time) .. "\nCurTimeError:" .. PlayMP.Player.Cur_play_time - RealPlayTime .. "\nCurPlayNum:" .. CurPlayNum .. "\nCurMenuPage:" .. tostring(CurMenuPage) .. "\nPending:" .. tostring(PlayMP.Player.isPending) .. "\nPlayerStatusNumber:" .. tostring(PlayMP.Player.State) .. "\ncurSettings Count(Including ServerSettings): " .. tostring(SettingsCount)
-						draw.DrawText( text, "ChatFont", 50, 50, Color( 255, 255, 255, 255 ), TEXT_ALIGN_LEFT )
-					end)
-				else
-					hook.Remove("HUDPaint", "PlayMProDebug")
-				end
+				PlayMP.do_show_debug_hud_on_screen()
+
+				PlayMP:OpenSubFrame( PlayMP:Str( "Notice" ), "DebugOnlyForDevelopment", 600, 200, function( mainPanel, scrpanel, ButtonPanel )
+					PlayMP:AddTextBox( scrpanel, scrpanel:GetTall(), FILL, "Debug mod is only for development! If you found bugs, please report to Github(https://github.com/Minbird/Playmusic-Pro) or Steam Chat(Minbirdragon).", scrpanel:GetWide() * 0.5, 40, "Default_PlaymusicPro_Font", Color(255,255,255), Color(0,0,0,0), TEXT_ALIGN_CENTER )
+					PlayMP:AddActionButton( ButtonPanel, PlayMP:Str( "OK" ), Color( 70, 70, 70 ), ButtonPanel:GetWide() - 120, 10, 100, 30, function()
+						hook.Remove("HUDPaint", "OpenRequestQueueWindow")
+						mainPanel:Close()
+					end )
+				end)
+				
 			end, "Debug Mode", "디버그모드")
 			
 		end)

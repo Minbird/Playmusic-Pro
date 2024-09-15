@@ -55,6 +55,8 @@ function PlayMP:DoAnimaOption( aim, posX, posY, endPoxX, endPoxY, remove, panel,
 end
 
 function PlayMP:ChangeMenuWindow( panelName, funcd )
+
+			if not IsValid(PlayMP.sideMenuPanel) or not IsValid(PlayMP.basePanel) then return end -- error!!
 			
 			local MenuWindowPanelNew = vgui.Create( "DPanel", PlayMP.basePanel )
 			MenuWindowPanelNew:SetPos( PlayMP.sideMenuPanel:GetWide(), 56 )

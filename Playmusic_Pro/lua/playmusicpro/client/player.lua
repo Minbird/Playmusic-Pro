@@ -694,28 +694,38 @@ function PlayMP:VolumeToWithNoChangeSetting( vol, ti, startVol )
 			chTime = (CurTime() - curTime)/ti
 
             if PlayMP.Player.Engine_type == "chromium" then
+                if not IsValid(PlayMP.Player.Player_HTML) then return end
 			    PlayMP.Player.Player_HTML:QueueJavascript(PlayMP.Player.QuerySelector .. [[.setVolume(]] .. curVol + (volTonNum * chTime) .. [[)]])
 			else
+                if not IsValid(PlayMP.Player.Player_Station) then return end
                 PlayMP.Player.Player_Station:SetVolume( PlayMP.Player.calculate_sfx_vol(PlayMP.Player.Cur_VolumeSFX, (curVol + (volTonNum * chTime)) ) )
             end
 
 			if chTime >= 1 then
 				PlayMP.Player.VolumeTo_isWorking = false
                 if PlayMP.Player.Engine_type == "chromium" then
+                    if not IsValid(PlayMP.Player.Player_HTML) then return end
 				    PlayMP.Player.Player_HTML:QueueJavascript(PlayMP.Player.QuerySelector .. [[.setVolume(]] .. vol .. [[)]])
                 else
+                    if not IsValid(PlayMP.Player.Player_Station) then return end
                     PlayMP.Player.Player_Station:SetVolume( PlayMP.Player.calculate_sfx_vol(PlayMP.Player.Cur_VolumeSFX, vol ) )
                 end
 				hook.Remove( "Think", "VolumeToWithNoChangeSetting" )
 			end
 		end )
+
+
 	else
+
+
 		if PlayMP.Player.Engine_type == "chromium" then
             PlayMP.Player.Player_HTML:QueueJavascript(PlayMP.Player.QuerySelector .. [[.setVolume(]] .. vol .. [[)]])
         else
             PlayMP.Player.Player_Station:SetVolume( PlayMP.Player.calculate_sfx_vol(PlayMP.Player.Cur_VolumeSFX, vol ) )
         end
 		PlayMP.Player.VolumeTo_isWorking = false
+
+
 	end
 	
 end

@@ -229,3 +229,57 @@ if not PlayMP:GetSetting( "NoUpdateNotice", false, true) and PlayMP.NewerVer != 
 		chat.AddText(Color(255,255,255), PlayMP:Str( "Welcome_Messages9" ), Color(255,150,100), PlayMP:Str( "Welcome_Messages10" ), Color(255,255,255), PlayMP:Str( "Welcome_Messages11" ), Color(255,150,100), PlayMP.info.newer_version_str, Color(255,255,255), PlayMP:Str( "Welcome_Messages12" ))
 	end
 end
+
+
+
+
+--- for debug!!
+-- only for develop 변수는 왜 이렇게 많은지 아오
+
+local debug_text = ""
+local debug_text_add = function( name, value )
+	debug_text = debug_text .. name .. " = " .. tostring(value) .. "\n"
+end
+
+PlayMP.do_show_debug_hud_on_screen = function()
+	if PlayMP:GetSetting( "디버그모드", false, true) then
+		hook.Add("HUDPaint", "PlayMProDebug", function()
+			debug_text_add("PlayMP.Player.Allow_Error_Time", PlayMP.Player.Allow_Error_Time)
+			debug_text_add("PlayMP.Player.Retry_Time", PlayMP.Player.Retry_Time)
+			debug_text_add("PlayMP.Player.Time_think_Time_Sec", PlayMP.Player.Time_think_Time_Sec)
+			debug_text_add("PlayMP.Player.Cur_Play_Num", PlayMP.Player.Cur_Play_Num)
+			debug_text_add("PlayMP.Player.State", PlayMP.Player.State)
+			debug_text_add("PlayMP.Player.Engine_type", PlayMP.Player.Engine_type)
+			debug_text_add("PlayMP.Player.Player_type", PlayMP.Player.Player_type)
+			debug_text_add("PlayMP.Player.Cur_media_start_time", PlayMP.Player.Cur_media_start_time)
+			debug_text_add("PlayMP.Player.Cur_play_time", PlayMP.Player.Cur_play_time)
+			debug_text_add("PlayMP.Player.Cur_Media_Length", PlayMP.Player.Cur_Media_Length)
+			debug_text_add("PlayMP.Player.Real_play_time", PlayMP.Player.Real_play_time)
+			debug_text_add("PlayMP.Player.Last_Valid_Real_play_time", PlayMP.Player.Last_Valid_Real_play_time)
+			debug_text_add("PlayMP.SeekToTimeThink", PlayMP.SeekToTimeThink)
+			debug_text_add("PlayMP.Player.Media_Start_Position", PlayMP.Player.Media_Start_Position)
+			debug_text_add("PlayMP.timeError", PlayMP.timeError)
+			debug_text_add("PlayMP.Player.isPending", PlayMP.Player.isPending)
+			debug_text_add("PlayMP.Player.isPlaying", PlayMP.Player.isPlaying)
+			debug_text_add("PlayMP.Player.isMuted", PlayMP.Player.isMuted)
+			debug_text_add("PlayMP.Player.isSeeking", PlayMP.Player.isSeeking)
+			debug_text_add("PlayMP.Player.isInReady", PlayMP.Player.isInReady)
+			debug_text_add("PlayMP.Player.isDownVolumeWithVoiceChat", PlayMP.Player.isDownVolumeWithVoiceChat)
+			debug_text_add("PlayMP.Player.VolumeTo_isWorking", PlayMP.Player.VolumeTo_isWorking)
+			debug_text_add("PlayMP.Player.Cur_Volume", PlayMP.Player.Cur_Volume)
+			debug_text_add("PlayMP.Player.Url", PlayMP.Player.Url)
+			debug_text_add("PlayMP.Player.QuerySelector", PlayMP.Player.QuerySelector)
+			debug_text_add("PlayMP.Player.TimeThink_Remover", PlayMP.Player.TimeThink_Remover)
+			debug_text_add("PlayMP.Player.Cur_VolumeSFX", PlayMP.Player.Cur_VolumeSFX)
+			debug_text_add("PlayMP.Player.Player_HTML", PlayMP.Player.Player_HTML)
+			debug_text_add("PlayMP.Player.Player_Station", PlayMP.Player.Player_Station)
+			debug_text_add("PlayMP.CurLang", PlayMP.CurLang)
+			draw.DrawText( debug_text, "DebugOverlay", 2, 15, Color( 255, 255, 255, 255 ), TEXT_ALIGN_LEFT )
+			debug_text = ""
+		end)
+	else
+		hook.Remove("HUDPaint", "PlayMProDebug")
+	end
+end
+
+PlayMP.do_show_debug_hud_on_screen()

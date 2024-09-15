@@ -35,8 +35,8 @@ PlayMP = {}
 print("[Playmusic Pro] Start Init...")
 
 PlayMP.info = {}
-PlayMP.info.version = "1.01"
-PlayMP.info.version_str = "3.0.1"
+PlayMP.info.version = "1.02"
+PlayMP.info.version_str = "3.0.2"
 PlayMP.info.newer_version = "0.0"
 PlayMP.info.newer_version_str = "Unknown"
 PlayMP.info.is_beta = false
